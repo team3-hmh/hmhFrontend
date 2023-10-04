@@ -3,7 +3,9 @@ package kr.example.ttubuckttubuck;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,11 +19,13 @@ import net.daum.mf.map.api.MapView;
  */
 
 public class MainActivity extends AppCompatActivity {
+    private static int inx = 0;
     private ViewGroup container;
     private MapView mapView;
+    private HorizontalScrollView scrollViewFriendList;
 
     // UI components ↓
-    private Button button1;
+    private Button buttonMain, buttonMap, buttonCommunity;
     private LinearLayout layoutList;
     private LinearLayout layoutListItem;
 
@@ -46,9 +50,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }*/
 
-    LinearLayout addItem(){
+    private LinearLayout addItem() {
+        LinearLayout tmp = new LinearLayout(getApplicationContext());
+        tmp.setOrientation(LinearLayout.HORIZONTAL);
+        tmp.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100));
+        tmp.setTag("listItem" + String.valueOf(++inx));
 
-        return null;
+        TextView tv1 = new TextView(getApplicationContext());
+        tv1.setText("Test");
+        tmp.addView(tv1);
+
+        return tmp;
     }
 
     @Override
@@ -57,9 +69,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         layoutList = findViewById(R.id.layoutList);
+        scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
+        scrollViewFriendList.setVerticalScrollBarEnabled(true);
 
-        button1 = findViewById(R.id.button1);
-        button1.setOnClickListener(view->{
+        buttonMain = findViewById(R.id.buttonMain);
+        buttonMain.setOnClickListener(view -> {
             layoutList.addView(addItem());
         });
 

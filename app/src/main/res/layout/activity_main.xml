@@ -48,7 +48,7 @@
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_weight="1"
-                    android:src="@tools:sample/avatars" />
+                     />
 
                 <ImageView
                     android:id="@+id/friendImg1"
@@ -58,7 +58,7 @@
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_weight="1"
-                    android:src="@tools:sample/avatars" />
+                     />
             </LinearLayout>
 
         </HorizontalScrollView>
@@ -87,7 +87,7 @@
                         android:gravity="center"/>
                 </LinearLayout>
 
-                <LinearLayout
+                <!--<LinearLayout
                     android:id="@+id/listItem1"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
@@ -97,7 +97,7 @@
                         android:layout_height="match_parent"
                         android:text="Hello World!"
                         android:gravity="center"/>
-                </LinearLayout>
+                </LinearLayout>-->
 
             </LinearLayout>
         </ScrollView>
@@ -110,7 +110,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/button1"
+                android:id="@+id/buttonMain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -118,7 +118,7 @@
                 android:text="Button" />
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/buttonMap"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -126,7 +126,7 @@
                 android:text="Button" />
 
             <Button
-                android:id="@+id/button3"
+                android:id="@+id/buttonCommunity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

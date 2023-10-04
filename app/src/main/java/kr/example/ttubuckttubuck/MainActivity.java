@@ -1,21 +1,13 @@
 package kr.example.ttubuckttubuck;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
-import net.daum.android.map.MapView;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import android.content.pm.Signature;
+import net.daum.mf.map.api.MapView;
 
 /*
     네이티브 앱 키	b2dce0727b3d31f38a6d7e9f4e36e7d9
@@ -27,6 +19,11 @@ import android.content.pm.Signature;
 public class MainActivity extends AppCompatActivity {
     private ViewGroup container;
     private MapView mapView;
+
+    // UI components ↓
+    private Button button1;
+    private LinearLayout layoutList;
+    private LinearLayout layoutListItem;
 
     /*private void getHashKey(){
         PackageInfo packageInfo = null;
@@ -49,17 +46,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }*/
 
+    LinearLayout addItem(){
+
+        return null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // 갤럭시 23 abi: arm64-v8a, armabi-v7a, armeabi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        layoutList = findViewById(R.id.layoutList);
 
-        mapView = new MapView(this);
-        Log.i("fuckyou", "mapView allocation succeess.");
+        button1 = findViewById(R.id.button1);
+        button1.setOnClickListener(view->{
+            layoutList.addView(addItem());
+        });
+
+        /*mapView = new MapView(this);
         container = (ViewGroup) findViewById(R.id.mapView);
-        Log.i("fuckyou", "container allocation succeess.");
-        container.addView(mapView);
-        Log.i("fuckyou", "addView allocation succeess.");
+        container.addView(mapView);*/
+
     }
 }

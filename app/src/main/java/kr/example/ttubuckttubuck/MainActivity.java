@@ -1,6 +1,8 @@
 package kr.example.ttubuckttubuck;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // 갤럭시 23 abi: arm64-v8a, armabi-v7a, armeabi
+        // UI Initialization ↓
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         layoutList = findViewById(R.id.layoutList);
@@ -75,6 +78,21 @@ public class MainActivity extends AppCompatActivity {
         buttonMain = findViewById(R.id.buttonMain);
         buttonMain.setOnClickListener(view -> {
             layoutList.addView(addItem());
+        });
+
+        buttonMap = findViewById(R.id.buttonMap);
+        buttonMap.setOnClickListener(view->{
+            Intent toMapActivity = new Intent(MainActivity.this, MapActivity.this);
+            /*toMapActivity.putExtra("deviceId", deviceId);
+            toMapActivity.putExtra("portNum", portNum);
+            toMapActivity.putExtra("baudRate", baudRate);*/
+            Log.d("MainActivity_Intent", "Convert to Map Activity.");
+            startActivity(toMapActivity);
+        });
+
+        buttonCommunity = findViewById(R.id.buttonCommunity);
+        buttonCommunity.setOnClickListener(view->{
+
         });
 
         /*mapView = new MapView(this);

@@ -19,14 +19,27 @@
         android:theme="@style/Theme.TTuBuckTTuBuck"
         tools:targetApi="33">
         <meta-data android:name="com.kakao.sdk.AppKey" android:value="b2dce0727b3d31f38a6d7e9f4e36e7d9" />
+
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MapActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
+
+        <activity
+            android:name=".CommunityActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
         </activity>
     </application>
 

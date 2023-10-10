@@ -6,11 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!--<RelativeLayout
-        android:id="@+id/mapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />-->
-
     <LinearLayout
         android:id="@+id/LayoutMain"
         android:layout_width="0dp"
@@ -86,19 +81,6 @@
                         android:text="Hello World!"
                         android:gravity="center"/>
                 </LinearLayout>
-
-                <!--<LinearLayout
-                    android:id="@+id/listItem1"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="Hello World!"
-                        android:gravity="center"/>
-                </LinearLayout>-->
-
             </LinearLayout>
         </ScrollView>
 

@@ -3,15 +3,12 @@ package kr.example.ttubuckttubuck;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import net.daum.mf.map.api.MapView;
 
 /*
     네이티브 앱 키	b2dce0727b3d31f38a6d7e9f4e36e7d9
@@ -22,8 +19,6 @@ import net.daum.mf.map.api.MapView;
 
 public class MainActivity extends AppCompatActivity {
     private static int inx = 0;
-    private ViewGroup container;
-    private MapView mapView;
     private HorizontalScrollView scrollViewFriendList;
 
     // UI components ↓
@@ -82,10 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
         buttonMap = findViewById(R.id.buttonMap);
         buttonMap.setOnClickListener(view->{
-            Intent toMapActivity = new Intent(MainActivity.this, MapActivity.this);
-            /*toMapActivity.putExtra("deviceId", deviceId);
+            Intent toMapActivity = new Intent(MainActivity.this, MapActivity.class);
+            /*
+            toMapActivity.putExtra("deviceId", deviceId);
             toMapActivity.putExtra("portNum", portNum);
-            toMapActivity.putExtra("baudRate", baudRate);*/
+            toMapActivity.putExtra("baudRate", baudRate);
+            */
             Log.d("MainActivity_Intent", "Convert to Map Activity.");
             startActivity(toMapActivity);
         });
@@ -94,10 +91,5 @@ public class MainActivity extends AppCompatActivity {
         buttonCommunity.setOnClickListener(view->{
 
         });
-
-        /*mapView = new MapView(this);
-        container = (ViewGroup) findViewById(R.id.mapView);
-        container.addView(mapView);*/
-
     }
 }

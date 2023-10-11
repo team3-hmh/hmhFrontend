@@ -16,11 +16,11 @@
             android:id="@+id/goBackBtn"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
             android:layout_marginLeft="20dp"
-            android:src="@drawable/go_back_btn"
+            android:layout_marginTop="20dp"
+            android:background="@null"
             android:scaleType="fitCenter"
-            android:background="@null" />
+            android:src="@drawable/go_back_btn" />
 
     </RelativeLayout>
 
@@ -28,7 +28,6 @@
         android:id="@+id/navigationView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-    </LinearLayout>
+        android:orientation="vertical"></LinearLayout>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

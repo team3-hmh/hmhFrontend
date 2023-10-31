@@ -28,11 +28,14 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/imageButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@android:drawable/btn_star" />
+                android:id="@+id/goBackBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/go_back_btn"
+                android:scaleType="fitCenter"
+                android:background="@null" />
 
             <ImageButton
                 android:id="@+id/imageButton2"
@@ -60,15 +63,13 @@
                 android:id="@+id/imageView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@tools:sample/avatars" />
+                android:layout_weight="1" />
 
             <ImageView
                 android:id="@+id/imageView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@tools:sample/avatars" />
+                android:layout_weight="1" />
         </LinearLayout>
 
         <ScrollView

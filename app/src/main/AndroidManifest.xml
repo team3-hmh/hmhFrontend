@@ -41,6 +41,37 @@
             android:exported="true"
             android:launchMode="singleTask">
         </activity>
+
+        <activity
+            android:name=".DensityActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
+
+        <activity
+            android:name=".JoinActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
+
+        <activity
+            android:name=".CommunityActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
+
+        <activity
+            android:name=".MyPageActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
+
     </application>
 
 </manifest>

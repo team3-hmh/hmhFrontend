@@ -18,11 +18,12 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity_Debug";
     private static int inx = 0;
     private HorizontalScrollView scrollViewFriendList;
 
     // UI components ↓
-    private Button buttonMain, buttonMap, buttonCommunity;
+    private Button mainBtn, mapBtn, communityBtn;
     private LinearLayout layoutList;
     private LinearLayout layoutListItem;
 
@@ -70,26 +71,36 @@ public class MainActivity extends AppCompatActivity {
         scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
 
-        buttonMain = findViewById(R.id.buttonMain);
-        buttonMain.setOnClickListener(view -> {
+        mainBtn = findViewById(R.id.buttonMain);
+        mainBtn.setOnClickListener(view -> {
             layoutList.addView(addItem());
         });
 
-        buttonMap = findViewById(R.id.buttonMap);
-        buttonMap.setOnClickListener(view->{
+        mapBtn = findViewById(R.id.buttonMap);
+        mapBtn.setOnClickListener(view -> {
             Intent toMapActivity = new Intent(MainActivity.this, MapActivity.class);
             /*
             toMapActivity.putExtra("deviceId", deviceId);
             toMapActivity.putExtra("portNum", portNum);
             toMapActivity.putExtra("baudRate", baudRate);
             */
-            Log.d("MainActivity_Intent", "Convert to Map Activity.");
+            Log.d(TAG+"Intent", "Convert to Map Activity.");
             startActivity(toMapActivity);
         });
 
-        buttonCommunity = findViewById(R.id.buttonCommunity);
-        buttonCommunity.setOnClickListener(view->{
-
+        communityBtn = findViewById(R.id.buttonCommunity);
+        communityBtn.setOnClickListener(view -> {
+            Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+            Log.d(TAG+"Intent", "Convert to Community Activity.");
+            startActivity(toCommunityActivity);
         });
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }

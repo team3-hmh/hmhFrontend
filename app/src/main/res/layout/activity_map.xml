@@ -7,28 +7,42 @@
     android:gravity="bottom"
     app:umanoDragView="@id/navigationView">
 
-    <RelativeLayout
-        android:id="@+id/mapView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <ImageButton
             android:id="@+id/goBackBtn"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginLeft="20dp"
-            android:src="@drawable/go_back_btn"
+            android:layout_margin="15dp"
+            android:background="@null"
             android:scaleType="fitCenter"
-            android:background="@null" />
+            android:src="@drawable/go_back_btn" />
 
-    </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/navigationView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="500dp"
         android:orientation="vertical">
+
+        <EditText
+            android:hint="Enter the destination."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+
+
     </LinearLayout>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

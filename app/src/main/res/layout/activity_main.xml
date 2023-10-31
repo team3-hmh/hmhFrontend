@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_gravity="center"
-                android:text="Button" />
+                android:text="Home" />
 
             <Button
                 android:id="@+id/buttonMap"
@@ -105,7 +105,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_gravity="center"
-                android:text="Button" />
+                android:text="Map" />
 
             <Button
                 android:id="@+id/buttonCommunity"
@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_gravity="center"
-                android:text="Button" />
+                android:text="Community" />
         </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

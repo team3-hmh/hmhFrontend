@@ -12,20 +12,35 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/goBackBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="15dp"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/go_back_btn" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/goBackBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="15dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/go_back_btn" />
+
+            <ImageButton
+                android:id="@+id/refreshBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginVertical="15dp"
+                android:layout_marginLeft="250dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/reload" />
+        </LinearLayout>
 
         <RelativeLayout
             android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
         </RelativeLayout>
 
     </LinearLayout>
@@ -37,10 +52,10 @@
         android:orientation="vertical">
 
         <EditText
-            android:hint="Enter the destination."
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:hint="Enter the destination." />
 
 
     </LinearLayout>

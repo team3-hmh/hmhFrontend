@@ -28,16 +28,20 @@ import com.skt.tmap.TMapData;
 import com.skt.tmap.TMapGpsManager;
 import com.skt.tmap.TMapPoint;
 import com.skt.tmap.TMapView;
+import com.skt.tmap.address.TMapAddressInfo;
 import com.skt.tmap.overlay.TMapMarkerItem;
 import com.skt.tmap.poi.TMapPOIItem;
+import com.skt.tmap.vsm.map.VSMNavigationView;
 
 import java.util.ArrayList;
 
 import kr.example.ttubuckttubuck.utils.Locker;
+import kr.example.ttubuckttubuck.utils.ReverseGeoCoding;
 
 public class MapActivity extends AppCompatActivity implements TMapView.OnMapReadyListener, TMapGpsManager.OnLocationChangedListener, TMapView.OnApiKeyListenerCallback {
     // static(final) 변수 ↓
     private static final String TAG = "MapActivity_Debug";
+    private static final String appKey = "rZWWy5hD2n87YkkTKDsV2ou4xLJHWpb5OiqBswXh";
     public static final int PERMISSION = 10000;
     private static final int ACCESS_GPS = 1;
     private static final boolean VERBOSE = true;
@@ -89,11 +93,12 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
     private ImageButton mainBtn, reloadBtn;
     private EditText destination;
     private Bitmap markerBmp;
+    private VSMNavigationView navigationView;
 
     // API 변수 ↓
     private double firstLatitude, firstLongitude;
     private String currentAddressAferReverseGedoCoding = null;
-    private TMapData currentLocation = null;
+    private ReverseGeoCoding mReverseGeoCoder;
 
     @Override
     public void onSKTMapApikeySucceed() {
@@ -156,21 +161,27 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         //double editLatitude = Double.valueOf(String.format("%.6f", latitude));
         //double editLongitude = Double.valueOf(String.format("%.6f", longitude));
 
-        currentAddressAferReverseGedoCoding = new TMapData().convertGpsToAddress((float) latitude, (float) longitude);
-        Log.d(TAG, "GeoCoding result: " + currentAddressAferReverseGedoCoding);
+        //TMapAddressInfo result = new TMapData().reverseGeocoding(curLocation.getLatitude(), curLocation.getLongitude(), );
+
+        currentAddressAferReverseGedoCoding = new TMapData().convertGpsToAddress(curLocation.getLatitude(), curLocation.getLatitude());
+        //Log.d(TAG, "GeoCoding result: " + result + " or " + currentAddressAferReverseGedoCoding);
+
+        //Log.d(TAG, "GeoCoder called.");
+        //mReverseGeoCoder = new ReverseGeoCoding(appKey, 1, latitude, longitude, "EPSG3857", "null");
+    }
+
+    void setNavigationView(){
+        navigationView = new VSMNavigationView(this);
     }
 
     // Success to work.
     private void searchAround() {
         TMapData mTMapData = new TMapData();
         TMapPoint tmp = curLocation;
-        mTMapData.findAroundNamePOI(tmp, "편의점;은행", 1, 99, new TMapData.OnFindAroundNamePOIListener() {
-            @Override
-            public void onFindAroundNamePOI(ArrayList<TMapPOIItem> arrayList) {
-                for(int i = 0; i < arrayList.size(); i++){
-                    TMapPOIItem item = arrayList.get(i);
-                    Log.d(TAG, "POI name: " + item.getPOIName() + ", address: "+ item.getPOIAddress().replace("mull", ""));
-                }
+        mTMapData.findAroundNamePOI(tmp, "편의점;은행", 1, 99, arrayList -> {
+            for(int i = 0; i < arrayList.size(); i++){
+                TMapPOIItem item = arrayList.get(i);
+                Log.d(TAG, "POI name: " + item.getPOIName() + ", address: "+ item.getPOIAddress().replace("mull", ""));
             }
         });
     }
@@ -224,6 +235,8 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
             Log.e(TAG, "Failed to add the marker to mapView: " + e);
             e.printStackTrace();
         }
+
+        //reverseGeoCoding(curLocation.getLatitude(), curLocation.getLongitude());
     }
 
     @Override
@@ -235,7 +248,7 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         mainHandler = new Handler(getMainLooper());
         // UI 초기화 ↓
         mapView = new TMapView(this);
-        mapView.setSKTMapApiKey("rZWWy5hD2n87YkkTKDsV2ou4xLJHWpb5OiqBswXh"); // API Key 할당.
+        mapView.setSKTMapApiKey(appKey); // API Key 할당.
 
         destination = findViewById(R.id.destinationText);
         /*try {
@@ -277,8 +290,8 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         //    return true;
 
         try {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-                return true;
+            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+                return true;*/
 
             for (String permission : permissions) {
                 if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED)
@@ -332,12 +345,16 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         Log.d(TAG, "onResume() called.");
 
         LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-        }
+        // 원인 파악 요망.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION);
+
         Location curLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         firstLatitude = curLocation.getLatitude();
         firstLongitude = curLocation.getLongitude();
+
+        //reverseGeoCoding(firstLatitude, firstLongitude);
         Log.d(TAG, "Detected current location as first: " + firstLatitude + ", " + firstLongitude);
     }
 

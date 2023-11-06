@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:id="@+id/LayoutMain"
+        android:id="@+id/mainLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
@@ -17,11 +17,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/titleLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="My Page" />
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/goBackBtn"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/go_back_btn"
+                android:scaleType="fitCenter"
+                android:background="@null"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My Page"
+                android:layout_gravity="center"
+                android:layout_marginLeft="280dp"
+                />
+        </LinearLayout>
 
         <HorizontalScrollView
             android:id="@+id/scrollViewFriendList"
@@ -43,7 +63,7 @@
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_weight="1"
-                     />
+                    />
 
                 <ImageView
                     android:id="@+id/friendImg1"
@@ -53,7 +73,7 @@
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_weight="1"
-                     />
+                    />
             </LinearLayout>
 
         </HorizontalScrollView>
@@ -62,7 +82,7 @@
             android:id="@+id/scrollViewList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="6">
+            android:layout_weight="7.5">
 
             <LinearLayout
                 android:id="@+id/layoutList"
@@ -83,37 +103,5 @@
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
-
-        <LinearLayout
-            android:id="@+id/layoutMenu"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1.5"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/buttonMain"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/buttonMap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/buttonCommunity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:text="Button" />
-        </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

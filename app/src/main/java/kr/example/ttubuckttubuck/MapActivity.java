@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -86,6 +87,7 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
     private TMapPoint curLocation;
     private TMapMarkerItem curMarker;
     private ImageButton mainBtn, reloadBtn;
+    private EditText destination;
     private Bitmap markerBmp;
 
     // API 변수 ↓
@@ -132,29 +134,33 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
     @Override
     public void onLocationChange(Location location) {
         Log.d(TAG + "_Callback", "[ Callback] : onLocationChange() called.");
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
+        final float curLatitude = (float) location.getLatitude();
+        final float curLongitude = (float) location.getLongitude();
         //reverseGeoCoding(curLocation.getLatitude(), curLocation.getLongitude());
-        curLocation.setLatitude(latitude);
-        curLocation.setLongitude(longitude);
+        curLocation.setLatitude(curLatitude);
+        curLocation.setLongitude(curLongitude);
 
-        Log.d(TAG + "_Callback", "Changed location: " + latitude + ", " + longitude);
+        Log.d(TAG + "_Callback", "Changed location: " + curLatitude + ", " + curLongitude);
         Log.d(TAG + "_Callback", "Reverse GeoCoding address: " + currentAddressAferReverseGedoCoding);
         if (VERBOSE)
-            Toast.makeText(this, "Changed location: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Changed location: " + curLatitude + ", " + curLongitude, Toast.LENGTH_SHORT).show();
 
-        curMarker.setTMapPoint(curLocation);
-        mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude(), true);
+        curMarker.setPosition(curLatitude, curLongitude);
+        mapView.setCenterPoint(curLatitude, curLongitude, true);
+
+        //reverseGeoCoding(curLatitude, curLongitude);
         //searchAround();
     }
 
     private void reverseGeoCoding(double latitude, double longitude) {
         //double editLatitude = Double.valueOf(String.format("%.6f", latitude));
         //double editLongitude = Double.valueOf(String.format("%.6f", longitude));
-        //Log.d(TAG, editLatitude + ", " + editLongitude);
-        currentAddressAferReverseGedoCoding = new TMapData().convertGpsToAddress(latitude, longitude);
+
+        currentAddressAferReverseGedoCoding = new TMapData().convertGpsToAddress((float) latitude, (float) longitude);
+        Log.d(TAG, "GeoCoding result: " + currentAddressAferReverseGedoCoding);
     }
 
+    // Success to work.
     private void searchAround() {
         TMapData mTMapData = new TMapData();
         TMapPoint tmp = curLocation;
@@ -231,6 +237,7 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         mapView = new TMapView(this);
         mapView.setSKTMapApiKey("rZWWy5hD2n87YkkTKDsV2ou4xLJHWpb5OiqBswXh"); // API Key 할당.
 
+        destination = findViewById(R.id.destinationText);
         /*try {
             locker.lock();
         } catch (InterruptedException e) {

@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -109,6 +110,7 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
     private TMapPoint curLocation;
     private TMapMarkerItem curMarker;
     private ImageButton mainBtn, reloadBtn;
+    private Button searchBtn;
     private EditText destination;
     private Bitmap markerBmp;
     private VSMNavigationView navigationView;
@@ -174,8 +176,6 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         mapView.setCenterPoint(curLatitude, curLongitude, true);
 
         // reverseGeoCoding(curLatitude, curLongitude);
-        // searchAround();
-
     }
 
     private void reverseGeoCoding(double latitude, double longitude) {
@@ -199,7 +199,7 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
     private void searchAround() {
         TMapData mTMapData = new TMapData();
         TMapPoint tmp = curLocation;
-        mTMapData.findAroundNamePOI(tmp, "편의점;은행", 1, 99, arrayList -> {
+        mTMapData.findAroundNamePOI(tmp, "편의점", 1, 1000, arrayList -> {
             for (int i = 0; i < arrayList.size(); i++) {
                 TMapPOIItem item = arrayList.get(i);
                 Log.d(TAG, "POI name: " + item.getPOIName() + ", address: " + item.getPOIAddress().replace("mull", ""));
@@ -222,8 +222,140 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         return null;
     }
 
-    private void searchPath() throws URISyntaxException, IOException, JSONException {
+    /*private void requestFullAddress(String strAddr) {
+        // 지번주소 정확도 순 Flag( 인덱스 작은 수록 정확도 높음 )
+        final String[] arrOldMatchFlag = {"M11", "M21", "M12", "M13", "M22", "M23", "M41", "M42", "M31", "M32", "M33"};
+        // 도로명주소 정확도 순 Flag( 인덱스 작은 수록 정확도 높음 )
+        final String[] arrNewMatchFlag = {"N51", "N52", "N53", "N54", "N55", "N61", "N62"};
+        SLHttpRequest request = new SLHttpRequest("https://api2.sktelecom.com/tmap/geo/fullAddrGeo"); // SKT
+        request.addParameter("version", "1");
+        request.addParameter("appKey", API_KEY);
+        request.addParameter("coordType", "WGS84GEO");
+        request.addParameter("addressFlag", "F00");
+        request.addParameter("fullAddr", strAddr);
+        request.send(new SLHttpRequest.OnResponseListener() {
+
+            @Override
+            public void OnSuccess(String data) {
+                // TODO Auto-generated method stub
+
+                FullAddrData fullAddrData = new FullAddrData();
+
+                // JsonParsing
+                try {
+                    ArrayList<String> alMatchFlag = new ArrayList<String>(); // MatchFlag 수집
+                    int indexMatchFlag = -1;
+                    int i, j;
+
+                    JSONObject objData = new JSONObject(data).getJSONObject("coordinateInfo");
+                    int length = objData.getInt("totalCount");
+                    JSONArray arrCoordinate = objData.getJSONArray("coordinate");
+                    JSONObject objCoordinate = null;
+
+                    // 1. matchFlag 수집
+                    for (i = 0; i < length; i++) {
+                        objCoordinate = arrCoordinate.getJSONObject(i);
+
+                        if (objCoordinate.getString("matchFlag") != null && !objCoordinate.getString("matchFlag").equals("")) {
+                            // 지번주소
+                            alMatchFlag.add(objCoordinate.getString("matchFlag"));
+                        } else if (objCoordinate.getString("newMatchFlag") != null && !objCoordinate.getString("newMatchFlag").equals("")) {
+                            // 도로명주소
+                            alMatchFlag.add(objCoordinate.getString("newMatchFlag"));
+                        }
+                    }
+
+                    // 2. < matchFlag 기준으로 더 정확한 항목의 index 결정 >
+                    // 2_1. 수집한 matchFlag 중 "M11"(지번주소중 가장 높은정확도) 이 있으면 선택
+                    for (i = 0; i < alMatchFlag.size(); i++) {
+                        if (alMatchFlag.get(i).equals("M11")) {
+                            indexMatchFlag = i;
+                            break;
+                        }
+                    }
+
+                    // 2_2. "M11" 없으면 arrNewMatchFlag(도로명주소) 에서 선택
+                    if (indexMatchFlag == -1) {
+                        for (i = 0; i < arrNewMatchFlag.length; i++) {
+                            for (j = 0; j < alMatchFlag.size(); j++) {
+                                if (alMatchFlag.get(j).equals(arrNewMatchFlag[i])) {
+                                    indexMatchFlag = j;
+                                    break;
+                                }
+                            }
+                            if (indexMatchFlag != -1) {
+                                break;
+                            }
+                        }
+                    }
+                    // 2_3. 도로명주소 없으면 arrOldMatchFlag(지번주소) 에서 선택
+                    if (indexMatchFlag == -1) {
+                        for (i = 0; i < arrOldMatchFlag.length; i++) {
+                            for (j = 0; j < alMatchFlag.size(); j++) {
+                                if (alMatchFlag.get(j).equals(arrOldMatchFlag[i])) {
+                                    indexMatchFlag = j;
+                                    break;
+                                }
+                            }
+                            if (indexMatchFlag != -1) {
+                                break;
+                            }
+                        }
+                    }
+
+                    // 3. 선택된 인덱스의 결과 세팅
+                    if (indexMatchFlag != -1) {
+                        objCoordinate = arrCoordinate.getJSONObject(indexMatchFlag);
+                        if (!objCoordinate.getString("matchFlag").equals("")) {
+                            // 지번 주소
+                            if (!objCoordinate.getString("lat").equals(""))
+                                fullAddrData.lat = Double.parseDouble(objCoordinate.getString("lat"));
+                            if (!objCoordinate.getString("lon").equals(""))
+                                fullAddrData.lon = Double.parseDouble(objCoordinate.getString("lon"));
+                            if (!objCoordinate.getString("latEntr").equals(""))
+                                fullAddrData.latEntr = Double.parseDouble(objCoordinate.getString("latEntr"));
+                            if (!objCoordinate.getString("lonEntr").equals(""))
+                                fullAddrData.lonEntr = Double.parseDouble(objCoordinate.getString("lonEntr"));
+                            fullAddrData.addr = objCoordinate.getString("city_do") + " " + objCoordinate.getString("gu_gun") + " " + objCoordinate.getString("legalDong") + " " + objCoordinate.getString("bunji");
+                            fullAddrData.flag = objCoordinate.getString("matchFlag");
+                        } else if (!objCoordinate.getString("newMatchFlag").equals("")) {
+                            // 도로명 주소
+                            if (!objCoordinate.getString("newLat").equals(""))
+                                fullAddrData.lat = Double.parseDouble(objCoordinate.getString("newLat"));
+                            if (!objCoordinate.getString("newLon").equals(""))
+                                fullAddrData.lon = Double.parseDouble(objCoordinate.getString("newLon"));
+                            if (!objCoordinate.getString("newLatEntr").equals(""))
+                                fullAddrData.latEntr = Double.parseDouble(objCoordinate.getString("newLatEntr"));
+                            if (!objCoordinate.getString("newLonEntr").equals(""))
+                                fullAddrData.lonEntr = Double.parseDouble(objCoordinate.getString("newLonEntr"));
+                            fullAddrData.addr = objCoordinate.getString("city_do") + " " + objCoordinate.getString("gu_gun") + " " + objCoordinate.getString("newRoadName") + " " + objCoordinate.getString("newBuildingIndex") + " " + objCoordinate.getString("newBuildingDong") + " (" + objCoordinate.getString("zipcode") + ")";
+                            fullAddrData.flag = objCoordinate.getString("newMatchFlag");
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    Log.d("debug", e.toString());
+                }
+
+                //listener.onComplete(fullAddrData);
+
+                setFullTextGeoCoding(fullAddrData);
+            }
+
+            @Override
+            public void OnFail(int errorCode, String errorMessage) {
+                // TODO Auto-generated method stub
+                Log.d("debug", "errorMessage :" + errorMessage);
+                //listener.onComplete(null);
+            }
+        });
+    }*/
+
+    private void searchPath(String desitnation) throws URISyntaxException, IOException, JSONException {
         Log.d(TAG, "searchPath() called.");
+
+        // double endX, double endY
 
         // Not worked. ----------------------------------------------------------------------------------------
         /*// final String urlString = "https://apis.skplanetx.com/tmap/routes/pedestrian?version=1&format=json&appKey=" + appKey;
@@ -250,9 +382,10 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         mPolyLine.setLineColor(Color.GRAY);
         mPolyLine.setID("1");
 
-        // SK타워
+
         double endX= 126.92432158129688;
         double endY = 37.55279861528311;
+
         TMapPoint endPoint = new TMapPoint(endY, endX);
 
         double startY = curLocation.getLongitude();
@@ -395,26 +528,8 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
             Log.e(TAG, "Failed to add the marker to mapView: " + e);
             e.printStackTrace();
         }
-
-        Runnable mSearchPath = () -> {
-            try {
-                searchPath();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-
-
-        threadPool.execute(mSearchPath);
-        Log.d(TAG, "treadPool");
-
         //reverseGeoCoding(curLocation.getLatitude(), curLocation.getLongitude());
+        searchAround();
     }
 
     @Override
@@ -441,6 +556,31 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
 
         container = findViewById(R.id.mapView);
         container.addView(mapView);
+
+        searchBtn = findViewById(R.id.searchBtn);
+        searchBtn.setOnClickListener(view->{
+            String address = destination.getText().toString();
+            if(address.equals(""))
+                Toast.makeText(getApplicationContext(), "목적지를 입력하세요.", Toast.LENGTH_SHORT).show();
+            else {
+                Runnable mSearchPath = () -> {
+                    try {
+                        searchPath(address);
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                };
+
+                Log.d(TAG, "Start to search the query");
+                threadPool.execute(mSearchPath);
+            }
+        });
 
         reloadBtn = findViewById(R.id.refreshBtn);
         reloadBtn.setOnClickListener(view -> {

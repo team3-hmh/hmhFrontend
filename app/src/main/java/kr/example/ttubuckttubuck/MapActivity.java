@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -26,17 +27,33 @@ import androidx.core.content.ContextCompat;
 
 import com.skt.tmap.TMapData;
 import com.skt.tmap.TMapGpsManager;
+import com.skt.tmap.TMapInfo;
 import com.skt.tmap.TMapPoint;
 import com.skt.tmap.TMapView;
 import com.skt.tmap.address.TMapAddressInfo;
 import com.skt.tmap.overlay.TMapMarkerItem;
+import com.skt.tmap.overlay.TMapPolyLine;
 import com.skt.tmap.poi.TMapPOIItem;
 import com.skt.tmap.vsm.map.VSMNavigationView;
 
-import java.util.ArrayList;
+import org.json.JSONException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import kr.example.ttubuckttubuck.utils.Locker;
 import kr.example.ttubuckttubuck.utils.ReverseGeoCoding;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MapActivity extends AppCompatActivity implements TMapView.OnMapReadyListener, TMapGpsManager.OnLocationChangedListener, TMapView.OnApiKeyListenerCallback {
     // static(final) 변수 ↓
@@ -49,6 +66,7 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
     // Thread 변수 ↓
     private Handler mainHandler;
     private TMapGpsManager gpsManager;
+    private ExecutorService threadPool;
     private Locker locker = new Locker();
     private boolean isLocked = false;
 
@@ -99,6 +117,8 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
     private double firstLatitude, firstLongitude;
     private String currentAddressAferReverseGedoCoding = null;
     private ReverseGeoCoding mReverseGeoCoder;
+    private List<TMapPoint> mapPoints;
+    private TMapPolyLine mPolyLine;
 
     @Override
     public void onSKTMapApikeySucceed() {
@@ -142,35 +162,36 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         final float curLatitude = (float) location.getLatitude();
         final float curLongitude = (float) location.getLongitude();
         //reverseGeoCoding(curLocation.getLatitude(), curLocation.getLongitude());
-        curLocation.setLatitude(curLatitude);
-        curLocation.setLongitude(curLongitude);
+        curLocation.setLatitude(location.getLatitude());
+        curLocation.setLongitude(location.getLongitude());
 
         Log.d(TAG + "_Callback", "Changed location: " + curLatitude + ", " + curLongitude);
-        Log.d(TAG + "_Callback", "Reverse GeoCoding address: " + currentAddressAferReverseGedoCoding);
+        // Log.d(TAG + "_Callback", "Reverse GeoCoding address: " + currentAddressAferReverseGedoCoding);
         if (VERBOSE)
             Toast.makeText(this, "Changed location: " + curLatitude + ", " + curLongitude, Toast.LENGTH_SHORT).show();
 
         curMarker.setPosition(curLatitude, curLongitude);
         mapView.setCenterPoint(curLatitude, curLongitude, true);
 
-        //reverseGeoCoding(curLatitude, curLongitude);
-        //searchAround();
+        // reverseGeoCoding(curLatitude, curLongitude);
+        // searchAround();
+
     }
 
     private void reverseGeoCoding(double latitude, double longitude) {
         //double editLatitude = Double.valueOf(String.format("%.6f", latitude));
         //double editLongitude = Double.valueOf(String.format("%.6f", longitude));
 
-        //TMapAddressInfo result = new TMapData().reverseGeocoding(curLocation.getLatitude(), curLocation.getLongitude(), );
+        TMapAddressInfo result = new TMapData().reverseGeocoding(curLocation.getLatitude(), curLocation.getLongitude(), null);
 
         currentAddressAferReverseGedoCoding = new TMapData().convertGpsToAddress(curLocation.getLatitude(), curLocation.getLatitude());
-        //Log.d(TAG, "GeoCoding result: " + result + " or " + currentAddressAferReverseGedoCoding);
+        Log.d(TAG, "GeoCoding result: " + result + " or " + currentAddressAferReverseGedoCoding);
 
-        //Log.d(TAG, "GeoCoder called.");
-        //mReverseGeoCoder = new ReverseGeoCoding(appKey, 1, latitude, longitude, "EPSG3857", "null");
+        Log.d(TAG, "GeoCoder called.");
+        mReverseGeoCoder = new ReverseGeoCoding(appKey, 1, latitude, longitude, "EPSG3857", "null");
     }
 
-    void setNavigationView(){
+    void setNavigationView() {
         navigationView = new VSMNavigationView(this);
     }
 
@@ -179,20 +200,159 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         TMapData mTMapData = new TMapData();
         TMapPoint tmp = curLocation;
         mTMapData.findAroundNamePOI(tmp, "편의점;은행", 1, 99, arrayList -> {
-            for(int i = 0; i < arrayList.size(); i++){
+            for (int i = 0; i < arrayList.size(); i++) {
                 TMapPOIItem item = arrayList.get(i);
-                Log.d(TAG, "POI name: " + item.getPOIName() + ", address: "+ item.getPOIAddress().replace("mull", ""));
+                Log.d(TAG, "POI name: " + item.getPOIName() + ", address: " + item.getPOIAddress().replace("mull", ""));
             }
         });
     }
 
-    private void refreshLocation(){
+    private void refreshLocation() {
         mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude());
         mapView.setZoomLevel(17);
     }
 
+    private String getContentFromNode(Element item, String tagName) {
+        NodeList list = item.getElementsByTagName(tagName);
+        if (list.getLength() > 0) {
+            if (list.item(0).getFirstChild() != null) {
+                return list.item(0).getFirstChild().getNodeValue();
+            }
+        }
+        return null;
+    }
+
+    private void searchPath() throws URISyntaxException, IOException, JSONException {
+        Log.d(TAG, "searchPath() called.");
+
+        // Not worked. ----------------------------------------------------------------------------------------
+        /*// final String urlString = "https://apis.skplanetx.com/tmap/routes/pedestrian?version=1&format=json&appKey=" + appKey;
+        final String urlString = "https://apis.skplanetx.com/tmap/routes/pedestrian?version=1&startName=a&endName=b&startX=" + curLocation.getLongitude() + "&startY=" + curLocation.getLongitude() + "&endX=0.0&endY=0.0&appKey=" + appKey + "&format=json";
+        URI uri = new URI(urlString);
+        Log.d(TAG, "URI set.");
+
+        HttpPost httpPost = new HttpPost(uri);
+        // httpPost.setPath(urlString);
+        Log.d(TAG, "HttpPost set.");
+        // HttpClient httpClient = (HttpClient) new DefaultHttpClient(); // Error occurred.
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        Log.d(TAG, "HttpClient set.");
+
+        httpPost.setEntity(new UrlEncodedFormEntity(namePairs));
+        Log.d(TAG, "HttpPost.setEntity() called.");
+
+        OkHttpClient client = new OkHttpClient();
+        ----------------------------------------------------------------------------------------*/
+
+        mPolyLine = new TMapPolyLine();
+        mPolyLine.setLineColor(Color.BLUE);
+        mPolyLine.setLineWidth(10);
+        mPolyLine.setLineColor(Color.GRAY);
+        mPolyLine.setID("1");
+
+        // SK타워
+        double endX= 126.92432158129688;
+        double endY = 37.55279861528311;
+        TMapPoint endPoint = new TMapPoint(endY, endX);
+
+        double startY = curLocation.getLongitude();
+        double startX = curLocation.getLatitude();
+        TMapPoint startPoint = new TMapPoint(startX, startY);
+
+
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{\"startX\":" + startX + ",\"startY\":" + startY + ",\"angle\":20,\"speed\":30,\"endPoiId\":\"10001\",\"endX\":" + endX + ",\"endY\":" + endY + ",\"passList\":\"126.92774822,37.55395475_126.92577620,37.55337145\",\"reqCoordType\":\"WGS84GEO\",\"startName\":\"%EC%B6%9C%EB%B0%9C\",\"endName\":\"%EB%8F%84%EC%B0%A9\",\"searchOption\":\"0\",\"resCoordType\":\"WGS84GEO\",\"sort\":\"index\"}");
+        Request request = new Request.Builder()
+                .url("https://apis.openapi.sk.com/tmap/routes/pedestrian?version=1&callback=function")
+                .post(body)
+                .addHeader("accept", "application/json")
+                .addHeader("content-type", "application/json")
+                .addHeader("appKey", appKey)
+                .build();
+        Response response = null;
+
+        OkHttpClient client = new OkHttpClient();
+        try {
+            response = client.newCall(request).execute();
+            Log.d(TAG, "Getting the response body.");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get the response.");
+            e.printStackTrace();
+
+        }
+        String responseString = response.body().string();
+        Log.d(TAG, "[ Response ] message: " + responseString);
+        Log.d(TAG, "[ Response ] isSuccessful(): " + response.isSuccessful());
+
+        mapView.removeTMapPath();
+
+        TMapData.TMapPathType type = TMapData.TMapPathType.PEDESTRIAN_PATH;
+        new TMapData().findPathDataAllType(type, startPoint, endPoint, new TMapData.OnFindPathDataAllTypeListener() {
+            @Override
+            public void onFindPathDataAllType(Document doc) {
+                mapView.removeTMapPath();
+
+                TMapPolyLine polyline = new TMapPolyLine();
+                polyline.setID(type.name());
+                polyline.setLineWidth(10);
+                polyline.setLineColor(Color.RED);
+                polyline.setLineAlpha(255);
+
+
+                if (doc != null) {
+                    NodeList list = doc.getElementsByTagName("Document");
+                    Element item2 = (Element) list.item(0);
+                    String totalDistance = getContentFromNode(item2, "tmap:totalDistance");
+                    String totalTime = getContentFromNode(item2, "tmap:totalTime");
+                    String totalFare;
+                    if (type == TMapData.TMapPathType.CAR_PATH) {
+                        totalFare = getContentFromNode(item2, "tmap:totalFare");
+                    } else {
+                        totalFare = "";
+                    }
+
+                    NodeList list2 = doc.getElementsByTagName("LineString");
+
+                    for (int i = 0; i < list2.getLength(); i++) {
+                        Element item = (Element) list2.item(i);
+                        String str = getContentFromNode(item, "coordinates");
+                        if (str == null) {
+                            continue;
+                        }
+
+                        String[] str2 = str.split(" ");
+                        for (int k = 0; k < str2.length; k++) {
+                            try {
+                                String[] str3 = str2[k].split(",");
+                                TMapPoint point = new TMapPoint(Double.parseDouble(str3[1]), Double.parseDouble(str3[0]));
+                                polyline.addLinePoint(point);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    mapView.setTMapPath(polyline);
+
+                    TMapInfo info = mapView.getDisplayTMapInfo(polyline.getLinePointList());
+                    int zoom = info.getZoom();
+                    if (zoom > 12) {
+                        zoom = 12;
+                    }
+
+                    mapView.setZoomLevel(zoom);
+                    mapView.setCenterPoint(info.getPoint().getLatitude(), info.getPoint().getLongitude());
+                }
+            }
+        });
+
+        mapView.setTMapPath(mPolyLine);
+    }
+
     private void curLocationInit() {
         Log.d(TAG, "curLocationInit() called.");
+        mapView.setCompassModeFix(true);
+
 
         // 현재 위치를 나타낼 위치 class인 TMapPoint의 객체 생성.
         curLocation = new TMapPoint(firstLatitude, firstLongitude);
@@ -236,6 +396,24 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
             e.printStackTrace();
         }
 
+        Runnable mSearchPath = () -> {
+            try {
+                searchPath();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+
+
+        threadPool.execute(mSearchPath);
+        Log.d(TAG, "treadPool");
+
         //reverseGeoCoding(curLocation.getLatitude(), curLocation.getLongitude());
     }
 
@@ -246,8 +424,11 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         Log.d(TAG, "onCreate() called.");
 
         mainHandler = new Handler(getMainLooper());
+        threadPool = Executors.newCachedThreadPool();
+
         // UI 초기화 ↓
         mapView = new TMapView(this);
+
         mapView.setSKTMapApiKey(appKey); // API Key 할당.
 
         destination = findViewById(R.id.destinationText);
@@ -262,9 +443,9 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         container.addView(mapView);
 
         reloadBtn = findViewById(R.id.refreshBtn);
-        reloadBtn.setOnClickListener(view ->{
+        reloadBtn.setOnClickListener(view -> {
             refreshLocation();
-            if(VERBOSE)
+            if (VERBOSE)
                 Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
         });
 
@@ -353,6 +534,7 @@ public class MapActivity extends AppCompatActivity implements TMapView.OnMapRead
         Location curLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         firstLatitude = curLocation.getLatitude();
         firstLongitude = curLocation.getLongitude();
+        // Log.d(TAG, "provider meaning?: " +curLocation.getProvider());
 
         //reverseGeoCoding(firstLatitude, firstLongitude);
         Log.d(TAG, "Detected current location as first: " + firstLatitude + ", " + firstLongitude);

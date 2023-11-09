@@ -2,6 +2,7 @@ package kr.example.ttubuckttubuck.utils;
 
 import android.util.Log;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class ReverseGeoCoding {
         mEndpoint = mRetroFit.create(Endpoint.class);
 
         callAddress = mEndpoint.getData(appKey, ver, lat, lon, coordType, addressType);
+
         callAddress.enqueue(new Callback<>() {    //비동기로 실행되어 콜백으로 앱으로 알려줌
             //API Reponse 됐을 경우 호출 단, 404, 500 error에도 호출
             @Override
@@ -39,7 +41,7 @@ public class ReverseGeoCoding {
                 if (response.isSuccessful()) {
                     //자바 객체로 변환된 JSON데이터 저장
                     AddressInfo result = response.body();
-                    Log.d(TAG, "ver: " + result.getVer() + ", " + "lat: " + result.getLatitude() + ", " + "lon: " + result.getLongitude()+ ", " + "appKey: " + result.getAppKey());
+                    Log.d(TAG, "addressType: " + result.getAddressType());
                 } else
                     Log.e(TAG, "Failed to get the response");
             }
@@ -62,7 +64,7 @@ public class ReverseGeoCoding {
                 @Query("lat") double latitude,
                 @Query("lon") double longitude,
                 @Query("coordType") String coordType,
-                @Query("addressType") String addressType);
+                @Query("addressType") String addressType); //WGS84GEO
 
         @FormUrlEncoded
         @POST("/posts")
@@ -70,59 +72,38 @@ public class ReverseGeoCoding {
     }
 
     private class AddressInfo {
-        @SerializedName("appKey")
-        private String appKey;
-        @SerializedName("version")
-        private int ver;
-        @SerializedName("lat")
-        private double latitude;
-        @SerializedName("lon")
-        private double longitude;
-        @SerializedName("coordType")
-        private String coordType;
+        @SerializedName("fullAddress")
+        @Expose private String fullAddress;
         @SerializedName("addressType")
-        private String addressType;
-
-        // appKey section
-        public String getAppKey() {
-            return appKey;
-        }
-        public void setAppKey(String appKey) {
-            this.appKey = appKey;
-        }
-
-        // ver section
-        public int getVer() {
-            return ver;
-        }
-
-        public void setVer(int ver) {
-            this.ver = ver;
-        }
-
-        // lat section
-        public double getLatitude() {
-            return latitude;
-        }
-        public void setLatitude(double latitude) {
-            this.latitude = latitude;
-        }
-
-        // long section
-        public double getLongitude() {
-            return longitude;
-        }
-        public void setLongitude(double longitude){
-            this.longitude = longitude;
-        }
-
-        // coordType section
-        public void setCoordType(String coordType) {
-            this.coordType = coordType;
-        }
-        public String getCoordType() {
-            return coordType;
-        }
+        @Expose private String addressType;
+        @SerializedName("city_do")
+        @Expose private String city_do;
+        @SerializedName("gu_gun")
+        @Expose private String gu_gun;
+        @SerializedName("eup_myun")
+        @Expose private String eup_myun;
+        @SerializedName("adminDong")
+        @Expose private String adminDong;
+        @SerializedName("adminDongCode")
+        @Expose private String adminDongCode;
+        @SerializedName("legalDong")
+        @Expose private String legalDong;
+        @SerializedName("legalDongCode")
+        @Expose private String legalDongCode;
+        @SerializedName("ri")
+        @Expose private String ri;
+        @SerializedName("bunji")
+        @Expose private String bunji;
+        @SerializedName("roadName")
+        @Expose private String roadName;
+        @SerializedName("buildingIndex")
+        @Expose private String buildingIndex;
+        @SerializedName("buildingName")
+        @Expose private String buildingName;
+        @SerializedName("mappingDistance")
+        @Expose private String mappingDistance;
+        @SerializedName("roadCode")
+        @Expose private String roadCode;
 
         // addressType section
         public void setAddressType(String addressType) {

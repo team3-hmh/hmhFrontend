@@ -3,8 +3,6 @@ plugins {
 }
 
 android {
-    useLibrary 'org.apache.http.legacy'
-
     namespace 'kr.example.ttubuckttubuck'
     compileSdk 34
     splits {
@@ -41,11 +39,6 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     buildToolsVersion '33.0.2'
-
-    // Fixed grade error: " 2 files found with path 'META-INF/DEPENDENCIES' "
-    packagingOptions{
-        pickFirst 'META-INF/DEPENDENCIES'
-    }
 }
 
 dependencies {
@@ -57,10 +50,8 @@ dependencies {
     implementation files('libs/vsm-tmap-sdk-v2-android-1.6.60.aar')
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.0.3'
-    implementation 'org.slf4j:slf4j-api:1.7.25'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
-    implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.0-alpha3'
+    implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
+    //implementation("com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.10");
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

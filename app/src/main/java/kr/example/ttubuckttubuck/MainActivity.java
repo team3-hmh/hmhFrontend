@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         buttonMap = findViewById(R.id.buttonMap);
         buttonMap.setOnClickListener(view->{
-            Intent toMapActivity = new Intent(MainActivity.this, MapActivity.this);
+            Intent toMapActivity = new Intent(MainActivity.this, MapActivity.class);
             /*toMapActivity.putExtra("deviceId", deviceId);
             toMapActivity.putExtra("portNum", portNum);
             toMapActivity.putExtra("baudRate", baudRate);*/

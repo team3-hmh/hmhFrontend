@@ -3,12 +3,15 @@ package kr.example.ttubuckttubuck;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import net.daum.mf.map.api.MapView;
 
 /*
     네이티브 앱 키	b2dce0727b3d31f38a6d7e9f4e36e7d9
@@ -18,12 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity_Debug";
     private static int inx = 0;
+    private ViewGroup container;
+    private MapView mapView;
     private HorizontalScrollView scrollViewFriendList;
 
     // UI components ↓
-    private Button mainBtn, mapBtn, communityBtn;
+    private Button buttonMain, buttonMap, buttonCommunity;
     private LinearLayout layoutList;
     private LinearLayout layoutListItem;
 
@@ -71,36 +75,29 @@ public class MainActivity extends AppCompatActivity {
         scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
 
-        mainBtn = findViewById(R.id.buttonMain);
-        mainBtn.setOnClickListener(view -> {
+        buttonMain = findViewById(R.id.buttonMain);
+        buttonMain.setOnClickListener(view -> {
             layoutList.addView(addItem());
         });
 
-        mapBtn = findViewById(R.id.buttonMap);
-        mapBtn.setOnClickListener(view -> {
+        buttonMap = findViewById(R.id.buttonMap);
+        buttonMap.setOnClickListener(view->{
             Intent toMapActivity = new Intent(MainActivity.this, MapActivity.class);
-            /*
-            toMapActivity.putExtra("deviceId", deviceId);
+            /*toMapActivity.putExtra("deviceId", deviceId);
             toMapActivity.putExtra("portNum", portNum);
-            toMapActivity.putExtra("baudRate", baudRate);
-            */
-            Log.d(TAG+"Intent", "Convert to Map Activity.");
+            toMapActivity.putExtra("baudRate", baudRate);*/
+            Log.d("MainActivity_Intent", "Convert to Map Activity.");
             startActivity(toMapActivity);
         });
 
-        communityBtn = findViewById(R.id.buttonCommunity);
-        communityBtn.setOnClickListener(view -> {
-            Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
-            Log.d(TAG+"Intent", "Convert to Community Activity.");
-            startActivity(toCommunityActivity);
+        buttonCommunity = findViewById(R.id.buttonCommunity);
+        buttonCommunity.setOnClickListener(view->{
+
         });
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-    @Override
-    protected void onResume() {
-        super.onResume();
+
+        /*mapView = new MapView(this);
+        container = (ViewGroup) findViewById(R.id.mapView);
+        container.addView(mapView);*/
+
     }
 }

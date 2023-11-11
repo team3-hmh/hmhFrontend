@@ -16,25 +16,43 @@
         android:weightSum="10"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
             android:id="@+id/topLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:layout_weight="1.5"
-            android:gravity="center_vertical">
+            android:layout_weight="1"
+            android:background="#CADFEF"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/goBackBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:layout_marginLeft="15dp"
-                android:src="@drawable/go_back_btn"
+                android:background="@null"
                 android:scaleType="fitCenter"
-                android:background="@null" />
+                android:src="@drawable/go_back_btn" />
+
+            <TextView
+                android:id="@+id/loginTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginRight="35dp"
+                android:gravity="center"
+                android:text="MyPage"
+                android:textSize="30dp" />
+
+
         </LinearLayout>
 
         <ScrollView
@@ -47,32 +65,32 @@
                 android:id="@+id/listLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="300dp"
                     android:layout_height="320dp"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="30dp"></LinearLayout>
+                    android:layout_marginTop="30dp"
+                    android:orientation="horizontal"></LinearLayout>
 
                 <LinearLayout
                     android:layout_width="300dp"
                     android:layout_height="80dp"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="25dp"></LinearLayout>
+                    android:layout_marginTop="25dp"
+                    android:orientation="horizontal"></LinearLayout>
 
                 <LinearLayout
                     android:layout_width="300dp"
                     android:layout_height="80dp"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="25dp"></LinearLayout>
+                    android:layout_marginTop="25dp"
+                    android:orientation="horizontal"></LinearLayout>
 
                 <LinearLayout
                     android:layout_width="300dp"
                     android:layout_height="80dp"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="25dp"></LinearLayout>
+                    android:layout_marginTop="25dp"
+                    android:orientation="horizontal"></LinearLayout>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

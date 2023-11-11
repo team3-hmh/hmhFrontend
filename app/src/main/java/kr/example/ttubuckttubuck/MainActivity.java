@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Api 요청
         Call<List<TodoListDto>> todos = todoListApi.getTodoList(1L);
-        todos.enqueue(new Callback<List<TodoListDto>>() {
+        todos.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
                 List<TodoListDto> todoLists = response.body();
@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+
             @Override
             public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
                 layoutList.addView(addItem("Api calling Failed, " + t.toString()));

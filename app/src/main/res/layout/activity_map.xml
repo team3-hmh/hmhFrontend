@@ -51,27 +51,36 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/destinations"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/destinationText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_marginHorizontal="5dp"
                 android:layout_marginTop="10dp"
-                android:hint="Enter the destination." />
+                android:hint="목적지를 입력하세요."
+                android:text="" />
 
             <Button
                 android:id="@+id/searchBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:layout_marginTop="13dp"
                 android:text="검색" />
 
         </LinearLayout>
 
-
+        <LinearLayout
+            android:id="@+id/candidates"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+        </LinearLayout>
     </LinearLayout>
-
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

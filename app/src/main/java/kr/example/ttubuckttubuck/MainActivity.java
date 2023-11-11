@@ -20,13 +20,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-/*
-    네이티브 앱 키	b2dce0727b3d31f38a6d7e9f4e36e7d9
-    REST API 키	097a63061505e5e0292a89c873d6ac44
-    JavaScript 키	213f8b4ddf969d0cc5167f564938867b
-    Admin 키	7de1e10437899b818d5bb109857cc258
- */
-
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity_Debug";
     private static int inx = 0;

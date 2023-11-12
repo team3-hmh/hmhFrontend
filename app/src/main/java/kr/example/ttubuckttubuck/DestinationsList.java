@@ -15,6 +15,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.ListFragment;
 
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 
 public class DestinationsList extends ListFragment {
     private static final String TAG = "DestinationsList_Debug";
+    private static final boolean VERBOSE = true;
 
     DestinationsList() {
     }
@@ -54,11 +57,12 @@ public class DestinationsList extends ListFragment {
                     view = getActivity().getLayoutInflater().inflate(R.layout.destinations_fragment, parent, false);
                 TextView title = view.findViewById(R.id.destinationTitle);
                 TextView address = view.findViewById(R.id.destinationAddress);
-
-                if(item.title == null){
+                if (VERBOSE)
+                    Log.d(TAG, "item.address: " + item.address);
+                if (item.title == null) {
                     title.setText(item.address);
                     address.setText("");
-                }else {
+                } else {
                     title.setText(item.title);
                     address.setText(item.address);
                 }
@@ -72,8 +76,8 @@ public class DestinationsList extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         setListAdapter(null);
         setEmptyText("길찾기 결과가 여기에 표시됩니다.");
-        ((TextView)getListView().getEmptyView()).setTextSize(18);
-        ((TextView)getListView().getEmptyView()).setTextColor(Color.GRAY);
+        ((TextView) getListView().getEmptyView()).setTextSize(18);
+        ((TextView) getListView().getEmptyView()).setTextColor(Color.GRAY);
         setListAdapter(listAdapter);
     }
 
@@ -86,7 +90,10 @@ public class DestinationsList extends ListFragment {
     @Override
     public void onListItemClick(@NonNull ListView l, @NonNull View v, int position, long id) {
         ListItem item = (ListItem) l.getItemAtPosition(position);
-        Log.d(TAG, "ListItem clicked: " + item.location.first + ", " + item.location.second);
+        if (VERBOSE)
+            Log.d(TAG, "ListItem clicked: " + item.address + ", " + item.location.first + ", " + item.location.second);
+
+        MapActivity.slidePanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         try {
             searchPath(item.location.first, item.location.second);
 

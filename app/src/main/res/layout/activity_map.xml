@@ -64,7 +64,7 @@
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginTop="10dp"
                 android:hint="목적지를 입력하세요."
-                android:text="" />
+                android:text="국민대학교" />
 
             <Button
                 android:id="@+id/searchBtn"

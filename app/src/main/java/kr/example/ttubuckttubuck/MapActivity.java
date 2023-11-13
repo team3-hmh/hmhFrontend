@@ -2,6 +2,7 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.DestinationsList.listAdapter;
 import static kr.example.ttubuckttubuck.DestinationsList.listItems;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -20,21 +21,24 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.skt.tmap.TMapData;
 import com.skt.tmap.TMapGpsManager;
 import com.skt.tmap.TMapInfo;
@@ -143,7 +147,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     // UI 구성 요소 ↓
     private ViewGroup container;
     public static SlidingUpPanelLayout slidePanel;
-    private LinearLayout navigationView;
     private static TMapView mapView;
     private static TMapPoint curLocation;
     private TMapMarkerItem curMarker;
@@ -152,6 +155,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private EditText destinationTxt;
     private Bitmap markerBmp;
     private Fragment destinationsFragment;
+    private Toolbar toolBar;
+    private ActionBar actionBar;
+    private BottomNavigationView navigationView;
 
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
@@ -206,6 +212,27 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
+        if (item.getTitle() != null && item.getTitle().equals("Refresh")) {
+            refreshLocation();
+            if (VERBOSE)
+                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
+            Log.d(TAG + "Intent", "Convert to Main Activity.");
+            startActivity(toMainActivity);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.refresh, menu);
+        return true;
+    }
+
+    @Override
     public void onMapReady() {
         Log.d(TAG + "_Callback", "[ Callback ] : onMapReady() called.");
 
@@ -230,15 +257,17 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         Log.d(TAG + "_Callback", "[ Callback] : onLocationChange() called.");
         /*final float curLatitude = (float) location.getLatitude();
         final float curLongitude = (float) location.getLongitude();*/
-        curLocation.setLatitude(location.getLatitude());
-        curLocation.setLongitude(location.getLongitude());
+        if (curLocation != null) {
+            curLocation.setLatitude(location.getLatitude());
+            curLocation.setLongitude(location.getLongitude());
 
-        Log.d(TAG + "_Callback", "Changed location: " + location.getLatitude() + ", " + location.getLongitude());
+            Log.d(TAG + "_Callback", "Changed location: " + location.getLatitude() + ", " + location.getLongitude());
 
-        if (VERBOSE)
-            Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+            if (VERBOSE)
+                Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
 
-        refreshLocation();
+            refreshLocation();
+        }
     }
 
     private String reverseGeoCoding(double latitude, double longitude) {
@@ -455,16 +484,17 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
         // UI 초기화 ↓
         slidePanel = findViewById(R.id.slidePanel);
-        navigationView = findViewById(R.id.navigationView);
+        navigationView = findViewById(R.id.navigationBtm);
         mapView = new TMapView(this);
         mapView.setSKTMapApiKey(appKey); // API Key 할당.
         container = findViewById(R.id.mapView);
         container.addView(mapView);
+        setActionBar();
 
         destinationTxt = findViewById(R.id.destinationText);
         destinationTxt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onFocusChange(View view, boolean b){
+            public void onFocusChange(View view, boolean b) {
                 Log.d(TAG, "setOnFocusChangeListener() worked: " + b);
                 slidePanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
@@ -479,7 +509,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                 Runnable mSearchPath = () -> {
                     try {
                         geoCoding(address);
-                        // requestFullAddress(address);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -488,23 +517,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                 Log.d(TAG, "Start to search the query");
                 threadPool.execute(mSearchPath);
 
-                InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                //InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                //iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
-        });
-
-        reloadBtn = findViewById(R.id.refreshBtn);
-        reloadBtn.setOnClickListener(view -> {
-            refreshLocation();
-            if (VERBOSE)
-                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
-        });
-
-        mainBtn = findViewById(R.id.goBackBtn);
-        mainBtn.setOnClickListener(view -> {
-            Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
-            Log.d(TAG + "Intent", "Convert to Main Activity.");
-            startActivity(toMainActivity);
         });
 
         getSupportFragmentManager().addOnBackStackChangedListener(this);
@@ -513,6 +528,36 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
         // 위치 접근 권한 확인 ↓:
         checkPermission(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION);
+    }
+
+    private void setActionBar() {
+        toolBar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolBar);
+        toolBar.setTitle("Map");
+
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setTitle("Map");
+
+        navigationView = findViewById(R.id.navigationBtm);
+        navigationView.setSelectedItemId(MAP);
+        navigationView.setOnItemSelectedListener(item -> {
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
+            if (item.getTitle().equals("Post")) {
+                Log.d(TAG + "Intent", "Convert to Post Activity.");
+            } else if (item.getTitle().equals("Map")) {
+                Log.d(TAG + "Intent", "Already in Map Activity.");
+            } else if (item.getTitle().equals("Home")) {
+                Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                Log.d(TAG + "Intent", "Convert to Main Activity.");
+                startActivity(toMainActivity);
+            } else { // Menu
+                Log.d(TAG + "Intent", "Convert to Menu Activity.");
+            }
+            return false;
+        });
+
     }
 
     @TargetApi(Build.VERSION_CODES.M)

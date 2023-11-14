@@ -93,9 +93,11 @@ public class MainActivity extends AppCompatActivity {
         scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
 
-        //Api 요청
+        //todoList 불러오기
+        // TODO: 현재 id가 1로 되어있으니 로그인하면서 액티비티 전환할 때 사용자의 id 넘겨주고 그 id로 치환하기
         Call<List<TodoListDto>> todos = todoListApi.getTodoList(1L);
         todos.enqueue(new Callback<>() {
+            //로그인 성공
             @Override
             public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
                 List<TodoListDto> todoLists = response.body();
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+            // TODO: 이 내용은 지워도 될듯함
             @Override
             public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
                 layoutList.addView(addItem("Api calling Failed, " + t.toString()));

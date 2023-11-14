@@ -12,10 +12,10 @@ import retrofit2.http.Path;
 public interface MemberApi {
 
     @POST("/member/join")
-    Call<Long> join(@Body SignInDto signInDto);
+    Call<Long> join(@Body SignUpDto signUpDto);
 
     @POST("/member/login")
-    Call<String> login(@Body SignUpDto signUpDto);
+    Call<String> login(@Body SignInDto signInDto);
 
     @POST("/member/insertImage/{id}")
     Call<MemberDto> insertImage(@Path("id") Long id, @Body MemberDto memberDto);

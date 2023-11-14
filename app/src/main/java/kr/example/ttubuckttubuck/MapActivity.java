@@ -2,6 +2,8 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.DestinationsList.listAdapter;
 import static kr.example.ttubuckttubuck.DestinationsList.listItems;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
 import android.Manifest;
@@ -27,7 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -57,13 +58,10 @@ import org.w3c.dom.NodeList;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
-import kr.example.ttubuckttubuck.utils.ReverseGeoCoding;
 
 public class MapActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener, TMapView.OnMapReadyListener, TMapGpsManager.OnLocationChangedListener, TMapView.OnApiKeyListenerCallback, SlidingUpPanelLayout.PanelSlideListener {
     // static(final) 변수 ↓
@@ -150,7 +148,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private static TMapView mapView;
     private static TMapPoint curLocation;
     private TMapMarkerItem curMarker;
-    private ImageButton mainBtn, reloadBtn;
     private Button searchBtn;
     private EditText destinationTxt;
     private Bitmap markerBmp;
@@ -185,9 +182,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
     // API 변수 ↓
     private double firstLatitude, firstLongitude;
-    private String currentAddressAferReverseGedoCoding = null;
-    private ReverseGeoCoding mReverseGeoCoder;
-    private List<TMapPoint> mapPoints;
     private static TMapPolyLine mPolyLine;
 
     @Override
@@ -213,22 +207,14 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
-        if (item.getTitle() != null && item.getTitle().equals("Refresh")) {
-            refreshLocation();
-            if (VERBOSE)
-                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
-        } else {
-            Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
-            Log.d(TAG + "Intent", "Convert to Main Activity.");
-            startActivity(toMainActivity);
-        }
+        refreshLocation();
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.refresh, menu);
+        Log.d(TAG, "REFRESH item info: " + menu.getItem(0).toString());
         return true;
     }
 
@@ -309,10 +295,12 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     }
 
     private void refreshLocation() {
-        mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude(), true);
-        mapView.setZoomLevel(17);
+        if (curLocation != null) {
+            mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude(), true);
+            mapView.setZoomLevel(17);
 
-        curMarker.setTMapPoint(new TMapPoint(curLocation.getLatitude(), curLocation.getLongitude()));
+            curMarker.setTMapPoint(new TMapPoint(curLocation.getLatitude(), curLocation.getLongitude()));
+        }
     }
 
     private static String getContentFromNode(Element item, String tagName) {
@@ -331,10 +319,11 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         new TMapData().findAllPOI(destination, new TMapData.OnFindAllPOIListener() {
             @Override
             public void onFindAllPOI(ArrayList<TMapPOIItem> arrayList) {
-                for (int i = 0; i < arrayList.size(); i++) {
-                    // Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
-                    double lat = arrayList.get(i).getPOIPoint().getLatitude();
-                    double lon = arrayList.get(i).getPOIPoint().getLongitude();
+                if(arrayList != null) {
+                    for (int i = 0; i < arrayList.size(); i++) {
+                        // Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
+                        double lat = arrayList.get(i).getPOIPoint().getLatitude();
+                        double lon = arrayList.get(i).getPOIPoint().getLongitude();
 
                     /*new TMapData().convertGpsToAddress(lat, lon, new TMapData.OnConvertGPSToAddressListener() {
                         @Override
@@ -343,9 +332,10 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                         }
                     });*/
 
-                    listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
+                        listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
+                    }
+                    runOnUiThread(() -> listAdapter.notifyDataSetChanged());
                 }
-                runOnUiThread(() -> listAdapter.notifyDataSetChanged());
             }
         });
     }
@@ -484,7 +474,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
         // UI 초기화 ↓
         slidePanel = findViewById(R.id.slidePanel);
-        navigationView = findViewById(R.id.navigationBtm);
         mapView = new TMapView(this);
         mapView.setSKTMapApiKey(appKey); // API Key 할당.
         container = findViewById(R.id.mapView);
@@ -541,19 +530,21 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         actionBar.setTitle("Map");
 
         navigationView = findViewById(R.id.navigationBtm);
-        navigationView.setSelectedItemId(MAP);
         navigationView.setOnItemSelectedListener(item -> {
-            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
-            if (item.getTitle().equals("Post")) {
-                Log.d(TAG + "Intent", "Convert to Post Activity.");
-            } else if (item.getTitle().equals("Map")) {
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + " : " + item.getItemId());
+            if (item.getTitle().equals("Map")) {
+                MAP = item.getItemId();
                 Log.d(TAG + "Intent", "Already in Map Activity.");
             } else if (item.getTitle().equals("Home")) {
+                HOME = item.getItemId();
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
                 startActivity(toMainActivity);
-            } else { // Menu
-                Log.d(TAG + "Intent", "Convert to Menu Activity.");
+            } else { // Community
+                COMMUNITY = item.getItemId();
+                Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+                Log.d(TAG + "Intent", "Convert to Community Activity.");
+                startActivity(toCommunityActivity);
             }
             return false;
         });

@@ -1,11 +1,14 @@
 package kr.example.ttubuckttubuck;
 
+import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,6 +20,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
+import kr.example.ttubuckttubuck.CustomView.HomeTodoItem;
+import kr.example.ttubuckttubuck.CustomView.HomeUserButton;
 import kr.example.ttubuckttubuck.api.TodoListApi;
 import kr.example.ttubuckttubuck.dto.TodoListDto;
 import kr.example.ttubuckttubuck.utils.NetworkClient;
@@ -32,7 +37,11 @@ public class MainActivity extends AppCompatActivity {
 
     // UI components ↓
     private BottomNavigationView navigationView;
+    private LinearLayout layoutUserList;
+    private HomeUserButton userItemMyself;
+    private HomeTodoItem todoExample;
     private LinearLayout layoutList;
+    private ImageView addUserBtn;
     private Toolbar toolBar;
     private ActionBar actionBar;
 
@@ -68,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
+    private void addUserItem(){
+
+    }
+
     private void setActionBar() {
         toolBar = findViewById(R.id.toolBar);
         setSupportActionBar(toolBar);
@@ -79,20 +92,20 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setTitle("Home");
 
         navigationView = findViewById(R.id.navigationBtm);
-        navigationView.setSelectedItemId(HOME);
         navigationView.setOnItemSelectedListener(item -> {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId());
-            if (item.getTitle().equals("Post")) {
-                Log.d(TAG + "Intent", "Convert to Post Activity.");
-            } else if (item.getTitle().equals("Map")) {
+            if (item.getTitle().equals("Map")) {
+                MAP = item.getItemId();
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
+                HOME = item.getItemId();
                 layoutList.addView(addItem());
                 Log.d(TAG + "Intent", "Already in Main Activity.");
-            } else { // Menu
-                Log.d(TAG + "Intent", "Convert to Menu Activity.");
+            } else { // Community
+                COMMUNITY = item.getItemId();
+                Log.d(TAG + "Intent", "Convert to Community Activity.");
             }
             return false;
         });
@@ -107,9 +120,16 @@ public class MainActivity extends AppCompatActivity {
 
         setActionBar();
 
+        layoutUserList = findViewById(R.id.layoutFriendList);
         layoutList = findViewById(R.id.layoutList);
         scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
+        userItemMyself = findViewById(R.id.userItem0);
+
+        todoExample = findViewById(R.id.todoItem0);
+
+        addUserBtn = findViewById(R.id.addUserBtn);
+        addUserBtn.setOnClickListener(view -> addUserItem());
 
         //Api 요청
         Call<List<TodoListDto>> todos = todoListApi.getTodoList(1L);

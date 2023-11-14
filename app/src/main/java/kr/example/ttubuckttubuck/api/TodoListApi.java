@@ -12,6 +12,9 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface TodoListApi {
+    @PUT("/member/todoList/{id}")
+    Call<TodoListDto> editTodoDone(@Path("id") Long id);
+
     @GET("/member/todoList/{member}")
     Call<List<TodoListDto>> getTodoList(@Path("member") Long member);
 

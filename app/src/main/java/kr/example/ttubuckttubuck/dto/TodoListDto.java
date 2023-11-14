@@ -14,6 +14,8 @@ public class TodoListDto {
     private String content;
     @SerializedName("date")
     private String date;
+    @SerializedName("done")
+    private Boolean done;
 
     public String getContent() { return content; }
 }

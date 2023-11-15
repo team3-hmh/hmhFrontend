@@ -2,17 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/mapBtn"
+        android:id="@id/map"
         android:title="Map"
         android:icon="@drawable/map"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/homeBtn"
+        android:id="@id/home"
         android:title="Home"
         android:icon="@drawable/home"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/menuBtn"
+        android:id="@id/community"
         android:title="Community"
         android:icon="@drawable/menu"
         app:showAsAction="always"/>

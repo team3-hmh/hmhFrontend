@@ -11,22 +11,22 @@ import android.widget.TextView;
 
 import kr.example.ttubuckttubuck.R;
 
-public class HomeUserButton extends LinearLayout {
+public class HomeUserItem extends LinearLayout {
     private ImageView userImg;
     private TextView userName;
 
-    public HomeUserButton(Context context) {
+    public HomeUserItem(Context context) {
         super(context);
         initView();
     }
 
-    public HomeUserButton(Context context, AttributeSet attrs) {
+    public HomeUserItem(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView();
         getAttrs(attrs);
     }
 
-    public HomeUserButton(Context context, AttributeSet attrs, int defStyle) {
+    public HomeUserItem(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
         initView();
         getAttrs(attrs, defStyle);
@@ -43,17 +43,17 @@ public class HomeUserButton extends LinearLayout {
     }
 
     private void getAttrs(AttributeSet attrs) {
-        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.AddUserBtn);
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.UserItem);
         setTypeArray(typedArray);
     }
 
     private void getAttrs(AttributeSet attrs, int defStyle) {
-        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.AddUserBtn, defStyle, 0);
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.UserItem, defStyle, 0);
         setTypeArray(typedArray);
     }
 
     private void setTypeArray(TypedArray typedArray) {
-        int img = typedArray.getResourceId(R.styleable.AddUserBtn_userImg, R.drawable.profile);
+        int img = typedArray.getResourceId(R.styleable.UserItem_userImg, R.drawable.profile);
         userImg.setImageResource(img);
 
         //String text = typedArray.getString(R.styleable.AddUserBtn_userName);
@@ -63,12 +63,12 @@ public class HomeUserButton extends LinearLayout {
         typedArray.recycle();
     }
 
-    void setUserImg(int img) {
+    public void setUserImg(int img) {
         userImg.setImageResource(img);
     }
 
 
-    void setUserName(String text) {
+    public void setUserName(String text) {
         userName.setText(text);
     }
 }

@@ -2,7 +2,6 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.DestinationsList.listAdapter;
 import static kr.example.ttubuckttubuck.DestinationsList.listItems;
-import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
@@ -155,6 +154,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private Toolbar toolBar;
     private ActionBar actionBar;
     private BottomNavigationView navigationView;
+    private int fromWhere;
 
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
@@ -469,6 +469,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         setContentView(R.layout.activity_map);
         Log.d(TAG, "onCreate() called.");
 
+        fromWhere = getIntent().getIntExtra("fromWhere", HOME);
+
         mainHandler = new Handler(getMainLooper());
         threadPool = Executors.newCachedThreadPool();
 
@@ -530,19 +532,20 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         actionBar.setTitle("Map");
 
         navigationView = findViewById(R.id.navigationBtm);
+        navigationView.getMenu().findItem(fromWhere).setChecked(false);
+        navigationView.getMenu().findItem(MAP).setChecked(true);
         navigationView.setOnItemSelectedListener(item -> {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + " : " + item.getItemId());
             if (item.getTitle().equals("Map")) {
-                MAP = item.getItemId();
                 Log.d(TAG + "Intent", "Already in Map Activity.");
             } else if (item.getTitle().equals("Home")) {
-                HOME = item.getItemId();
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
+                toMainActivity.putExtra("fromWhere", MAP);
                 startActivity(toMainActivity);
             } else { // Community
-                COMMUNITY = item.getItemId();
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+                toCommunityActivity.putExtra("fromWhere", MAP);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
                 startActivity(toCommunityActivity);
             }

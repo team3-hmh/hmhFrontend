@@ -8,9 +8,21 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import kr.example.ttubuckttubuck.api.MemberApi;
+import kr.example.ttubuckttubuck.dto.SignUpDto;
+import kr.example.ttubuckttubuck.utils.NetworkClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 public class JoinActivity extends AppCompatActivity {
     private static final String TAG = "JoinActivity_Debug";
-    private EditText idText, pwdText, nameText;
+
+    Retrofit retrofit = NetworkClient.getRetrofitClient(JoinActivity.this);
+
+    MemberApi memberApi = retrofit.create(MemberApi.class);
+    private EditText idText, pwdText, nameText, pwdCheckText;
     private Button joinBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,13 +31,31 @@ public class JoinActivity extends AppCompatActivity {
 
         idText = findViewById(R.id.idText);
         pwdText = findViewById(R.id.pwdText);
+        pwdCheckText = findViewById(R.id.pwdCheckText);
         nameText = findViewById(R.id.nameText);
 
         joinBtn = findViewById(R.id.joinBtn);
         joinBtn.setOnClickListener(view->{
-            Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
-            Log.d(TAG+"Intent", "Convert to Main Activity.");
-            startActivity(toMainActivity);
+            SignUpDto signUpDto = new SignUpDto(
+                    idText.getText(),
+                    pwdText.getText(),
+                    pwdCheckText.getText(),
+                    nameText.getText()
+            );
+            Call<Long> join = memberApi.join(signUpDto);
+            join.enqueue(new Callback<Long>() {
+                @Override
+                public void onResponse(Call<Long> call, Response<Long> response) {
+                    Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+                    Log.d(TAG + "Intent", "Completed Join. Convert to Login Activity.");
+                    startActivity(toLoginActivity);
+                }
+
+                @Override
+                public void onFailure(Call<Long> call, Throwable t) {
+                    // TODO: 회원가입 실패하면 어떻게 할지?
+                }
+            });
         });
     }
 }

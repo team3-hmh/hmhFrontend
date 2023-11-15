@@ -16,4 +16,7 @@ public class MemberDto {
     @SerializedName("image")
     private String image;
 
+    public Long getId() {
+        return this.id;
+    }
 }

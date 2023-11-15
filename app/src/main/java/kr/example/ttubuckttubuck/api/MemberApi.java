@@ -8,6 +8,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface MemberApi {
 
@@ -22,4 +23,7 @@ public interface MemberApi {
 
     @GET("/member/{id}")
     Call<MemberDto> memberInfo(@Path("id") Long id);
+
+    @GET("/member/email")
+    Call<MemberDto> findByEmail(@Query("email") String email);
 }

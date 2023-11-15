@@ -117,6 +117,13 @@ public class MainActivity extends AppCompatActivity {
         // UI Initialization ↓
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Intent intent = getIntent();
+        long member = intent.getLongExtra("id", -1);
+        if (member == -1) {
+            Log.d(TAG + "Intent", "Not valid User");
+            Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(toLoginActivity);
+        }
 
         setActionBar();
 

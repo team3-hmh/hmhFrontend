@@ -44,21 +44,27 @@ public class LoginActivity extends AppCompatActivity {
 
         loginBtn = findViewById(R.id.loginBtn);
         loginBtn.setOnClickListener(view -> {
-            SignInDto signInDto = new SignInDto(idText.getText(), pwdText.getText());
+            SignInDto signInDto = new SignInDto(String.valueOf(idText.getText()), String.valueOf(pwdText.getText()));
             Call<String> loginToken = memberApi.login(signInDto); //로그인 요청
             Call<MemberDto> memberDtoCall = memberApi.findByEmail(String.valueOf(idText.getText()));
             loginToken.enqueue(new Callback<String>() {
                 //로그인 성공
                 @Override
-                public void onResponse(Call<String> call, Response<String> response) {
+                public void onResponse(Call<String> call, Response<String> responseParent) {
                     memberDtoCall.enqueue(new Callback<MemberDto>() {
                         @Override
                         public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
                             MemberDto memberDto = response.body();
+                            Log.d(TAG, "Is response null?: " + (responseParent == null));
+                            Log.d(TAG, "response.message(): " + responseParent.message());
+                            Log.d(TAG, "Is response.body() null?: " + (responseParent.body() == null));
+                            Log.d(TAG, "response.body().toString()" + responseParent.body().toString());
+                            Log.d(TAG, "response.isSuccessful(): " + responseParent.isSuccessful());
+
                             Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                             // TODO: findByEmail() 추가 하고 호출 해서 MemberDto 에서 id 추출 해서 Intent에 담아서 전송
-                            assert memberDto != null;
-                            toMainActivity.putExtra("id", memberDto.getId());
+                            // assert memberDto != null;
+                            toMainActivity.putExtra("id", 1L);
                             Log.d(TAG + "Intent", "Convert to Main Activity.");
                             startActivity(toMainActivity);
                         }
@@ -66,6 +72,12 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(Call<MemberDto> call, Throwable t) {
                             // TODO: 로그인 실패
+                            Log.d(TAG, "response.message(): " + responseParent.message());
+                            Log.d(TAG, "response.body().toString()" + responseParent.body().toString());
+                            Log.d(TAG, "response.isSuccessful(): " + responseParent.isSuccessful());
+                            Log.d(TAG, "call.toString(): " + call);
+                            Log.d(TAG, "call.isExecuted(): " + call.isExecuted());
+                            Log.e(TAG, "");
                         }
                     });
 
@@ -75,6 +87,13 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<String> call, Throwable t) {
                     // TODO: 로그인 실패 알람 띄우기
+
+                    // go@naver.com
+                    // qpw
+                    Log.d(TAG, "call.toString(): " + call.toString());
+                    Log.d(TAG, "call.isExecuted(): " + call.isExecuted());
+                    Log.e(TAG, "t info: " + t.getMessage());
+                    t.printStackTrace();
                 }
             });
         });

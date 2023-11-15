@@ -67,7 +67,6 @@ public class CommunityActivity extends AppCompatActivity {
                 toMainActivity.putExtra("fromWhere", COMMUNITY);
                 startActivity(toMainActivity);
             } else { // Community
-                postList.addView(addPostItem(-1,"성북구 국민대학교 북악관 207호", content,"2023-11-11"));
                 Log.d(TAG + "Intent", "Already in Community Activity.");
             }
             return false;
@@ -83,6 +82,9 @@ public class CommunityActivity extends AppCompatActivity {
         setActionBar();
 
         postList = findViewById(R.id.postList);
+
+        addPostBtn = findViewById(R.id.addPostBtn);
+        addPostBtn.setOnClickListener(view-> postList.addView(addPostItem(-1,"성북구 국민대학교 북악관 207호", content,"2023-11-11")));
     }
     @Override
     protected void onPause() {

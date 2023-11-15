@@ -64,14 +64,13 @@
 
                 <ImageView
                     android:id="@+id/addUserBtn"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginLeft="10dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="17dp"
                     android:layout_marginRight="25dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/add_user"
                     android:scaleType="fitCenter"
-                    android:background="@null"
+                    android:background="@drawable/add_post_btn"
                     />
             </LinearLayout>
         </HorizontalScrollView>

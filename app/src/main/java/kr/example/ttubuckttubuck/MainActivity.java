@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         tmp.setTitle(title);
         tmp.setDate(date);
         tmp.setUserImg(R.drawable.profile);
+        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> Log.d(TAG, "TODO Checked."));
         return tmp;
     }
 

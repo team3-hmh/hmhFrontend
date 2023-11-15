@@ -43,8 +43,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="25dp"
         android:layout_gravity="center"
-        android:src="@drawable/todo_check"
         android:scaleType="fitCenter"
-        android:background="@null"
+        android:background="@drawable/todo_chk_btn"
         />
 </LinearLayout>

@@ -62,6 +62,14 @@
                     android:layout_marginVertical="15dp" />
 
                 <EditText
+                    android:id="@+id/pwdCheckText"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:hint="PasswordCheck"
+                    android:textSize="30dp"
+                    android:layout_marginVertical="15dp" />
+
+                <EditText
                     android:id="@+id/nameText"
                     android:layout_width="match_parent"
                     android:layout_height="80dp"

@@ -13,5 +13,10 @@ public class MemberDto {
     private String birth;
     @SerializedName("password")
     private String password;
+    @SerializedName("image")
+    private String image;
 
+    public Long getId() {
+        return this.id;
+    }
 }

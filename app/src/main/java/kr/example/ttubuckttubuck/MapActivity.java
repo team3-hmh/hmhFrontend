@@ -2,6 +2,9 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.DestinationsList.listAdapter;
 import static kr.example.ttubuckttubuck.DestinationsList.listItems;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -20,18 +23,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.skt.tmap.TMapData;
 import com.skt.tmap.TMapGpsManager;
 import com.skt.tmap.TMapInfo;
@@ -41,29 +49,21 @@ import com.skt.tmap.address.TMapAddressInfo;
 import com.skt.tmap.overlay.TMapMarkerItem;
 import com.skt.tmap.overlay.TMapPolyLine;
 import com.skt.tmap.poi.TMapPOIItem;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
-import kr.example.ttubuckttubuck.utils.Locker;
-import kr.example.ttubuckttubuck.utils.ReverseGeoCoding;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
-public class MapActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener, TMapView.OnMapReadyListener, TMapGpsManager.OnLocationChangedListener, TMapView.OnApiKeyListenerCallback {
+public class MapActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener, TMapView.OnMapReadyListener, TMapGpsManager.OnLocationChangedListener, TMapView.OnApiKeyListenerCallback, SlidingUpPanelLayout.PanelSlideListener {
     // static(final) 변수 ↓
     private static final String TAG = "MapActivity_Debug";
     private static final String appKey = "rZWWy5hD2n87YkkTKDsV2ou4xLJHWpb5OiqBswXh";
@@ -78,9 +78,35 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private Locker locker = new Locker();
     private boolean isLocked = false;
 
-    @Override
-    public void onBackStackChanged() {
-        getSupportActionBar().setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
+    private static class Locker {
+        private static final ReentrantLock locker = new ReentrantLock();
+        private static final Condition condition = locker.newCondition();
+        private static boolean key = false;
+
+        public static void lock() {
+            locker.lock();
+            try {
+                synchronized (condition) {
+                    Log.d(TAG, "await looping.");
+                    if (!key)
+                        condition.await();
+                }
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                Log.d(TAG, "unlock called.");
+                locker.unlock();
+            }
+        }
+
+        public static void unlock() {
+            key = true;
+            synchronized (condition) {
+                Log.d(TAG, "notifyAll called.");
+                condition.notifyAll();
+            }
+        }
     }
 
     private class MarkerHeading extends AsyncTask<Void, Void, Boolean> {
@@ -118,21 +144,50 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
     // UI 구성 요소 ↓
     private ViewGroup container;
+    public static SlidingUpPanelLayout slidePanel;
     private static TMapView mapView;
     private static TMapPoint curLocation;
     private TMapMarkerItem curMarker;
-    private ImageButton mainBtn, reloadBtn;
     private Button searchBtn;
-    private EditText destination;
+    private EditText destinationTxt;
     private Bitmap markerBmp;
     private Fragment destinationsFragment;
+    private Toolbar toolBar;
+    private ActionBar actionBar;
+    private BottomNavigationView navigationView;
+
+    @Override
+    public void onPanelSlide(View panel, float slideOffset) {
+        Log.d(TAG, "onPanelSlide() called.");
+    }
+
+    // Not working.
+    @Override
+    public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+        Log.d(TAG, "onPanelStateChanged() called.");
+        /*
+        if (previousState == SlidingUpPanelLayout.PanelState.COLLAPSED || newState == SlidingUpPanelLayout.PanelState.DRAGGING) {
+            Log.d(TAG, "if");
+            runOnUiThread(() -> {
+                destinationTxt.setEnabled(false);
+            });
+        }
+        else {
+            Log.d(TAG, "else");
+            runOnUiThread(() -> {
+                destinationTxt.setEnabled(true);
+            });
+        }*/
+    }
 
     // API 변수 ↓
     private double firstLatitude, firstLongitude;
-    private String currentAddressAferReverseGedoCoding = null;
-    private ReverseGeoCoding mReverseGeoCoder;
-    private List<TMapPoint> mapPoints;
     private static TMapPolyLine mPolyLine;
+
+    @Override
+    public void onBackStackChanged() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
+    }
 
     @Override
     public void onSKTMapApikeySucceed() {
@@ -148,6 +203,19 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
             Toast.makeText(this, "API Key is invalid.", Toast.LENGTH_SHORT);
         Log.e(TAG, "API Key is invalid.");
         //locker.unlock();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        refreshLocation();
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.refresh, menu);
+        Log.d(TAG, "REFRESH item info: " + menu.getItem(0).toString());
+        return true;
     }
 
     @Override
@@ -173,39 +241,52 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     @Override
     public void onLocationChange(Location location) {
         Log.d(TAG + "_Callback", "[ Callback] : onLocationChange() called.");
-        final float curLatitude = (float) location.getLatitude();
-        final float curLongitude = (float) location.getLongitude();
-        //reverseGeoCoding(curLocation.getLatitude(), curLocation.getLongitude());
-        curLocation.setLatitude(location.getLatitude());
-        curLocation.setLongitude(location.getLongitude());
+        /*final float curLatitude = (float) location.getLatitude();
+        final float curLongitude = (float) location.getLongitude();*/
+        if (curLocation != null) {
+            curLocation.setLatitude(location.getLatitude());
+            curLocation.setLongitude(location.getLongitude());
 
-        Log.d(TAG + "_Callback", "Changed location: " + curLatitude + ", " + curLongitude);
-        // Log.d(TAG + "_Callback", "Reverse GeoCoding address: " + currentAddressAferReverseGedoCoding);
-        if (VERBOSE)
-            Toast.makeText(this, "Changed location: " + curLatitude + ", " + curLongitude, Toast.LENGTH_SHORT).show();
+            Log.d(TAG + "_Callback", "Changed location: " + location.getLatitude() + ", " + location.getLongitude());
 
-        curMarker.setTMapPoint(new TMapPoint(curLatitude, curLongitude));
-        mapView.setCenterPoint(curLatitude, curLongitude, true);
+            if (VERBOSE)
+                Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+            refreshLocation();
+        }
     }
 
-    private void reverseGeoCoding(double latitude, double longitude) {
+    private String reverseGeoCoding(double latitude, double longitude) {
         //double editLatitude = Double.valueOf(String.format("%.6f", latitude));
         //double editLongitude = Double.valueOf(String.format("%.6f", longitude));
 
-        TMapAddressInfo result = new TMapData().reverseGeocoding(curLocation.getLatitude(), curLocation.getLongitude(), null);
+        TMapAddressInfo result = new TMapData().reverseGeocoding(latitude, longitude, "A10");
+        /*new TMapData().convertGpsToAddress(longitude, latitude, new TMapData.OnConvertGPSToAddressListener() {
+                    @Override
+                    public void onConverGPSToAddress(String s) {
+                        // Log.d("findAllPOI_Result", "GPS to address: " + s);
 
-        currentAddressAferReverseGedoCoding = new TMapData().convertGpsToAddress(curLocation.getLatitude(), curLocation.getLatitude());
-        Log.d(TAG, "GeoCoding result: " + result + " or " + currentAddressAferReverseGedoCoding);
+                    }
+                }
+        );*/
 
-        Log.d(TAG, "GeoCoder called.");
-        mReverseGeoCoder = new ReverseGeoCoding(appKey, 1, latitude, longitude, "EPSG3857", "null");
+        // Log.d(TAG, "GeoCoding result: " + result.strCity_do + " " + result.strGu_gun + " " + result.strLegalDong + " " + result.strRoadName + " " + result.strBuildingIndex + " " + result.strBuildingName);
+        // Log.d(TAG, "GeoCoding result: " + result.strCity_do + " " + result.strGu_gun + " " + result.strLegalDong + " " + result.strBunji + " " + result.strBuildingName);
+        Log.d(TAG, "GeoCoding result: " + result.strFullAddress);
+        return result.strFullAddress.split(",")[1];
     }
 
     // Success to work.
-    private void searchAround() {
-        TMapData mTMapData = new TMapData();
+    private void searchAround(String[] keywords) {
+        String query = "";
+        for (int i = 0; i < keywords.length; i++) {
+            query += keywords[i];
+            if (i != keywords.length - 1)
+                query += ";";
+        }
+
         TMapPoint tmp = curLocation;
-        mTMapData.findAroundNamePOI(tmp, "편의점", 1, 1000, arrayList -> {
+        new TMapData().findAroundNamePOI(tmp, query, 1, 1000, arrayList -> {
             for (int i = 0; i < arrayList.size(); i++) {
                 TMapPOIItem item = arrayList.get(i);
                 Log.d(TAG, "POI name: " + item.getPOIName() + ", address: " + item.getPOIAddress().replace("mull", ""));
@@ -214,8 +295,12 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     }
 
     private void refreshLocation() {
-        mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude());
-        mapView.setZoomLevel(17);
+        if (curLocation != null) {
+            mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude(), true);
+            mapView.setZoomLevel(17);
+
+            curMarker.setTMapPoint(new TMapPoint(curLocation.getLatitude(), curLocation.getLongitude()));
+        }
     }
 
     private static String getContentFromNode(Element item, String tagName) {
@@ -228,211 +313,35 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         return null;
     }
 
-    class FullAddrData {
-        public double lat, lon, latEntr, lonEntr;
-        public String addr, flag, buildingName;
+    private void geoCoding(String destination) throws InterruptedException {
+        String address = new String();
+        listItems.clear();
+        new TMapData().findAllPOI(destination, new TMapData.OnFindAllPOIListener() {
+            @Override
+            public void onFindAllPOI(ArrayList<TMapPOIItem> arrayList) {
+                if(arrayList != null) {
+                    for (int i = 0; i < arrayList.size(); i++) {
+                        // Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
+                        double lat = arrayList.get(i).getPOIPoint().getLatitude();
+                        double lon = arrayList.get(i).getPOIPoint().getLongitude();
+
+                    /*new TMapData().convertGpsToAddress(lat, lon, new TMapData.OnConvertGPSToAddressListener() {
+                        @Override
+                        public void onConverGPSToAddress(String s) {
+                            // Log.d("findAllPOI_Result", "GPS to address: " + s);
+                        }
+                    });*/
+
+                        listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
+                    }
+                    runOnUiThread(() -> listAdapter.notifyDataSetChanged());
+                }
+            }
+        });
     }
 
-    private void requestFullAddress(String destination) throws IOException {
-        // 지번주소 정확도 순 Flag( 인덱스 작은 수록 정확도 높음 )
-        final String[] arrOldMatchFlag = {"M11", "M21", "M12", "M13", "M22", "M23", "M41", "M42", "M31", "M32", "M33"};
-        // 도로명주소 정확도 순 Flag( 인덱스 작은 수록 정확도 높음 )
-        final String[] arrNewMatchFlag = {"N51", "N52", "N53", "N54", "N55", "N61", "N62"};
-
-        // https://skopenapi.readme.io/reference/full-text-geocoding
-        /*
-        <주소 구분 코드>
-        F01
-        - 지번주소
-        - 구주소 타입
-
-        F02
-        - 새(도로명) 주소
-        - 새(도로명) 주소 타입 F00
-        - 구주소, 새(도로명)주소 타입
-
-        <좌표 타입>
-        EPSG3857
-        - Google Mercator
-
-        WGS84GEO
-        - 경위도
-        */
-
-        String rawString = destination;
-        // String rawString = "서울시 강남구 신사동";
-        // ByteBuffer buffer = StandardCharsets.UTF_8.encode(rawString);
-        // String encodedString = StandardCharsets.UTF_8.decode(buffer).toString();
-        String encodedString = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU)
-            encodedString = URLEncoder.encode(rawString, StandardCharsets.UTF_8);
-
-        Log.d("encodedString", "encodedString: " + encodedString);
-        // true ↓
-        // Log.d(TAG, "assert: " + encodedString.equals("%EC%84%9C%EC%9A%B8%EC%8B%9C+%EA%B0%95%EB%82%A8%EA%B5%AC+%EC%8B%A0%EC%82%AC%EB%8F%99"));
-
-        OkHttpClient client = new OkHttpClient();
-        int cnt = 200;
-        Request request = new Request.Builder()
-                .url("https://apis.openapi.sk.com/tmap/geo/fullAddrGeo?addressFlag=F01&coordType=WGS84GEO&version=1&fullAddr=" + encodedString + "&page=1&count=" + cnt)
-                .get()
-                .addHeader("accept", "application/json")
-                .addHeader("appKey", appKey)
-                .build();
-
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            Log.d(TAG, "Getting the response body.");
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to get the response.");
-            e.printStackTrace();
-        }
-        String responseString = response.body().string();
-        Log.d(TAG, "[ requestFullAddress ] message: " + responseString);
-        Log.d(TAG, "[ requestFullAddress ] isSuccessful(): " + response.isSuccessful());
-
-        if (!(response.isSuccessful())) {
-            runOnUiThread(() -> Toast.makeText(getApplicationContext(), "해당 주소 정보가 존재하지 않습니다.", Toast.LENGTH_SHORT).show());
-        }
-
-        FullAddrData fullAddrData = new FullAddrData();
-
-        // JsonParsing
-        try {
-            ArrayList<String> alMatchFlag = new ArrayList<>(); // MatchFlag 수집
-            int indexMatchFlag = -1;
-            int i, j;
-
-            JSONObject objData = new JSONObject(responseString).getJSONObject("coordinateInfo");
-            int length = objData.getInt("totalCount") < cnt ? objData.getInt("totalCount") : cnt;
-            JSONArray arrCoordinate = objData.getJSONArray("coordinate");
-            JSONObject objCoordinate = null;
-
-            ArrayList<JSONObject> destinations = new ArrayList<>();
-            ArrayList<JSONObject> destinationsNew = new ArrayList<>();
-            ArrayList<JSONObject> results = new ArrayList<>();
-
-            // 1. matchFlag 수집
-
-            for (i = 0; i < length; i++) {
-                objCoordinate = arrCoordinate.getJSONObject(i);
-
-                if (objCoordinate.getString("matchFlag") != null && !objCoordinate.getString("matchFlag").equals("")) {
-                    // 지번주소
-                    alMatchFlag.add(objCoordinate.getString("matchFlag"));
-                    destinations.add(objCoordinate);
-                } else if (objCoordinate.getString("newMatchFlag") != null && !objCoordinate.getString("newMatchFlag").equals("")) {
-                    // 도로명주소
-                    alMatchFlag.add(objCoordinate.getString("newMatchFlag"));
-                    destinationsNew.add(objCoordinate);
-                }
-            }
-
-            Log.d(TAG, "alMatchFlag: " + alMatchFlag.size());
-            Log.d(TAG, "destinations: " + destinations.size());
-            Log.d(TAG, "destinationsNew: " + destinationsNew.size());
-
-            // 2. < matchFlag 기준으로 더 정확한 항목의 index 결정 >
-            // 2_1. 수집한 matchFlag 중 "M00"(지번주소중 가장 높은정확도) 이 있으면 선택
-            for (i = 0; i < destinations.size(); i++) {
-                if (destinations.get(i).getString("matchFlag").equals("M00")) {
-                    Log.d(TAG, "M00: " + destinations.get(i).getString("gu_gun"));
-                    indexMatchFlag = i;
-                    results.add(destinations.get(i));
-                }
-            }
-
-            Log.d(TAG, "indexMatchFlag: " + indexMatchFlag);
-
-            // 2_2. "M00" 없으면 arrNewMatchFlag(도로명주소) 에서 선택
-            if (indexMatchFlag == -1) {
-                for (i = 0; i < arrNewMatchFlag.length; i++) {
-                    for (j = 0; j < destinationsNew.size(); j++) {
-                        if (destinationsNew.get(j).getString("matchFlag").equals(arrNewMatchFlag[i])) {
-                            indexMatchFlag = j;
-                            results.add(destinations.get(j));
-                            //break;
-                        }
-                    }
-                    /*if (indexMatchFlag != -1) {
-                        break;
-                    }*/
-                }
-
-            }
-
-            // 2_3. 도로명주소 없으면 arrOldMatchFlag(지번주소) 에서 선택
-            if (indexMatchFlag == -1) {
-                for (i = 0; i < arrOldMatchFlag.length; i++) {
-                    for (j = 0; j < destinations.size(); j++) {
-                        if (destinations.get(j).getString("matchFlag").equals(arrOldMatchFlag[i])) {
-                            indexMatchFlag = j;
-                            results.add(destinations.get(j));
-                            //break;
-                        }
-                    }
-                    /*if (indexMatchFlag != -1) {
-                        break;
-                    }*/
-                }
-            }
-
-            Log.d(TAG, "results: " + results.size());
-            listItems.clear();
-            for (i = 0; i < results.size(); i++) {
-                if (VERBOSE) Log.d(TAG, "i: " + i);
-                // 3. 선택된 인덱스의 결과 세팅
-                if (indexMatchFlag != -1) {
-                    objCoordinate = arrCoordinate.getJSONObject(i);
-                    if (!objCoordinate.getString("matchFlag").equals("")) {
-                        // 지번 주소
-                        if (!objCoordinate.getString("lat").equals(""))
-                            fullAddrData.lat = Double.parseDouble(objCoordinate.getString("lat"));
-                        if (!objCoordinate.getString("lon").equals(""))
-                            fullAddrData.lon = Double.parseDouble(objCoordinate.getString("lon"));
-                        if (!objCoordinate.getString("latEntr").equals(""))
-                            fullAddrData.latEntr = Double.parseDouble(objCoordinate.getString("latEntr"));
-                        if (!objCoordinate.getString("lonEntr").equals(""))
-                            fullAddrData.lonEntr = Double.parseDouble(objCoordinate.getString("lonEntr"));
-                        if (!objCoordinate.getString("buildingName").equals(""))
-                            fullAddrData.buildingName = objCoordinate.getString("buildingName") + " ";
-                        if (!objCoordinate.getString("buildingDong").equals(""))
-                            fullAddrData.buildingName += objCoordinate.getString("buildingDong");
-                        fullAddrData.addr = objCoordinate.getString("city_do") + " " + objCoordinate.getString("gu_gun") + " " + objCoordinate.getString("legalDong") + " " + objCoordinate.getString("adminDong") + " " + objCoordinate.getString("bunji");
-                        fullAddrData.flag = objCoordinate.getString("matchFlag");
-                    } else if (!objCoordinate.getString("newMatchFlag").equals("")) {
-                        // 도로명 주소
-                        if (!objCoordinate.getString("newLat").equals(""))
-                            fullAddrData.lat = Double.parseDouble(objCoordinate.getString("newLat"));
-                        if (!objCoordinate.getString("newLon").equals(""))
-                            fullAddrData.lon = Double.parseDouble(objCoordinate.getString("newLon"));
-                        if (!objCoordinate.getString("newLatEntr").equals(""))
-                            fullAddrData.latEntr = Double.parseDouble(objCoordinate.getString("newLatEntr"));
-                        if (!objCoordinate.getString("newLonEntr").equals(""))
-                            fullAddrData.lonEntr = Double.parseDouble(objCoordinate.getString("newLonEntr"));
-                        if (!objCoordinate.getString("buildingName").equals(""))
-                            fullAddrData.buildingName = objCoordinate.getString("buildingName") + " ";
-                        if (!objCoordinate.getString("buildingDong").equals(""))
-                            fullAddrData.buildingName += objCoordinate.getString("buildingDong");
-                        fullAddrData.addr = objCoordinate.getString("city_do") + " " + objCoordinate.getString("gu_gun") + " " + objCoordinate.getString("newRoadName") + " " + objCoordinate.getString("newBuildingIndex") + " " + objCoordinate.getString("newBuildingDong") + " (" + objCoordinate.getString("zipcode") + ")";
-                        fullAddrData.flag = objCoordinate.getString("newMatchFlag");
-                    }
-
-                    Log.d(TAG, "GeoCoding: " + fullAddrData.buildingName + ": " + fullAddrData.addr + ": " + fullAddrData.lat + ", " + fullAddrData.lon);
-                    listItems.add(new DestinationsList.ListItem(fullAddrData.buildingName, fullAddrData.addr, new Pair<>(fullAddrData.lat, fullAddrData.lon)));
-
-                }
-            }
-            runOnUiThread(() -> listAdapter.notifyDataSetChanged());
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            Log.d(TAG, "Failed to get the body: " + e);
-            e.printStackTrace();
-        }
-    }
-
-    public static void searchPath(double destinationX, double destinationY) throws URISyntaxException, IOException, JSONException {
+    public static void searchPath(double destinationX, double destinationY) throws
+            URISyntaxException, IOException, JSONException {
         Log.d(TAG, "searchPath() called.");
 
         double endX = destinationY;
@@ -453,7 +362,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
             mPolyLine = new TMapPolyLine();
             mPolyLine.setID(type.name());
             mPolyLine.setLineWidth(10);
-            mPolyLine.setLineColor(Color.GREEN);
+            mPolyLine.setLineColor(Color.parseColor("#21D524"));
             mPolyLine.setLineAlpha(255);
 
 
@@ -511,7 +420,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
         // 현재 위치를 나타낼 위치 class인 TMapPoint의 객체 생성.
         curLocation = new TMapPoint(firstLatitude, firstLongitude);
-        refreshLocation();
 
         // GPS 추적 기능 class인 TMapGpsManager 객체 할당 후 Callback 등록.
         gpsManager = new TMapGpsManager(this);
@@ -551,8 +459,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
             Log.e(TAG, "Failed to add the marker to mapView: " + e);
             e.printStackTrace();
         }
-        // reverseGeoCoding(curLocation.getLatitude(), curLocation.getLongitude());
-        // searchAround();
+
+        refreshLocation();
     }
 
     @Override
@@ -565,24 +473,31 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         threadPool = Executors.newCachedThreadPool();
 
         // UI 초기화 ↓
+        slidePanel = findViewById(R.id.slidePanel);
         mapView = new TMapView(this);
         mapView.setSKTMapApiKey(appKey); // API Key 할당.
         container = findViewById(R.id.mapView);
         container.addView(mapView);
+        setActionBar();
 
-        destination = findViewById(R.id.destinationText);
+        destinationTxt = findViewById(R.id.destinationText);
+        destinationTxt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                Log.d(TAG, "setOnFocusChangeListener() worked: " + b);
+                slidePanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            }
+        });
 
         searchBtn = findViewById(R.id.searchBtn);
         searchBtn.setOnClickListener(view -> {
-            String address = destination.getText().toString();
+            String address = destinationTxt.getText().toString();
             if (address.equals(""))
                 Toast.makeText(getApplicationContext(), "목적지를 입력하세요.", Toast.LENGTH_SHORT).show();
             else {
                 Runnable mSearchPath = () -> {
                     try {
-                        requestFullAddress(address);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        geoCoding(address);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -590,21 +505,10 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
                 Log.d(TAG, "Start to search the query");
                 threadPool.execute(mSearchPath);
+
+                //InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                //iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
-        });
-
-        reloadBtn = findViewById(R.id.refreshBtn);
-        reloadBtn.setOnClickListener(view -> {
-            refreshLocation();
-            if (VERBOSE)
-                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
-        });
-
-        mainBtn = findViewById(R.id.goBackBtn);
-        mainBtn.setOnClickListener(view -> {
-            Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
-            Log.d(TAG + "Intent", "Convert to Main Activity.");
-            startActivity(toMainActivity);
         });
 
         getSupportFragmentManager().addOnBackStackChangedListener(this);
@@ -613,6 +517,38 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
         // 위치 접근 권한 확인 ↓:
         checkPermission(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION);
+    }
+
+    private void setActionBar() {
+        toolBar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolBar);
+        toolBar.setTitle("Map");
+
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setTitle("Map");
+
+        navigationView = findViewById(R.id.navigationBtm);
+        navigationView.setOnItemSelectedListener(item -> {
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + " : " + item.getItemId());
+            if (item.getTitle().equals("Map")) {
+                MAP = item.getItemId();
+                Log.d(TAG + "Intent", "Already in Map Activity.");
+            } else if (item.getTitle().equals("Home")) {
+                HOME = item.getItemId();
+                Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                Log.d(TAG + "Intent", "Convert to Main Activity.");
+                startActivity(toMainActivity);
+            } else { // Community
+                COMMUNITY = item.getItemId();
+                Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+                Log.d(TAG + "Intent", "Convert to Community Activity.");
+                startActivity(toCommunityActivity);
+            }
+            return false;
+        });
+
     }
 
     @TargetApi(Build.VERSION_CODES.M)

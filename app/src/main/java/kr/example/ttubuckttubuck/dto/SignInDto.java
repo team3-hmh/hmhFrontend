@@ -1,7 +1,5 @@
 package kr.example.ttubuckttubuck.dto;
 
-import android.text.Editable;
-
 import com.google.gson.annotations.SerializedName;
 
 public class SignInDto {
@@ -10,8 +8,8 @@ public class SignInDto {
     @SerializedName("password")
     private String password;
 
-    public SignInDto(Editable email, Editable password) {
-        this.email = email.toString();
-        this.password = password.toString();
+    public SignInDto(String email, String password) {
+        this.email = email;
+        this.password = password;
     }
 }

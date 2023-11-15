@@ -44,36 +44,33 @@
             android:layout_weight="2">
 
             <LinearLayout
-                android:id="@+id/layoutFriendList"
+                android:id="@+id/userList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <kr.example.ttubuckttubuck.CustomView.HomeUserButton
+            <LinearLayout
+                android:id="@+id/addedUserList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <kr.example.ttubuckttubuck.CustomView.HomeUserItem
                     android:id="@+id/userItem0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <kr.example.ttubuckttubuck.CustomView.HomeUserButton
-                    android:id="@+id/userItem1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <kr.example.ttubuckttubuck.CustomView.HomeUserButton
-                    android:id="@+id/userItem2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
                 <ImageView
                     android:id="@+id/addUserBtn"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginLeft="10dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="17dp"
                     android:layout_marginRight="25dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/add_user"
                     android:scaleType="fitCenter"
-                    android:background="@null"
+                    android:background="@drawable/add_post_btn"
                     />
             </LinearLayout>
         </HorizontalScrollView>
@@ -85,16 +82,11 @@
             android:layout_weight="7.7">
 
             <LinearLayout
-                android:id="@+id/layoutList"
+                android:id="@+id/todoList"
                 android:weightSum="10"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
-
-                <kr.example.ttubuckttubuck.CustomView.HomeTodoItem
-                    android:id="@+id/todoItem0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
             </LinearLayout>
         </ScrollView>
 

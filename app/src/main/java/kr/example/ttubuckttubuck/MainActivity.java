@@ -1,8 +1,6 @@
 package kr.example.ttubuckttubuck;
 
-import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
-import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,7 +19,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.List;
 
 import kr.example.ttubuckttubuck.CustomView.HomeTodoItem;
-import kr.example.ttubuckttubuck.CustomView.HomeUserButton;
+import kr.example.ttubuckttubuck.CustomView.HomeUserItem;
 import kr.example.ttubuckttubuck.api.TodoListApi;
 import kr.example.ttubuckttubuck.dto.TodoListDto;
 import kr.example.ttubuckttubuck.utils.NetworkClient;
@@ -33,17 +31,17 @@ import retrofit2.Retrofit;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity_Debug";
     private static int inx = 0;
+    private static int userItemCnt = 0;
+    private static int todotemCnt = 0;
     private HorizontalScrollView scrollViewFriendList;
 
     // UI components ↓
     private BottomNavigationView navigationView;
-    private LinearLayout layoutUserList;
-    private HomeUserButton userItemMyself;
-    private HomeTodoItem todoExample;
-    private LinearLayout layoutList;
+    private LinearLayout todoList, addedUserList;
     private ImageView addUserBtn;
     private Toolbar toolBar;
     private ActionBar actionBar;
+    private int fromWhere;
 
     // 네트워크로 데이터 전송, Retrofit 객체 생성
     // NetworkClient : 위에서 Retrofit 기본 설정한 클래스 파일
@@ -77,8 +75,23 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private void addUserItem(){
+    private HomeUserItem addFriendItem(String userName){
+        HomeUserItem tmp = new HomeUserItem(getApplicationContext());
+        tmp.setTag("userItem"+ (userItemCnt++));
+        tmp.setUserName(userName);
+        tmp.setUserImg(R.drawable.profile);
+        return tmp;
+    }
 
+    private HomeTodoItem addTodoItem(String userName, String place, String date){
+        HomeTodoItem tmp = new HomeTodoItem(getApplicationContext());
+        tmp.setTag("todoItem"+ (++todotemCnt));
+        String title = userName + "과(와) " + place + " 약속";
+        tmp.setTitle(title);
+        tmp.setDate(date);
+        tmp.setUserImg(R.drawable.profile);
+        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> Log.d(TAG, "TODO Checked."));
+        return tmp;
     }
 
     private void setActionBar() {
@@ -92,20 +105,24 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setTitle("Home");
 
         navigationView = findViewById(R.id.navigationBtm);
+        navigationView.getMenu().findItem(fromWhere).setChecked(false);
+        navigationView.getMenu().findItem(HOME).setChecked(true);
         navigationView.setOnItemSelectedListener(item -> {
-            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId());
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId() + " : " + R.id.map);
             if (item.getTitle().equals("Map")) {
-                MAP = item.getItemId();
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
+                toMapActivity.putExtra("fromWhere", HOME);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
-                HOME = item.getItemId();
-                layoutList.addView(addItem());
+                // todoList.addView(addItem());
+                todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
                 Log.d(TAG + "Intent", "Already in Main Activity.");
             } else { // Community
-                COMMUNITY = item.getItemId();
+                Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+                toCommunityActivity.putExtra("fromWhere", HOME);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
+                startActivity(toCommunityActivity);
             }
             return false;
         });
@@ -125,18 +142,19 @@ public class MainActivity extends AppCompatActivity {
             startActivity(toLoginActivity);
         }
 
+        fromWhere = getIntent().getIntExtra("fromWhere", HOME);
         setActionBar();
 
-        layoutUserList = findViewById(R.id.layoutFriendList);
-        layoutList = findViewById(R.id.layoutList);
+        addedUserList = findViewById(R.id.addedUserList);
+        todoList = findViewById(R.id.todoList);
         scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
-        userItemMyself = findViewById(R.id.userItem0);
-
-        todoExample = findViewById(R.id.todoItem0);
 
         addUserBtn = findViewById(R.id.addUserBtn);
-        addUserBtn.setOnClickListener(view -> addUserItem());
+        addUserBtn.setOnClickListener(view -> {
+            Log.d(TAG, "addUserBtn called.");
+            addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
+        });
 
         //todoList 불러오기
         // TODO: 현재 id가 1로 되어있으니 로그인하면서 액티비티 전환할 때 사용자의 id 넘겨주고 그 id로 치환하기
@@ -148,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 List<TodoListDto> todoLists = response.body();
                 if (todoLists != null) {
                     for (TodoListDto x : todoLists) {
-                        layoutList.addView(addItem(x.getContent()));
+                        todoList.addView(addItem(x.getContent()));
                     }
                 }
             }
@@ -156,14 +174,14 @@ public class MainActivity extends AppCompatActivity {
             // TODO: 이 내용은 지워도 될듯함
             @Override
             public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
-                layoutList.addView(addItem("Api calling Failed, " + t.toString()));
+                todoList.addView(addItem("Api calling Failed, " + t.toString()));
                 Log.v("api fail", t.toString());
             }
         });
 
         /*mainBtn = findViewById(R.id.buttonMain);
         mainBtn.setOnClickListener(view -> {
-            layoutList.addView(addItem());
+            todoList.addView(addItem());
         });
 
         mapBtn = findViewById(R.id.buttonMap);

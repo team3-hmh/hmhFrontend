@@ -5,101 +5,71 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/mainLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="1dp"
-        android:orientation="vertical"
-        android:weightSum="10"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/topLayout"
+            android:id="@+id/mainLayout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:weightSum="10"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <ImageButton
-                android:id="@+id/goBackBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginLeft="10dp"
-                android:src="@drawable/go_back_btn"
-                android:scaleType="fitCenter"
-                android:background="@null" />
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolBar"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"
+                android:layout_weight="0.2"
+                android:background="@color/app_theme"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageButton
-                android:id="@+id/imageButton2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@android:drawable/btn_star" />
-
-            <ImageButton
-                android:id="@+id/imageButton3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@android:drawable/btn_star" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/middleLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <ScrollView
-            android:id="@+id/listScrollView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="7">
-
-            <LinearLayout
-                android:id="@+id/listLayout"
+            <ScrollView
+                android:id="@+id/listScrollView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:gravity="center_horizontal"
-                android:orientation="vertical">
-
+                android:layout_weight="9.7">
 
                 <LinearLayout
-                    android:id="@+id/listItem"
-                    android:layout_width="300dp"
-                    android:layout_height="200dp"
-                    android:layout_marginTop="20dp"
-                    android:orientation="vertical"></LinearLayout>
+                    android:id="@+id/postList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/listItem1"
-                    android:layout_width="300dp"
-                    android:layout_height="200dp"
-                    android:layout_marginTop="20dp"
-                    android:orientation="vertical"></LinearLayout>
-            </LinearLayout>
-        </ScrollView>
-    </LinearLayout>
+                    <kr.example.ttubuckttubuck.CustomView.PostItem
+                        android:id="@+id/todoItem"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+            </ScrollView>
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/navigationBtm"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"
+                android:layout_weight="0.1"
+                android:background="@color/app_theme"
+                app:itemIconTint="@android:color/primary_text_dark"
+                app:itemTextColor="@android:color/primary_text_dark"
+                app:menu="@menu/bottom_navi" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/addPostBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@null"
+            android:layout_gravity="right|bottom"
+            android:layout_marginBottom="90dp"
+            android:layout_marginRight="20dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/add_post_btn" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

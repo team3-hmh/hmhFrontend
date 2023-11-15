@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="AddUserBtn">
+    <declare-styleable name="UserItem">
         <attr name="userName" format="reference|string" />
         <attr name="userImg" format="reference|integer" />
     </declare-styleable>
 
-    <declare-styleable name="AddTodoBtn">
+    <declare-styleable name="TodoItem">
         <attr name="userName"/>
         <attr name="userImg" />
         <attr name="title" format="reference|string" />
         <attr name="date" format="reference|string" />
         <attr name="todoChk" format="reference|integer" />
+    </declare-styleable>
+
+    <declare-styleable name="PostItem">
+        <attr name="postImg" format="integer"/>
+        <attr name="title" />
+        <attr name="content" />
+        <attr name="date"/>
     </declare-styleable>
 </resources>

@@ -5,6 +5,7 @@ import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,7 +21,10 @@ import java.util.List;
 
 import kr.example.ttubuckttubuck.CustomView.HomeTodoItem;
 import kr.example.ttubuckttubuck.CustomView.HomeUserItem;
+import kr.example.ttubuckttubuck.api.FollowApi;
+import kr.example.ttubuckttubuck.api.MemberApi;
 import kr.example.ttubuckttubuck.api.TodoListApi;
+import kr.example.ttubuckttubuck.dto.MemberDto;
 import kr.example.ttubuckttubuck.dto.TodoListDto;
 import kr.example.ttubuckttubuck.utils.NetworkClient;
 import retrofit2.Call;
@@ -48,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     // MainActivity.this : API서버와 통신 할 액티비티 이름
     Retrofit retrofit = NetworkClient.getRetrofitClient(MainActivity.this);
     TodoListApi todoListApi = retrofit.create(TodoListApi.class);
+    FollowApi followApi = retrofit.create(FollowApi.class);
+    MemberApi memberApi = retrofit.create(MemberApi.class);
 
     private LinearLayout addItem() {
         LinearLayout tmp = new LinearLayout(getApplicationContext());
@@ -83,15 +89,35 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private HomeTodoItem addTodoItem(String userName, String place, String date){
+    private HomeTodoItem addTodoItem(TodoListDto todoListDto){
         HomeTodoItem tmp = new HomeTodoItem(getApplicationContext());
         tmp.setTag("todoItem"+ (++todotemCnt));
-        String title = userName + "과(와) " + place + " 약속";
+        String title = todoListDto.getContent();
         tmp.setTitle(title);
-        tmp.setDate(date);
-        tmp.setUserImg(R.drawable.profile);
-        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> Log.d(TAG, "TODO Checked."));
+        tmp.setDate(todoListDto.getDate());
+        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> checkingTodo(view, todoListDto));
         return tmp;
+    }
+
+    private void checkingTodo(View view, TodoListDto todoListDto) {
+        Call<TodoListDto> dtoCall = todoListApi.editTodoDone(todoListDto.getId());
+        dtoCall.enqueue(new Callback<TodoListDto>() {
+            @Override
+            public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
+                TodoListDto checkedTodoList = response.body();
+                if (checkedTodoList.getDone()) {
+                    // TODO: check 이미지 변경
+                } else {
+                    // TODO: check 이미지 변경
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<TodoListDto> call, Throwable t) {
+                Log.d(TAG + "Api", t.toString());
+            }
+        });
     }
 
     private void setActionBar() {
@@ -116,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
                 // todoList.addView(addItem());
-                todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
+//                todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
                 Log.d(TAG + "Intent", "Already in Main Activity.");
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
@@ -152,56 +178,34 @@ public class MainActivity extends AppCompatActivity {
 
         addUserBtn = findViewById(R.id.addUserBtn);
         addUserBtn.setOnClickListener(view -> {
+            // TODO: FollowActivity 만들고 거기서 팔로우 해서 친구 추가하기
             Log.d(TAG, "addUserBtn called.");
             addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
         });
 
-        //todoList 불러오기
-        // TODO: 현재 id가 1로 되어있으니 로그인하면서 액티비티 전환할 때 사용자의 id 넘겨주고 그 id로 치환하기
-        Call<List<TodoListDto>> todos = todoListApi.getTodoList(1L);
+        //todoList, follows 불러오기
+        Call<List<TodoListDto>> todos = todoListApi.getTodoList(member);
+        Call<List<MemberDto>> follows = followApi.getFollowingList(member);
+
         todos.enqueue(new Callback<>() {
             //로그인 성공
             @Override
             public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
                 List<TodoListDto> todoLists = response.body();
                 if (todoLists != null) {
-                    for (TodoListDto x : todoLists) {
-                        todoList.addView(addItem(x.getContent()));
+                    for (TodoListDto todoList : todoLists) {
+                        addTodoItem(todoList);
                     }
                 }
             }
 
-            // TODO: 이 내용은 지워도 될듯함
             @Override
             public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
-                todoList.addView(addItem("Api calling Failed, " + t.toString()));
+                todoList.addView(addItem("todoListApi calling Failed, " + t.toString()));
                 Log.v("api fail", t.toString());
             }
         });
 
-        /*mainBtn = findViewById(R.id.buttonMain);
-        mainBtn.setOnClickListener(view -> {
-            todoList.addView(addItem());
-        });
-
-        mapBtn = findViewById(R.id.buttonMap);
-        mapBtn.setOnClickListener(view -> {
-            Intent toMapActivity = new Intent(MainActivity.this, MapActivity.class);
-            *//*
-            toMapActivity.putExtra("deviceId", deviceId);
-            toMapActivity.putExtra("portNum", portNum);
-            toMapActivity.putExtra("baudRate", baudRate);
-            *//*
-            Log.d(TAG + "Intent", "Convert to Map Activity.");
-            startActivity(toMapActivity);
-        });
-
-        communityBtn = findViewById(R.id.buttonCommunity);
-        communityBtn.setOnClickListener(view -> {
-            Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
-            Log.d(TAG + "Intent", "Convert to Community Activity.");
-            startActivity(toCommunityActivity);
-        });*/
     }
 
     @Override

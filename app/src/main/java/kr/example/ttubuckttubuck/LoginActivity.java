@@ -46,15 +46,15 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn.setOnClickListener(view -> {
             SignInDto signInDto = new SignInDto(String.valueOf(idText.getText()), String.valueOf(pwdText.getText()));
             Call<String> loginToken = memberApi.login(signInDto); //로그인 요청
-            Call<MemberDto> memberDtoCall = memberApi.findByEmail(String.valueOf(idText.getText()));
+            Call<Long> calledId = memberApi.findIdByEmail(signInDto);
             loginToken.enqueue(new Callback<String>() {
                 //로그인 성공
                 @Override
                 public void onResponse(Call<String> call, Response<String> responseParent) {
-                    memberDtoCall.enqueue(new Callback<MemberDto>() {
+                    calledId.enqueue(new Callback<Long>() {
                         @Override
-                        public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                            MemberDto memberDto = response.body();
+                        public void onResponse(Call<Long> call, Response<Long> response) {
+                            Long id = response.body();
                             Log.d(TAG, "Is response null?: " + (responseParent == null));
                             Log.d(TAG, "response.message(): " + responseParent.message());
                             Log.d(TAG, "Is response.body() null?: " + (responseParent.body() == null));
@@ -64,13 +64,13 @@ public class LoginActivity extends AppCompatActivity {
                             Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                             // TODO: findByEmail() 추가 하고 호출 해서 MemberDto 에서 id 추출 해서 Intent에 담아서 전송
                             // assert memberDto != null;
-                            toMainActivity.putExtra("id", 1L);
+                            toMainActivity.putExtra("id", id);
                             Log.d(TAG + "Intent", "Convert to Main Activity.");
                             startActivity(toMainActivity);
                         }
 
                         @Override
-                        public void onFailure(Call<MemberDto> call, Throwable t) {
+                        public void onFailure(Call<Long> call, Throwable t) {
                             // TODO: 로그인 실패
                             Log.d(TAG, "response.message(): " + responseParent.message());
                             Log.d(TAG, "response.body().toString()" + responseParent.body().toString());

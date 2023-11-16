@@ -17,10 +17,17 @@ public class TodoListDto {
     @SerializedName("done")
     private Boolean done;
 
-    public String getContent() { return content; }
-    public String getDate() { return date; }
-    public Long getPlace() { return place; }
-    public Long getId() { return id; }
-    public Long getMember() { return member; }
-    public boolean getDone() { return done; }
+    public String getContent() { return this.content; }
+
+    public String getDate() {
+        return this.date;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public boolean getDone() {
+        return this.done;
+    }
 }

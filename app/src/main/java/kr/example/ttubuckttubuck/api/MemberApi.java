@@ -24,6 +24,6 @@ public interface MemberApi {
     @GET("/member/{id}")
     Call<MemberDto> memberInfo(@Path("id") Long id);
 
-    @GET("/member/email")
-    Call<MemberDto> findByEmail(@Query("email") String email);
+    @POST("/member/email")
+    Call<Long> findIdByEmail(@Body SignInDto signInDto);
 }

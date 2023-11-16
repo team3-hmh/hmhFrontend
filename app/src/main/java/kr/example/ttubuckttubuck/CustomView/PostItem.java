@@ -55,7 +55,7 @@ public class PostItem extends LinearLayout {
     }
 
     private void setTypeArray(TypedArray typedArray) {
-        int img = typedArray.getResourceId(R.styleable.PostItem_postImg, R.drawable.post_img);
+        int img = typedArray.getResourceId(R.styleable.PostItem_postImg, R.drawable.kmu);
         postImg.setImageResource(img);
 
         //String text = typedArray.getString(R.styleable.AddUserBtn_userName);
@@ -63,7 +63,7 @@ public class PostItem extends LinearLayout {
         postTitle.setText(text);
 
 
-        text = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하 나무아미타불 색즉시공 공즉시색 도덕경 노자 공자 맹자 고자";
+        text = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하라는 내용이 기억에 남습니다.";
         postContent.setText(text);
 
 

@@ -18,4 +18,9 @@ public class TodoListDto {
     private Boolean done;
 
     public String getContent() { return content; }
+    public String getDate() { return date; }
+    public Long getPlace() { return place; }
+    public Long getId() { return id; }
+    public Long getMember() { return member; }
+    public boolean getDone() { return done; }
 }

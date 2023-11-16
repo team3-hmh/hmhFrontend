@@ -20,7 +20,7 @@ import kr.example.ttubuckttubuck.CustomView.PostItem;
 public class CommunityActivity extends AppCompatActivity {
     private static final String TAG = "CommunityActivity_Debug";
     private static int postitemCnt = 0;
-    private static String content = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하 나무아미타불 색즉시공 공즉시색 도덕경 노자 공자 맹자 고자";
+    private static String content = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하라는 내용이 기억에 남습니다.";
 
     // UI components ↓
     private BottomNavigationView navigationView;
@@ -33,7 +33,7 @@ public class CommunityActivity extends AppCompatActivity {
     private PostItem addPostItem(int postImg, String postTitle, String postContent, String date){
         PostItem tmp = new PostItem(getApplicationContext());
         tmp.setTag("todoItem"+ (++postitemCnt));
-        tmp.setPostImg(R.drawable.post_img);
+        tmp.setPostImg(R.drawable.kmu);
         tmp.setPostTitle(postTitle);
         tmp.setPostContent(postContent);
         tmp.setDate(date);

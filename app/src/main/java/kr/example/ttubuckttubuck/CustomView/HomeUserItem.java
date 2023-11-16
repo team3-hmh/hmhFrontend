@@ -56,8 +56,7 @@ public class HomeUserItem extends LinearLayout {
         int img = typedArray.getResourceId(R.styleable.UserItem_userImg, R.drawable.profile);
         userImg.setImageResource(img);
 
-        //String text = typedArray.getString(R.styleable.AddUserBtn_userName);
-        String text = "김 호";
+        String text = "홍길동";
         userName.setText(text);
 
         typedArray.recycle();
@@ -66,7 +65,6 @@ public class HomeUserItem extends LinearLayout {
     public void setUserImg(int img) {
         userImg.setImageResource(img);
     }
-
 
     public void setUserName(String text) {
         userName.setText(text);

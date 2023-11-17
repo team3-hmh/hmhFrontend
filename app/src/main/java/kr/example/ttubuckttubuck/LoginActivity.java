@@ -64,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
                             Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                             // TODO: findByEmail() 추가 하고 호출 해서 MemberDto 에서 id 추출 해서 Intent에 담아서 전송
                             // assert memberDto != null;
-                            toMainActivity.putExtra("id", id);
+                            toMainActivity.putExtra("id", 1L);
                             Log.d(TAG + "Intent", "Convert to Main Activity.");
                             startActivity(toMainActivity);
                         }

@@ -81,10 +81,11 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private HomeUserItem addFriendItem(String userName){
+    private HomeUserItem addFriendItem(MemberDto memberDto){
         HomeUserItem tmp = new HomeUserItem(getApplicationContext());
         tmp.setTag("userItem"+ (userItemCnt++));
-        tmp.setUserName(userName);
+        tmp.setUserName(memberDto.getName());
+        // TODO: 프로필 사진 불러오게 바꾸기
         tmp.setUserImg(R.drawable.profile);
         return tmp;
     }
@@ -95,27 +96,24 @@ public class MainActivity extends AppCompatActivity {
         String title = todoListDto.getContent();
         tmp.setTitle(title);
         tmp.setDate(todoListDto.getDate());
-        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> checkingTodo(view, todoListDto));
+        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> {
+            checkingTodo(view, todoListDto);
+        });
         return tmp;
     }
 
+    // TODO: 버튼 클릭하면 체크 바뀌게
     private void checkingTodo(View view, TodoListDto todoListDto) {
-        Call<TodoListDto> dtoCall = todoListApi.editTodoDone(todoListDto.getId());
-        dtoCall.enqueue(new Callback<TodoListDto>() {
+        Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
+        dummy.enqueue(new Callback<TodoListDto>() {
             @Override
             public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
-                TodoListDto checkedTodoList = response.body();
-                if (checkedTodoList.getDone()) {
-                    // TODO: check 이미지 변경
-                } else {
-                    // TODO: check 이미지 변경
-                }
-
+                view.setPressed(response.body().getDone());
             }
 
             @Override
             public void onFailure(Call<TodoListDto> call, Throwable t) {
-                Log.d(TAG + "Api", t.toString());
+                Log.v("api fail", t.toString());
             }
         });
     }
@@ -180,28 +178,47 @@ public class MainActivity extends AppCompatActivity {
         addUserBtn.setOnClickListener(view -> {
             // TODO: FollowActivity 만들고 거기서 팔로우 해서 친구 추가하기
             Log.d(TAG, "addUserBtn called.");
-            addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
+//            addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
         });
 
         //todoList, follows 불러오기
-        Call<List<TodoListDto>> todos = todoListApi.getTodoList(member);
-        Call<List<MemberDto>> follows = followApi.getFollowingList(member);
+        Call<List<TodoListDto>> todosCall = todoListApi.getTodoList(member);
+        Call<List<MemberDto>> followsCall = followApi.getFollowingList(member);
 
-        todos.enqueue(new Callback<>() {
+        todosCall.enqueue(new Callback<>() {
             //로그인 성공
             @Override
             public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
                 List<TodoListDto> todoLists = response.body();
-                if (todoLists != null) {
-                    for (TodoListDto todoList : todoLists) {
-                        addTodoItem(todoList);
+                for (TodoListDto x : todoLists) {
+                    if (!x.getDone()) {
+                        Log.d(TAG, String.valueOf(x.getId()));
+                        todoList.addView(addTodoItem(x));
                     }
+
                 }
             }
 
             @Override
             public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
                 todoList.addView(addItem("todoListApi calling Failed, " + t.toString()));
+                Log.v("api fail", t.toString());
+            }
+        });
+
+        followsCall.enqueue(new Callback<List<MemberDto>>() {
+            @Override
+            public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
+                List<MemberDto> follows = response.body();
+                if (follows != null) {
+                    for (MemberDto x : follows) {
+                        addedUserList.addView(addFriendItem(x));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MemberDto>> call, Throwable t) {
                 Log.v("api fail", t.toString());
             }
         });

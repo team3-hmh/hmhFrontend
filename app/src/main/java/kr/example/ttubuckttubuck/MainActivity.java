@@ -98,11 +98,12 @@ public class MainActivity extends AppCompatActivity {
         tmp.setDate(todoListDto.getDate());
         tmp.findViewById(R.id.todoChk).setOnClickListener(view-> {
             checkingTodo(view, todoListDto);
+            tmp.removeAllViews();
         });
         return tmp;
     }
 
-    // TODO: 버튼 클릭하면 체크 바뀌게
+    // TODO: 버튼 클릭하면 체크 바뀌게 -> 그냥 투두가 사라지게 변경 (Rating 할 때 생긴 문제 해결하면 그거로 마저 하기)
     private void checkingTodo(View view, TodoListDto todoListDto) {
         Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
         dummy.enqueue(new Callback<TodoListDto>() {

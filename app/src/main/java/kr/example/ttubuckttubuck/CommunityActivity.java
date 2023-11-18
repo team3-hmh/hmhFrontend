@@ -30,9 +30,9 @@ public class CommunityActivity extends AppCompatActivity {
     private ImageButton addPostBtn;
     private int fromWhere;
 
-    private PostItem addPostItem(int postImg, String postTitle, String postContent, String date){
+    private PostItem addPostItem(int postImg, String postTitle, String postContent, String date) {
         PostItem tmp = new PostItem(getApplicationContext());
-        tmp.setTag("todoItem"+ (++postitemCnt));
+        tmp.setTag("todoItem" + (++postitemCnt));
         tmp.setPostImg(R.drawable.kmu);
         tmp.setPostTitle(postTitle);
         tmp.setPostContent(postContent);
@@ -84,12 +84,21 @@ public class CommunityActivity extends AppCompatActivity {
         postList = findViewById(R.id.postList);
 
         addPostBtn = findViewById(R.id.addPostBtn);
-        addPostBtn.setOnClickListener(view-> postList.addView(addPostItem(-1,"성북구 국민대학교 북악관 207호", content,"2023-11-11")));
+        addPostBtn.setOnClickListener(view -> {
+                    //postList.addView(addPostItem(-1, "성북구 국민대학교 북악관 207호", content, "2023-11-11"))
+                    Intent toPostingActivity = new Intent(getApplicationContext(), PostingActivity.class);
+                    Log.d(TAG + "Intent", "Convert to Posting Activity.");
+                    // toPostingActivity.putExtra("fromWhere", COMMUNITY);
+                    startActivity(toPostingActivity);
+                }
+        );
     }
+
     @Override
     protected void onPause() {
         super.onPause();
     }
+
     @Override
     protected void onResume() {
         super.onResume();

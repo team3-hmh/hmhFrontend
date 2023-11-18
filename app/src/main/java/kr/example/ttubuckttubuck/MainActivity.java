@@ -89,13 +89,11 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private HomeTodoItem addTodoItem(TodoListDto todoListDto){
+    private HomeTodoItem addTodoItem(String name){
         HomeTodoItem tmp = new HomeTodoItem(getApplicationContext());
         tmp.setTag("todoItem"+ (++todotemCnt));
-        String title = todoListDto.getContent();
-        tmp.setTitle(title);
-        tmp.setDate(todoListDto.getDate());
-        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> checkingTodo(view, todoListDto));
+        tmp.setTitle(name);
+        tmp.setDate(name);
         return tmp;
     }
 
@@ -141,8 +139,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
-                // todoList.addView(addItem());
-//                todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
+                todoList.addView(addTodoItem("김호"));
+                // todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
                 Log.d(TAG + "Intent", "Already in Main Activity.");
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
@@ -194,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                 List<TodoListDto> todoLists = response.body();
                 if (todoLists != null) {
                     for (TodoListDto todoList : todoLists) {
-                        addTodoItem(todoList);
+                        //addTodoItem(todoList);
                     }
                 }
             }

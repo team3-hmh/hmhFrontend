@@ -43,6 +43,7 @@
 
                 <EditText
                     android:id="@+id/idText"
+                    android:text="go@naver.com"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:hint="ID"
@@ -50,6 +51,7 @@
 
                 <EditText
                     android:id="@+id/pwdText"
+                    android:text="qpwo1029!"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:hint="Password"

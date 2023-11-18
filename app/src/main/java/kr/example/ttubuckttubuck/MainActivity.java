@@ -81,39 +81,40 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private HomeUserItem addFriendItem(String userName){
+    private HomeUserItem addFriendItem(MemberDto memberDto){
         HomeUserItem tmp = new HomeUserItem(getApplicationContext());
         tmp.setTag("userItem"+ (userItemCnt++));
-        tmp.setUserName(userName);
+        tmp.setUserName(memberDto.getName());
+        // TODO: 프로필 사진 불러오게 바꾸기
         tmp.setUserImg(R.drawable.profile);
         return tmp;
     }
 
-    private HomeTodoItem addTodoItem(String name){
+    private HomeTodoItem addTodoItem(TodoListDto todoListDto){
         HomeTodoItem tmp = new HomeTodoItem(getApplicationContext());
         tmp.setTag("todoItem"+ (++todotemCnt));
-        tmp.setTitle(name);
-        tmp.setDate(name);
+        String title = todoListDto.getContent();
+        tmp.setTitle(title);
+        tmp.setDate(todoListDto.getDate());
+        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> {
+            checkingTodo(view, todoListDto);
+            tmp.removeAllViews();
+        });
         return tmp;
     }
 
+    // TODO: 버튼 클릭하면 체크 바뀌게 -> 그냥 투두가 사라지게 변경 (Rating 할 때 생긴 문제 해결하면 그거로 마저 하기)
     private void checkingTodo(View view, TodoListDto todoListDto) {
-        Call<TodoListDto> dtoCall = todoListApi.editTodoDone(todoListDto.getId());
-        dtoCall.enqueue(new Callback<TodoListDto>() {
+        Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
+        dummy.enqueue(new Callback<TodoListDto>() {
             @Override
             public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
-                TodoListDto checkedTodoList = response.body();
-                if (checkedTodoList.getDone()) {
-                    // TODO: check 이미지 변경
-                } else {
-                    // TODO: check 이미지 변경
-                }
-
+                view.setPressed(response.body().getDone());
             }
 
             @Override
             public void onFailure(Call<TodoListDto> call, Throwable t) {
-                Log.d(TAG + "Api", t.toString());
+                Log.v("api fail", t.toString());
             }
         });
     }
@@ -139,8 +140,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
-                todoList.addView(addTodoItem("김호"));
-                // todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
+                // todoList.addView(addItem());
+//                todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
                 Log.d(TAG + "Intent", "Already in Main Activity.");
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
@@ -178,28 +179,47 @@ public class MainActivity extends AppCompatActivity {
         addUserBtn.setOnClickListener(view -> {
             // TODO: FollowActivity 만들고 거기서 팔로우 해서 친구 추가하기
             Log.d(TAG, "addUserBtn called.");
-            addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
+//            addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
         });
 
         //todoList, follows 불러오기
-        Call<List<TodoListDto>> todos = todoListApi.getTodoList(member);
-        Call<List<MemberDto>> follows = followApi.getFollowingList(member);
+        Call<List<TodoListDto>> todosCall = todoListApi.getTodoList(member);
+        Call<List<MemberDto>> followsCall = followApi.getFollowingList(member);
 
-        todos.enqueue(new Callback<>() {
+        todosCall.enqueue(new Callback<>() {
             //로그인 성공
             @Override
             public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
                 List<TodoListDto> todoLists = response.body();
-                if (todoLists != null) {
-                    for (TodoListDto todoList : todoLists) {
-                        //addTodoItem(todoList);
+                for (TodoListDto x : todoLists) {
+                    if (!x.getDone()) {
+                        Log.d(TAG, String.valueOf(x.getId()));
+                        todoList.addView(addTodoItem(x));
                     }
+
                 }
             }
 
             @Override
             public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
                 todoList.addView(addItem("todoListApi calling Failed, " + t.toString()));
+                Log.v("api fail", t.toString());
+            }
+        });
+
+        followsCall.enqueue(new Callback<List<MemberDto>>() {
+            @Override
+            public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
+                List<MemberDto> follows = response.body();
+                if (follows != null) {
+                    for (MemberDto x : follows) {
+                        addedUserList.addView(addFriendItem(x));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MemberDto>> call, Throwable t) {
                 Log.v("api fail", t.toString());
             }
         });

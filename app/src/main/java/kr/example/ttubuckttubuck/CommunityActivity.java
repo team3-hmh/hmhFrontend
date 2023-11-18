@@ -55,7 +55,7 @@ public class CommunityActivity extends AppCompatActivity {
         navigationView.getMenu().findItem(fromWhere).setChecked(false);
         navigationView.getMenu().findItem(COMMUNITY).setChecked(true);
         navigationView.setOnItemSelectedListener(item -> {
-            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId() + " : " + R.id.map);
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId());
             if (item.getTitle().equals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", COMMUNITY);

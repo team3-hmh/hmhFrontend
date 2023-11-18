@@ -5,35 +5,29 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/mainLayout"
+        android:id="@+id/layoutMain"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="1dp"
         android:orientation="vertical"
         android:weightSum="10"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:id="@+id/topLayout"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolBar"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#CADFEF"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_height="60dp"
+            android:layout_weight="0.2"
+            android:background="@color/app_theme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageButton
                 android:id="@+id/goBackBtn"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginLeft="15dp"
                 android:background="@null"
                 android:scaleType="fitCenter"
@@ -51,48 +45,82 @@
                 android:gravity="center"
                 android:text="MyPage"
                 android:textSize="30dp" />
+        </androidx.appcompat.widget.Toolbar>
 
-
-        </LinearLayout>
-
-        <ScrollView
-            android:id="@+id/listScrollView"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="8.5">
+            android:layout_height="wrap_content"
+            android:layout_weight="9.7">
 
             <LinearLayout
-                android:id="@+id/listLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="50dp"
+                android:gravity="center"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="300dp"
-                    android:layout_height="320dp"
-                    android:layout_marginTop="30dp"
-                    android:orientation="horizontal"></LinearLayout>
+                <FrameLayout
+                    android:id="@+id/profile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
 
-                <LinearLayout
-                    android:layout_width="300dp"
-                    android:layout_height="80dp"
-                    android:layout_marginTop="25dp"
-                    android:orientation="horizontal"></LinearLayout>
+                    <ImageView
+                        android:id="@+id/eclipse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/eclipse" />
 
-                <LinearLayout
-                    android:layout_width="300dp"
-                    android:layout_height="80dp"
-                    android:layout_marginTop="25dp"
-                    android:orientation="horizontal"></LinearLayout>
+                    <ImageButton
+                        android:id="@+id/cameraBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@null"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/camera" />
+                </FrameLayout>
 
-                <LinearLayout
-                    android:layout_width="300dp"
-                    android:layout_height="80dp"
-                    android:layout_marginTop="25dp"
-                    android:orientation="horizontal"></LinearLayout>
+                <TextView
+                    android:id="@+id/userName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="김뚜벅"
+                    android:textFontWeight="700"
+                    android:textSize="25dp" />
+
+                <TextView
+                    android:id="@+id/userEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:text="1234@kookmin.ac.kr"
+                    android:textSize="18dp" />
             </LinearLayout>
-        </ScrollView>
+
+            <Button
+                android:id="@+id/logoutBtn"
+                android:textSize="20dp"
+                android:layout_gravity="center|bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="80dp"
+                android:text="Logout" />
+        </FrameLayout>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/navigationBtm"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:layout_weight="0.1"
+            android:background="@color/app_theme"
+            app:itemIconTint="@android:color/primary_text_dark"
+            app:itemTextColor="@android:color/primary_text_dark"
+            app:menu="@menu/bottom_navi" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

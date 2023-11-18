@@ -1,36 +1,87 @@
 package kr.example.ttubuckttubuck;
 
+import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.POSTING;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
 public class PostingActivity extends AppCompatActivity {
-    private static final String TAG = "PostingActivity";
+    private static final String TAG = "PostingActivity_Debug";
 
+    // UI components ↓
+    private BottomNavigationView navigationView;
+    private Toolbar toolBar;
+    private ActionBar actionBar;
     private ImageButton starBtn1, starBtn2, starBtn3, starBtn4, starBtn5;
     private ArrayList<ImageButton> starBtns = new ArrayList<>();
     private EditText postEditTxt;
     private Button submitBtn;
+    private int fromWhere = -1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_posting);
         Log.d(TAG, "onCreate() called.");
+        setActionBar();
+        starBtnInit();
 
         postEditTxt = findViewById(R.id.postEditTxt);
         submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setOnClickListener(view -> {
-
+            Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+            toCommunityActivity.putExtra("fromWhere", POSTING);
+            Log.d(TAG + "Intent", "Convert to Community Activity.");
+            startActivity(toCommunityActivity);
         });
+    }
 
-        starBtnInit();
+    private void setActionBar() {
+        toolBar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolBar);
+        toolBar.setTitle("Posting");
+
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setTitle("Posting");
+
+        navigationView = findViewById(R.id.navigationBtm);
+        navigationView.getMenu().findItem(COMMUNITY).setChecked(true);
+        navigationView.setOnItemSelectedListener(item -> {
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId());
+            if (item.getTitle().equals("Map")) {
+                Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
+                toMapActivity.putExtra("fromWhere", COMMUNITY);
+                Log.d(TAG + "Intent", "Convert to Map Activity.");
+                startActivity(toMapActivity);
+            } else if (item.getTitle().equals("Home")) {
+                Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                Log.d(TAG + "Intent", "Convert to Main Activity.");
+                toMainActivity.putExtra("fromWhere", COMMUNITY);
+                startActivity(toMainActivity);
+            } else { // Community
+                Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+                toCommunityActivity.putExtra("fromWhere", COMMUNITY);
+                Log.d(TAG + "Intent", "Convert to Community Activity.");
+                startActivity(toCommunityActivity);
+            }
+            return false;
+        });
     }
 
     private void starBtnInit(){
@@ -72,11 +123,10 @@ public class PostingActivity extends AppCompatActivity {
     }
 
     private void setBtnSelected(int inx){
-        for(int i = 0; i < 5; i++)
-            starBtns.get(i).setPressed(false);
-
+        for(int i = inx + 1; i < 5; i++)
+            starBtns.get(i).setSelected(false);
         for(int i = 0; i <= inx; i++)
-            starBtns.get(i).setPressed(true);
+            starBtns.get(i).setSelected(true);
     }
     protected void onPause() {
         super.onPause();

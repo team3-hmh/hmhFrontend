@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolBar;
     private ActionBar actionBar;
     private int fromWhere;
+    private HomeUserItem myself;
 
     // 네트워크로 데이터 전송, Retrofit 객체 생성
     // NetworkClient : 위에서 Retrofit 기본 설정한 클래스 파일
@@ -54,19 +55,6 @@ public class MainActivity extends AppCompatActivity {
     TodoListApi todoListApi = retrofit.create(TodoListApi.class);
     FollowApi followApi = retrofit.create(FollowApi.class);
     MemberApi memberApi = retrofit.create(MemberApi.class);
-
-    private LinearLayout addItem() {
-        LinearLayout tmp = new LinearLayout(getApplicationContext());
-        tmp.setOrientation(LinearLayout.HORIZONTAL);
-        tmp.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100));
-        tmp.setTag("listItem" + String.valueOf(++inx));
-
-        TextView tv1 = new TextView(getApplicationContext());
-        tv1.setText("Test");
-        tmp.addView(tv1);
-
-        return tmp;
-    }
 
     private LinearLayout addItem(String content) {
         LinearLayout tmp = new LinearLayout(getApplicationContext());
@@ -109,9 +97,8 @@ public class MainActivity extends AppCompatActivity {
         dummy.enqueue(new Callback<TodoListDto>() {
             @Override
             public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
-                view.setPressed(response.body().getDone());
+                view.setSelected(response.body().getDone());
             }
-
             @Override
             public void onFailure(Call<TodoListDto> call, Throwable t) {
                 Log.v("api fail", t.toString());
@@ -174,6 +161,13 @@ public class MainActivity extends AppCompatActivity {
         todoList = findViewById(R.id.todoList);
         scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
+
+        myself = findViewById(R.id.userItem0);
+        myself.setOnClickListener(view->{
+            Log.d(TAG + "Intent", "Convert to MyPage Activity");
+            Intent toMyPageActivity = new Intent(getApplicationContext(), MyPageActivity.class);
+            startActivity(toMyPageActivity);
+        });
 
         addUserBtn = findViewById(R.id.addUserBtn);
         addUserBtn.setOnClickListener(view -> {

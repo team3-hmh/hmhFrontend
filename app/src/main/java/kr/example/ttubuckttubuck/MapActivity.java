@@ -1,9 +1,7 @@
 package kr.example.ttubuckttubuck;
 
-import static kr.example.ttubuckttubuck.DestinationsList.listAdapter;
-import static kr.example.ttubuckttubuck.DestinationsList.listItems;
-import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
-import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
+import static kr.example.ttubuckttubuck.DestinationsList.*;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.*;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -26,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -508,8 +507,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                 Log.d(TAG, "Start to search the query");
                 threadPool.execute(mSearchPath);
 
-                //InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                //iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
 

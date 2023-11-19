@@ -8,4 +8,5 @@ public class MenuItemID {
     public static int MAP = R.id.map;
     public static int COMMUNITY = R.id.community;
     public static int MYPAGE = R.id.mypage;
+    public static int ADD_FRIENDS = R.id.addFriends;
 }

@@ -84,29 +84,15 @@ public class MainActivity extends AppCompatActivity {
         String title = todoListDto.getContent();
         tmp.setTitle(title);
         tmp.setDate(todoListDto.getDate());
+        // TODO: 체크 표시 되게 바꿔야함
         tmp.findViewById(R.id.todoChk).setOnClickListener(view-> {
-            checkingTodo(view, todoListDto);
-            tmp.removeAllViews();
+            Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
+            view.findViewById(R.id.todoChk).setSelected(view.findViewById(R.id.todoChk).isSelected());
         });
         return tmp;
     }
 
-    // TODO: 버튼 클릭하면 체크 바뀌게 -> 그냥 투두가 사라지게 변경 (Rating 할 때 생긴 문제 해결하면 그거로 마저 하기)
-    private void checkingTodo(View view, TodoListDto todoListDto) {
-        Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
-        dummy.enqueue(new Callback<TodoListDto>() {
-            @Override
-            public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
-                view.setSelected(response.body().getDone());
-            }
-            @Override
-            public void onFailure(Call<TodoListDto> call, Throwable t) {
-                Log.v("api fail", t.toString());
-            }
-        });
-    }
-
-    private void setActionBar() {
+    private void setActionBar(Long member) {
         toolBar = findViewById(R.id.toolBar);
         setSupportActionBar(toolBar);
         toolBar.setTitle("Home");
@@ -124,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
             if (item.getTitle().equals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", HOME);
+                toMapActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
@@ -133,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
                 toCommunityActivity.putExtra("fromWhere", HOME);
+                toCommunityActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
                 startActivity(toCommunityActivity);
             }
@@ -155,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         fromWhere = getIntent().getIntExtra("fromWhere", HOME);
-        setActionBar();
+        setActionBar(member);
 
         addedUserList = findViewById(R.id.addedUserList);
         todoList = findViewById(R.id.todoList);
@@ -163,9 +151,23 @@ public class MainActivity extends AppCompatActivity {
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
 
         myself = findViewById(R.id.userItem0);
+        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
+        memberDtoCall.enqueue(new Callback<MemberDto>() {
+            @Override
+            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                myself.setUserName(response.body().getName());
+            }
+
+            @Override
+            public void onFailure(Call<MemberDto> call, Throwable t) {
+                Log.v("api fail", t.toString());
+            }
+        });
+
         myself.setOnClickListener(view->{
             Log.d(TAG + "Intent", "Convert to MyPage Activity");
             Intent toMyPageActivity = new Intent(getApplicationContext(), MyPageActivity.class);
+            toMyPageActivity.putExtra("member", member);
             startActivity(toMyPageActivity);
         });
 

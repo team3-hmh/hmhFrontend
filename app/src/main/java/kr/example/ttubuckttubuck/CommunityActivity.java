@@ -15,10 +15,23 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.List;
+
 import kr.example.ttubuckttubuck.CustomView.PostItem;
+import kr.example.ttubuckttubuck.api.PostingApi;
+import kr.example.ttubuckttubuck.dto.PostingDto;
+import kr.example.ttubuckttubuck.utils.NetworkClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class CommunityActivity extends AppCompatActivity {
     private static final String TAG = "CommunityActivity_Debug";
+
+    Retrofit retrofit = NetworkClient.getRetrofitClient(CommunityActivity.this);
+    PostingApi postingApi = retrofit.create(PostingApi.class);
+
     private static int postitemCnt = 0;
     private static String content = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하라는 내용이 기억에 남습니다.";
 
@@ -30,18 +43,19 @@ public class CommunityActivity extends AppCompatActivity {
     private ImageButton addPostBtn;
     private int fromWhere;
 
-    private PostItem addPostItem(int postImg, String postTitle, String postContent, String date) {
+    private PostItem addPostItem(PostingDto postingDto) {
         PostItem tmp = new PostItem(getApplicationContext());
         tmp.setTag("todoItem" + (++postitemCnt));
         tmp.setPostImg(R.drawable.kmu);
-        tmp.setPostTitle(postTitle);
-        tmp.setPostContent(postContent);
-        tmp.setDate(date);
+        tmp.setPostTitle("title example");
+        tmp.setPostContent(postingDto.getContent());
+        // TODO: date 대신 rating 들어가게 수정
+        tmp.setDate(postingDto.getRating());
 
         return tmp;
     }
 
-    private void setActionBar() {
+    private void setActionBar(Long member) {
         toolBar = findViewById(R.id.toolBar);
         setSupportActionBar(toolBar);
         toolBar.setTitle("Community");
@@ -59,12 +73,14 @@ public class CommunityActivity extends AppCompatActivity {
             if (item.getTitle().equals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", COMMUNITY);
+                toMapActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
                 toMainActivity.putExtra("fromWhere", COMMUNITY);
+                toMainActivity.putExtra("member", member);
                 startActivity(toMainActivity);
             } else { // Community
                 Log.d(TAG + "Intent", "Already in Community Activity.");
@@ -78,17 +94,46 @@ public class CommunityActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_community);
 
+        Intent intent = getIntent();
+        long member = intent.getLongExtra("member", -1);
+        if (member == -1) {
+            Log.d(TAG + "Intent", "Not valid User");
+            Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(toLoginActivity);
+        }
+
         fromWhere = getIntent().getIntExtra("fromWhere", HOME);
-        setActionBar();
+        setActionBar(member);
 
         postList = findViewById(R.id.postList);
+
+        Call<List<PostingDto>> postingDtoCall = postingApi.getAllPostings();
+
+        postingDtoCall.enqueue(new Callback<List<PostingDto>>() {
+            @Override
+            public void onResponse(Call<List<PostingDto>> call, Response<List<PostingDto>> response) {
+                List<PostingDto> postingDtos = response.body();
+                for (PostingDto p : postingDtos) {
+                    postList.addView(addPostItem(p));
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<PostingDto>> call, Throwable t) {
+
+            }
+        });
+
+
 
         addPostBtn = findViewById(R.id.addPostBtn);
         addPostBtn.setOnClickListener(view -> {
                     //postList.addView(addPostItem(-1, "성북구 국민대학교 북악관 207호", content, "2023-11-11"))
                     Intent toPostingActivity = new Intent(getApplicationContext(), PostingActivity.class);
                     Log.d(TAG + "Intent", "Convert to Posting Activity.");
-                    // toPostingActivity.putExtra("fromWhere", COMMUNITY);
+                    toPostingActivity.putExtra("fromWhere", COMMUNITY);
+                    toPostingActivity.putExtra("member", member);
                     startActivity(toPostingActivity);
                 }
         );

@@ -22,8 +22,8 @@ public interface PostingApi {
 
     @POST("/member/posting")
     @PUT("/member/posting")
-    Call<PostingDto> savePosting(@Body PlaceDto placeDto);
+    void savePosting(@Body PostingDto postingDto);
 
     @DELETE("/member/posting")
-    Call<PostingDto> delPosting(@Body PlaceDto placeDto);
+    Call<PostingDto> delPosting(@Body PostingDto postingDto);
 }

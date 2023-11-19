@@ -13,4 +13,20 @@ public class PostingDto {
     private String content;
     @SerializedName("rating")
     private Long rating;
+
+    public PostingDto(Long member, Long place, String content, Long rating) {
+        this.member = member;
+        this.place = place;
+        this.content = content;
+        this.rating = rating;
+    }
+
+    public String getContent() {
+        return this.content;
+    }
+
+
+    public String getRating() {
+        return String.valueOf(this.rating);
+    }
 }

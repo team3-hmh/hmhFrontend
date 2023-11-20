@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/layoutMain"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:weightSum="10"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_weight="0.2"
+            android:background="@color/app_theme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/toolBarTitle"
+                android:text="Home"
+                android:layout_gravity="center"
+                android:textSize="25dp"
+                android:textFontWeight="@integer/material_motion_duration_short_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="9.7"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:text="죄송합니다."
+                android:textSize="29dp"
+                android:textStyle="bold"
+                android:textColor="#6AABDB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="페이지 오류가 발생했습니다."
+                android:textSize="23dp"
+                android:textStyle="bold"
+                android:textColor="#6AABDB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/navigationBtm"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:layout_weight="0.1"
+            android:background="@color/app_theme"
+            app:itemTextColor="@android:color/primary_text_dark"
+            app:itemIconTint="@android:color/primary_text_dark"
+            app:menu="@menu/bottom_navi"
+            />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

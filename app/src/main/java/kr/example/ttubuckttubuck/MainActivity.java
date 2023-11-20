@@ -21,6 +21,7 @@ import java.util.List;
 
 import kr.example.ttubuckttubuck.CustomView.HomeTodoItem;
 import kr.example.ttubuckttubuck.CustomView.HomeUserItem;
+import kr.example.ttubuckttubuck.CustomView.TodoDialog;
 import kr.example.ttubuckttubuck.api.FollowApi;
 import kr.example.ttubuckttubuck.api.MemberApi;
 import kr.example.ttubuckttubuck.api.TodoListApi;
@@ -42,11 +43,12 @@ public class MainActivity extends AppCompatActivity {
     // UI components ↓
     private BottomNavigationView navigationView;
     private LinearLayout todoList, addedUserList;
-    private ImageView addUserBtn;
+    private ImageView addUserBtn, addTodoBtn;
     private Toolbar toolBar;
     private ActionBar actionBar;
     private int fromWhere;
     private HomeUserItem myself;
+    private TodoDialog todoDialog;
 
     // 네트워크로 데이터 전송, Retrofit 객체 생성
     // NetworkClient : 위에서 Retrofit 기본 설정한 클래스 파일
@@ -104,6 +106,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.v("api fail", t.toString());
             }
         });
+    }
+
+    private void setAddTodo(){
+        todoDialog = new TodoDialog(MainActivity.this);
+    }
+
+    private void showAddTodoDialog(){
+        todoDialog.show();
     }
 
     private void setActionBar() {
@@ -167,6 +177,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG + "Intent", "Convert to MyPage Activity");
             Intent toMyPageActivity = new Intent(getApplicationContext(), MyPageActivity.class);
             startActivity(toMyPageActivity);
+        });
+
+        setAddTodo();
+        addTodoBtn = findViewById(R.id.addTodoBtn);
+        addTodoBtn.setOnClickListener(view->{
+            Log.d(TAG, "addTodoList() called.");
+            showAddTodoDialog();
         });
 
         addUserBtn = findViewById(R.id.addUserBtn);

@@ -211,6 +211,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         refreshLocation();
+        mapView.setZoomLevel(17);
         return super.onOptionsItemSelected(item);
     }
 
@@ -255,7 +256,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
                 if (VERBOSE)
                     Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
-
                 refreshLocation();
             }
         }

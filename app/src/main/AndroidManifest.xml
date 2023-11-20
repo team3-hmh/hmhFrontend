@@ -45,7 +45,7 @@
         </activity>
 
         <activity
-            android:name=".DensityActivity"
+            android:name=".AddFriendsActivity"
             android:exported="true"
             android:launchMode="singleTask">
         </activity>

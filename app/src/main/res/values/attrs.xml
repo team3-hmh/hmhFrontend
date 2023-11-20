@@ -5,6 +5,10 @@
         <attr name="userImg" format="reference|integer" />
     </declare-styleable>
 
+    <declare-styleable name="AddUserItem">
+        <attr name="userName" />
+    </declare-styleable>
+
     <declare-styleable name="TodoItem">
         <attr name="userName"/>
         <attr name="userImg" />

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -41,7 +42,7 @@
             android:scrollbars="none"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2">
+            android:layout_weight="2.5">
 
             <LinearLayout
                 android:id="@+id/userList"
@@ -59,7 +60,6 @@
                     android:id="@+id/userItem0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-
             </LinearLayout>
 
                 <ImageView
@@ -79,7 +79,7 @@
             android:id="@+id/scrollViewList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="7.7">
+            android:layout_weight="7.1">
 
             <LinearLayout
                 android:id="@+id/todoList"
@@ -89,6 +89,17 @@
                 android:orientation="vertical">
             </LinearLayout>
         </ScrollView>
+
+        <ImageView
+            android:id="@+id/addTodoBtn"
+            android:layout_weight="0.1"
+            android:layout_width="55dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="20dp"
+            android:scaleType="fitCenter"
+            android:background="@drawable/add_post_btn"
+            />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/navigationBtm"

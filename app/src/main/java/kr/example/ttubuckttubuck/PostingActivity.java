@@ -18,8 +18,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
+import kr.example.ttubuckttubuck.api.PostingApi;
+import kr.example.ttubuckttubuck.dto.PostingDto;
+import kr.example.ttubuckttubuck.utils.NetworkClient;
+import retrofit2.Retrofit;
+
 public class PostingActivity extends AppCompatActivity {
     private static final String TAG = "PostingActivity_Debug";
+
+    Retrofit retrofit = NetworkClient.getRetrofitClient(PostingActivity.this);
+
+    PostingApi postingApi = retrofit.create(PostingApi.class);
 
     // UI components ↓
     private BottomNavigationView navigationView;
@@ -36,21 +45,42 @@ public class PostingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_posting);
+
+        Intent intent = getIntent();
+        long member = intent.getLongExtra("member", -1);
+        if (member == -1) {
+            Log.d(TAG + "Intent", "Not valid User");
+            Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(toLoginActivity);
+        }
+
         Log.d(TAG, "onCreate() called.");
-        setActionBar();
+        setActionBar(member);
         starBtnInit();
 
         postEditTxt = findViewById(R.id.postEditTxt);
         submitBtn = findViewById(R.id.submitBtn);
         submitBtn.setOnClickListener(view -> {
+            long rate = 0L;
+            for (ImageButton b : starBtns) {
+                if (b.isSelected()) {
+                    rate++;
+                }
+            }
+            // TODO: placeId는 어떻게 할지
+            // TODO: POST posting 해결해야함
+            PostingDto postingDto = new PostingDto(member, 1L, String.valueOf(postEditTxt.getText()), rate);
+            postingApi.savePosting(postingDto);
+
             Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
             toCommunityActivity.putExtra("fromWhere", POSTING);
+            toCommunityActivity.putExtra("member", member);
             Log.d(TAG + "Intent", "Convert to Community Activity.");
             startActivity(toCommunityActivity);
         });
     }
 
-    private void setActionBar() {
+    private void setActionBar(Long member) {
         toolBar = findViewById(R.id.toolBar);
         setSupportActionBar(toolBar);
         toolBar.setTitle("Posting");
@@ -67,16 +97,19 @@ public class PostingActivity extends AppCompatActivity {
             if (item.getTitle().equals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", COMMUNITY);
+                toMapActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
                 toMainActivity.putExtra("fromWhere", COMMUNITY);
+                toMainActivity.putExtra("member", member);
                 startActivity(toMainActivity);
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
                 toCommunityActivity.putExtra("fromWhere", COMMUNITY);
+                toCommunityActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
                 startActivity(toCommunityActivity);
             }

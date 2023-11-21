@@ -30,8 +30,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
 
+import kr.example.ttubuckttubuck.api.MemberApi;
+import kr.example.ttubuckttubuck.dto.MemberDto;
+import kr.example.ttubuckttubuck.utils.NetworkClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 public class MyPageActivity extends AppCompatActivity {
     private static final String TAG = "MyPageActivity_Debug";
+
+    Retrofit retrofit = NetworkClient.getRetrofitClient(MyPageActivity.this);
+    MemberApi memberApi = retrofit.create(MemberApi.class);
 
     // UI components ↓
     private BottomNavigationView navigationView;
@@ -49,8 +60,33 @@ public class MyPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_my_page);
         setActionBar();
 
+        Intent intent = getIntent();
+        long member = intent.getLongExtra("member", -1);
+        if (member == -1) {
+            Log.d(TAG + "Intent", "Not valid User");
+            Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(toMainActivity);
+        }
+
         userName = findViewById(R.id.userName);
         userEmail = findViewById(R.id.userEmail);
+        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
+        memberDtoCall.enqueue(new Callback<MemberDto>() {
+            @Override
+            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                MemberDto memberDto = response.body();
+                // TODO: 이미지 불러오고 적용시키기
+                userName.setText(memberDto.getName());
+                userEmail.setText(memberDto.getEmail());
+            }
+
+            @Override
+            public void onFailure(Call<MemberDto> call, Throwable t) {
+                Log.v("api fail", t.toString());
+            }
+        });
+
+
         eclipseProfile = findViewById(R.id.eclipse);
         profile = findViewById(R.id.profile);
         profile.setOnClickListener(view->{

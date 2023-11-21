@@ -32,7 +32,7 @@ public class NetworkClient {
                     .addInterceptor(loggingInterceptor)
                     .build();
 
-            retrofit = new Retrofit.Builder().baseUrl("http://3.35.214.201:8080/")
+            retrofit = new Retrofit.Builder().baseUrl("http://3.35.16.248:8080/")
                     .client(httpClient)
                     .addConverterFactory(GsonConverterFactory.create(gson)) // 데이터를 주고 받을 때 모델에 만든 클래스로 사용
                     .build();

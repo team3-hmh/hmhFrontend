@@ -20,7 +20,7 @@ import kr.example.ttubuckttubuck.CustomView.PostItem;
 public class CommunityActivity extends AppCompatActivity {
     private static final String TAG = "CommunityActivity_Debug";
     private static int postitemCnt = 0;
-    private static String content = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하 나무아미타불 색즉시공 공즉시색 도덕경 노자 공자 맹자 고자";
+    private static String content = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하라는 내용이 기억에 남습니다.";
 
     // UI components ↓
     private BottomNavigationView navigationView;
@@ -30,10 +30,10 @@ public class CommunityActivity extends AppCompatActivity {
     private ImageButton addPostBtn;
     private int fromWhere;
 
-    private PostItem addPostItem(int postImg, String postTitle, String postContent, String date){
+    private PostItem addPostItem(int postImg, String postTitle, String postContent, String date) {
         PostItem tmp = new PostItem(getApplicationContext());
-        tmp.setTag("todoItem"+ (++postitemCnt));
-        tmp.setPostImg(R.drawable.post_img);
+        tmp.setTag("todoItem" + (++postitemCnt));
+        tmp.setPostImg(R.drawable.kmu);
         tmp.setPostTitle(postTitle);
         tmp.setPostContent(postContent);
         tmp.setDate(date);
@@ -55,7 +55,7 @@ public class CommunityActivity extends AppCompatActivity {
         navigationView.getMenu().findItem(fromWhere).setChecked(false);
         navigationView.getMenu().findItem(COMMUNITY).setChecked(true);
         navigationView.setOnItemSelectedListener(item -> {
-            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId() + " : " + R.id.map);
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId());
             if (item.getTitle().equals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", COMMUNITY);
@@ -84,12 +84,21 @@ public class CommunityActivity extends AppCompatActivity {
         postList = findViewById(R.id.postList);
 
         addPostBtn = findViewById(R.id.addPostBtn);
-        addPostBtn.setOnClickListener(view-> postList.addView(addPostItem(-1,"성북구 국민대학교 북악관 207호", content,"2023-11-11")));
+        addPostBtn.setOnClickListener(view -> {
+                    //postList.addView(addPostItem(-1, "성북구 국민대학교 북악관 207호", content, "2023-11-11"))
+                    Intent toPostingActivity = new Intent(getApplicationContext(), PostingActivity.class);
+                    Log.d(TAG + "Intent", "Convert to Posting Activity.");
+                    // toPostingActivity.putExtra("fromWhere", COMMUNITY);
+                    startActivity(toPostingActivity);
+                }
+        );
     }
+
     @Override
     protected void onPause() {
         super.onPause();
     }
+
     @Override
     protected void onResume() {
         super.onResume();

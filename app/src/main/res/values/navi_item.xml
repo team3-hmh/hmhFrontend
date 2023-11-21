@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="map" />
-    <item type="id" name="home" />
-    <item type="id" name="community" />
-    <item type="id" name="refresh" />
+    <item name="map" type="id" />
+    <item name="home" type="id" />
+    <item name="community" type="id" />
+    <item name="refresh" type="id" />
+    <item name="posting" type="id" />
+    <item name="mypage" type="id" />
+    <item name="goBack" type="id" />
+    <item name="addFriends" type="id" />
 </resources>

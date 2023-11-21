@@ -12,7 +12,7 @@ import android.widget.TextView;
 import kr.example.ttubuckttubuck.R;
 
 public class HomeTodoItem extends LinearLayout {
-    private ImageView userImg;
+//    private ImageView userImg;
     private ImageView todoChk;
     private TextView title;
     private TextView date;
@@ -40,7 +40,7 @@ public class HomeTodoItem extends LinearLayout {
         View v = lI.inflate(R.layout.fragment_todo, this, false);
         addView(v);
 
-        userImg = findViewById(R.id.userImg);
+//        userImg = findViewById(R.id.userImg);
         // userName = findViewById(R.id.userName);
         // place = findViewById(R.id.place);
         title = findViewById(R.id.title);
@@ -59,8 +59,8 @@ public class HomeTodoItem extends LinearLayout {
     }
 
     private void setTypeArray(TypedArray typedArray) {
-        int img = typedArray.getResourceId(R.styleable.TodoItem_userImg, R.drawable.profile);
-        userImg.setImageResource(img);
+//        int img = typedArray.getResourceId(R.styleable.TodoItem_userImg, R.drawable.profile);
+//        userImg.setImageResource(img);
 
         int img2 = typedArray.getResourceId(R.styleable.TodoItem_todoChk, R.drawable.todo_check);
         todoChk.setImageResource(img2);
@@ -75,9 +75,9 @@ public class HomeTodoItem extends LinearLayout {
         typedArray.recycle();
     }
 
-    public void setUserImg(int img) {
-        userImg.setImageResource(img);
-    }
+//    public void setUserImg(int img) {
+//        userImg.setImageResource(img);
+//    }
 
     public void setTitle(String text) {
         title.setText(text);

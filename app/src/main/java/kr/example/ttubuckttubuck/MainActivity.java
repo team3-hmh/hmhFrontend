@@ -21,6 +21,7 @@ import java.util.List;
 
 import kr.example.ttubuckttubuck.CustomView.HomeTodoItem;
 import kr.example.ttubuckttubuck.CustomView.HomeUserItem;
+import kr.example.ttubuckttubuck.CustomView.TodoDialog;
 import kr.example.ttubuckttubuck.api.FollowApi;
 import kr.example.ttubuckttubuck.api.MemberApi;
 import kr.example.ttubuckttubuck.api.TodoListApi;
@@ -42,10 +43,12 @@ public class MainActivity extends AppCompatActivity {
     // UI components ↓
     private BottomNavigationView navigationView;
     private LinearLayout todoList, addedUserList;
-    private ImageView addUserBtn;
+    private ImageView addUserBtn, addTodoBtn;
     private Toolbar toolBar;
     private ActionBar actionBar;
     private int fromWhere;
+    private HomeUserItem myself;
+    private TodoDialog todoDialog;
 
     // 네트워크로 데이터 전송, Retrofit 객체 생성
     // NetworkClient : 위에서 Retrofit 기본 설정한 클래스 파일
@@ -54,19 +57,6 @@ public class MainActivity extends AppCompatActivity {
     TodoListApi todoListApi = retrofit.create(TodoListApi.class);
     FollowApi followApi = retrofit.create(FollowApi.class);
     MemberApi memberApi = retrofit.create(MemberApi.class);
-
-    private LinearLayout addItem() {
-        LinearLayout tmp = new LinearLayout(getApplicationContext());
-        tmp.setOrientation(LinearLayout.HORIZONTAL);
-        tmp.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 100));
-        tmp.setTag("listItem" + String.valueOf(++inx));
-
-        TextView tv1 = new TextView(getApplicationContext());
-        tv1.setText("Test");
-        tmp.addView(tv1);
-
-        return tmp;
-    }
 
     private LinearLayout addItem(String content) {
         LinearLayout tmp = new LinearLayout(getApplicationContext());
@@ -81,10 +71,11 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private HomeUserItem addFriendItem(String userName){
+    private HomeUserItem addFriendItem(MemberDto memberDto){
         HomeUserItem tmp = new HomeUserItem(getApplicationContext());
         tmp.setTag("userItem"+ (userItemCnt++));
-        tmp.setUserName(userName);
+        tmp.setUserName(memberDto.getName());
+        // TODO: 프로필 사진 불러오게 바꾸기
         tmp.setUserImg(R.drawable.profile);
         return tmp;
     }
@@ -95,29 +86,34 @@ public class MainActivity extends AppCompatActivity {
         String title = todoListDto.getContent();
         tmp.setTitle(title);
         tmp.setDate(todoListDto.getDate());
-        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> checkingTodo(view, todoListDto));
+        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> {
+            checkingTodo(view, todoListDto);
+            tmp.removeAllViews();
+        });
         return tmp;
     }
 
+    // TODO: 버튼 클릭하면 체크 바뀌게 -> 그냥 투두가 사라지게 변경 (Rating 할 때 생긴 문제 해결하면 그거로 마저 하기)
     private void checkingTodo(View view, TodoListDto todoListDto) {
-        Call<TodoListDto> dtoCall = todoListApi.editTodoDone(todoListDto.getId());
-        dtoCall.enqueue(new Callback<TodoListDto>() {
+        Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
+        dummy.enqueue(new Callback<TodoListDto>() {
             @Override
             public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
-                TodoListDto checkedTodoList = response.body();
-                if (checkedTodoList.getDone()) {
-                    // TODO: check 이미지 변경
-                } else {
-                    // TODO: check 이미지 변경
-                }
-
+                view.setSelected(response.body().getDone());
             }
-
             @Override
             public void onFailure(Call<TodoListDto> call, Throwable t) {
-                Log.d(TAG + "Api", t.toString());
+                Log.v("api fail", t.toString());
             }
         });
+    }
+
+    private void setAddTodo(){
+        todoDialog = new TodoDialog(MainActivity.this);
+    }
+
+    private void showAddTodoDialog(){
+        todoDialog.show();
     }
 
     private void setActionBar() {
@@ -176,32 +172,68 @@ public class MainActivity extends AppCompatActivity {
         scrollViewFriendList = findViewById(R.id.scrollViewFriendList);
         scrollViewFriendList.setVerticalScrollBarEnabled(true);
 
+        myself = findViewById(R.id.userItem0);
+        myself.setOnClickListener(view->{
+            Log.d(TAG + "Intent", "Convert to MyPage Activity");
+            Intent toMyPageActivity = new Intent(getApplicationContext(), MyPageActivity.class);
+            startActivity(toMyPageActivity);
+        });
+
+        setAddTodo();
+        addTodoBtn = findViewById(R.id.addTodoBtn);
+        addTodoBtn.setOnClickListener(view->{
+            Log.d(TAG, "addTodoList() called.");
+            showAddTodoDialog();
+        });
+
         addUserBtn = findViewById(R.id.addUserBtn);
         addUserBtn.setOnClickListener(view -> {
             // TODO: FollowActivity 만들고 거기서 팔로우 해서 친구 추가하기
             Log.d(TAG, "addUserBtn called.");
-            addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
+            Intent toAddFriendsActivity = new Intent(getApplicationContext(), AddFriendsActivity.class);
+            toAddFriendsActivity.putExtra("fromWhere", HOME);
+            Log.d(TAG + "Intent", "Convert to Community Activity.");
+            startActivity(toAddFriendsActivity);
         });
 
         //todoList, follows 불러오기
-        Call<List<TodoListDto>> todos = todoListApi.getTodoList(member);
-        Call<List<MemberDto>> follows = followApi.getFollowingList(member);
+        Call<List<TodoListDto>> todosCall = todoListApi.getTodoList(member);
+        Call<List<MemberDto>> followsCall = followApi.getFollowingList(member);
 
-        todos.enqueue(new Callback<>() {
+        todosCall.enqueue(new Callback<>() {
             //로그인 성공
             @Override
             public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
                 List<TodoListDto> todoLists = response.body();
-                if (todoLists != null) {
-                    for (TodoListDto todoList : todoLists) {
-                        addTodoItem(todoList);
+                for (TodoListDto x : todoLists) {
+                    if (!x.getDone()) {
+                        Log.d(TAG, String.valueOf(x.getId()));
+                        todoList.addView(addTodoItem(x));
                     }
+
                 }
             }
 
             @Override
             public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
                 todoList.addView(addItem("todoListApi calling Failed, " + t.toString()));
+                Log.v("api fail", t.toString());
+            }
+        });
+
+        followsCall.enqueue(new Callback<List<MemberDto>>() {
+            @Override
+            public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
+                List<MemberDto> follows = response.body();
+                if (follows != null) {
+                    for (MemberDto x : follows) {
+                        addedUserList.addView(addFriendItem(x));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MemberDto>> call, Throwable t) {
                 Log.v("api fail", t.toString());
             }
         });

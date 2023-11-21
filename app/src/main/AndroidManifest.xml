@@ -45,7 +45,7 @@
         </activity>
 
         <activity
-            android:name=".DensityActivity"
+            android:name=".AddFriendsActivity"
             android:exported="true"
             android:launchMode="singleTask">
         </activity>
@@ -71,6 +71,13 @@
             android:exported="true"
             android:launchMode="singleTask">
         </activity>
+
+        <activity
+            android:name=".PostingActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+        </activity>
+
 
         <activity
             android:name=".MyPageActivity"

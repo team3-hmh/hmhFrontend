@@ -68,7 +68,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private static final String appKey = "rZWWy5hD2n87YkkTKDsV2ou4xLJHWpb5OiqBswXh";
     public static final int PERMISSION = 10000;
     private static final int ACCESS_GPS = 1;
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = true;
 
     // Thread 변수 ↓
     private Handler mainHandler;
@@ -146,7 +146,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     public static SlidingUpPanelLayout slidePanel;
     private static TMapView mapView;
     private static TMapPoint curLocation;
-    private TMapMarkerItem curMarker;
+    private static TMapMarkerItem curMarker;
+    private static
+    ArrayList<TMapMarkerItem> resultMarkers = new ArrayList<>();
     private Button searchBtn;
     private EditText destinationTxt;
     private Bitmap markerBmp;
@@ -155,6 +157,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private ActionBar actionBar;
     private BottomNavigationView navigationView;
     private int fromWhere;
+    private static boolean blockRefresh = true;
 
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
@@ -208,6 +211,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         refreshLocation();
+        mapView.setZoomLevel(17);
         return super.onOptionsItemSelected(item);
     }
 
@@ -243,16 +247,17 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         Log.d(TAG + "_Callback", "[ Callback] : onLocationChange() called.");
         /*final float curLatitude = (float) location.getLatitude();
         final float curLongitude = (float) location.getLongitude();*/
-        if (curLocation != null) {
-            curLocation.setLatitude(location.getLatitude());
-            curLocation.setLongitude(location.getLongitude());
+        if(blockRefresh) {
+            if (curLocation != null) {
+                curLocation.setLatitude(location.getLatitude());
+                curLocation.setLongitude(location.getLongitude());
 
-            Log.d(TAG + "_Callback", "Changed location: " + location.getLatitude() + ", " + location.getLongitude());
+                Log.d(TAG + "_Callback", "Changed location: " + location.getLatitude() + ", " + location.getLongitude());
 
-            if (VERBOSE)
-                Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
-
-            refreshLocation();
+                if (VERBOSE)
+                    Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+                refreshLocation();
+            }
         }
     }
 
@@ -297,9 +302,13 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private void refreshLocation() {
         if (curLocation != null) {
             mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude(), true);
-            mapView.setZoomLevel(17);
+            // mapView.setZoomLevel(17);
 
-            curMarker.setTMapPoint(new TMapPoint(curLocation.getLatitude(), curLocation.getLongitude()));
+            runOnUiThread(() -> {
+                curMarker.setTMapPoint(new TMapPoint(curLocation.getLatitude(), curLocation.getLongitude()));
+                mapView.removeAllTMapMarkerItem();
+                setCurMarkerOnMap();
+            });
         }
     }
 
@@ -316,14 +325,18 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private void geoCoding(String destination) throws InterruptedException {
         String address = new String();
         listItems.clear();
+        resultMarkers.clear();
         new TMapData().findAllPOI(destination, new TMapData.OnFindAllPOIListener() {
             @Override
             public void onFindAllPOI(ArrayList<TMapPOIItem> arrayList) {
-                if(arrayList != null) {
+                blockRefresh = false;
+                if (arrayList != null) {
+                    double lat = 0, lon = 0;
+                    int inx = 0;
                     for (int i = 0; i < arrayList.size(); i++) {
                         // Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
-                        double lat = arrayList.get(i).getPOIPoint().getLatitude();
-                        double lon = arrayList.get(i).getPOIPoint().getLongitude();
+                        lat = arrayList.get(i).getPOIPoint().getLatitude();
+                        lon = arrayList.get(i).getPOIPoint().getLongitude();
 
                     /*new TMapData().convertGpsToAddress(lat, lon, new TMapData.OnConvertGPSToAddressListener() {
                         @Override
@@ -332,17 +345,65 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                         }
                     });*/
 
+                        TMapMarkerItem resultMarker = new TMapMarkerItem();
+                        resultMarker.setTMapPoint(new TMapPoint(lat, lon));
+                        resultMarker.setPosition(0.5f, 0.5f);
+                        resultMarker.setId(String.valueOf(inx));
+                        resultMarker.setName("Query" + inx++);
+                        resultMarker.setVisible(true);
+                        Log.d(TAG + "resultMarker", "resultMarker info: " + resultMarker);
+                        // Log.d(TAG + "resultMarker", "resultMarker position: " + resultMarker.getTMapPoint().getLatitude() + ", " + resultMarker.getTMapPoint().getLongitude());
+
+                        // markerBmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.marker), 100, 100, true);
+                        // resultMarker.setIcon(markerBmp);
+
                         listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
+                        resultMarkers.add(resultMarker);
                     }
-                    runOnUiThread(() -> listAdapter.notifyDataSetChanged());
+
+                    runOnUiThread(() -> {
+                        listAdapter.notifyDataSetChanged();
+                        mapView.removeAllTMapMarkerItem();
+                        try {
+                            // 지도에 표시할 marker 등록.
+                            for (TMapMarkerItem m : resultMarkers)
+                                mapView.addTMapMarkerItem(m);
+                            Log.d(TAG, "resultMarker added at mapView.");
+                        } catch (NullPointerException e) {
+                            Log.e(TAG, "NullPointerException occurred by Bitmap: " + e);
+                            e.printStackTrace();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Failed to add the marker to mapView: " + e);
+                            e.printStackTrace();
+                        }
+                    });
                 }
             }
         });
     }
 
+    private static void setCurMarkerOnMap() {
+        try {
+            // 지도에 표시할 marker 등록.
+            mapView.addTMapMarkerItem(curMarker);
+            Log.d(TAG, "curMarker added at mapView.");
+        } catch (NullPointerException e) {
+            Log.e(TAG, "NullPointerException occurred by Bitmap: " + e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to add the marker to mapView: " + e);
+            e.printStackTrace();
+        }
+    }
+
     public static void searchPath(double destinationX, double destinationY) throws
             URISyntaxException, IOException, JSONException {
         Log.d(TAG, "searchPath() called.");
+        resultMarkers.clear();
+        mapView.removeAllTMapMarkerItem();
+        blockRefresh = true;
+
+        setCurMarkerOnMap();
 
         double endX = destinationY;
         double endY = destinationX;
@@ -448,18 +509,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         markerBmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.marker), 100, 100, true);
         curMarker.setIcon(markerBmp);
 
-        try {
-            // 지도에 표시할 marker 등록.
-            mapView.addTMapMarkerItem(curMarker);
-            Log.d(TAG, "curMarker added at mapView.");
-        } catch (NullPointerException e) {
-            Log.e(TAG, "NullPointerException occurred by Bitmap: " + e);
-            e.printStackTrace();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to add the marker to mapView: " + e);
-            e.printStackTrace();
-        }
-
+        setCurMarkerOnMap();
         refreshLocation();
     }
 
@@ -508,8 +558,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                 Log.d(TAG, "Start to search the query");
                 threadPool.execute(mSearchPath);
 
-                //InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                //iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                // InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                // iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
 

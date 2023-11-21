@@ -59,8 +59,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MapActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener, TMapView.OnMapReadyListener, TMapGpsManager.OnLocationChangedListener, TMapView.OnApiKeyListenerCallback, SlidingUpPanelLayout.PanelSlideListener {
     // static(final) 변수 ↓
@@ -74,39 +72,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private Handler mainHandler;
     private TMapGpsManager gpsManager;
     private ExecutorService threadPool;
-    private Locker locker = new Locker();
-    private boolean isLocked = false;
+    private Object locker;
 
-    private static class Locker {
-        private static final ReentrantLock locker = new ReentrantLock();
-        private static final Condition condition = locker.newCondition();
-        private static boolean key = false;
-
-        public static void lock() {
-            locker.lock();
-            try {
-                synchronized (condition) {
-                    Log.d(TAG, "await looping.");
-                    if (!key)
-                        condition.await();
-                }
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                Log.d(TAG, "unlock called.");
-                locker.unlock();
-            }
-        }
-
-        public static void unlock() {
-            key = true;
-            synchronized (condition) {
-                Log.d(TAG, "notifyAll called.");
-                condition.notifyAll();
-            }
-        }
-    }
 
     private class MarkerHeading extends AsyncTask<Void, Void, Boolean> {
         private Context mContext = null;
@@ -324,6 +291,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
     private void geoCoding(String destination) throws InterruptedException {
         String address = new String();
+        mapView.removeTMapPath();
         listItems.clear();
         resultMarkers.clear();
         new TMapData().findAllPOI(destination, new TMapData.OnFindAllPOIListener() {

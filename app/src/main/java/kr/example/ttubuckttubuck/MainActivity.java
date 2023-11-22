@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "addUserBtn called.");
             Intent toAddFriendsActivity = new Intent(getApplicationContext(), AddFriendsActivity.class);
             toAddFriendsActivity.putExtra("fromWhere", HOME);
+            toAddFriendsActivity.putExtra("member", member);
             Log.d(TAG + "Intent", "Convert to Community Activity.");
             startActivity(toAddFriendsActivity);
         });

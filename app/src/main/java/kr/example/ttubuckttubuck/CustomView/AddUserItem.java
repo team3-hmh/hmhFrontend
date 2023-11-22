@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import kr.example.ttubuckttubuck.R;
+import kr.example.ttubuckttubuck.dto.SignInDto;
 
 public class AddUserItem extends LinearLayout {
     private TextView userName;
@@ -64,4 +65,11 @@ public class AddUserItem extends LinearLayout {
         userName.setText(name);
     }
     public Button getFollowBtn(){ return followBtn;}
+    public Button getUnfollowBtn() {
+        return unfollowBtn;
+    }
+
+    public String getUserName() {
+        return (String) userName.getText();
+    }
 }

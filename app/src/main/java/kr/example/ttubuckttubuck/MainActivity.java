@@ -191,7 +191,10 @@ public class MainActivity extends AppCompatActivity {
         addUserBtn.setOnClickListener(view -> {
             // TODO: FollowActivity 만들고 거기서 팔로우 해서 친구 추가하기
             Log.d(TAG, "addUserBtn called.");
-            // addedUserList.addView(addFriendItem(String.valueOf(userItemCnt)));
+            Intent toAddFriendsActivity = new Intent(getApplicationContext(), AddFriendsActivity.class);
+            toAddFriendsActivity.putExtra("fromWhere", HOME);
+            Log.d(TAG + "Intent", "Convert to Community Activity.");
+            startActivity(toAddFriendsActivity);
         });
 
         //todoList, follows 불러오기

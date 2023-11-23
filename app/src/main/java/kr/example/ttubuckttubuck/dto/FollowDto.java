@@ -7,4 +7,9 @@ public class FollowDto {
     private Long id;
     @SerializedName("followingId")
     private Long followingId;
+
+    public FollowDto(long member, Long followingId) {
+        this.id = member;
+        this.followingId = followingId;
+    }
 }

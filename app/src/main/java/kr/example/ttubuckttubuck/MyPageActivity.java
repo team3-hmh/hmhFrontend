@@ -51,10 +51,9 @@ public class MyPageActivity extends AppCompatActivity {
 
     Retrofit retrofit = NetworkClient.getRetrofitClient(MyPageActivity.this);
     MemberApi memberApi = retrofit.create(MemberApi.class);
-
     // API components ↓
     private long member;
-    private Call<MemberDto> memberDtoCall;
+//    private Call<MemberDto> memberDtoCall;
 
     // UI components ↓
     private BottomNavigationView navigationView;
@@ -76,7 +75,7 @@ public class MyPageActivity extends AppCompatActivity {
         setActionBar();
 
         Intent intent = getIntent();
-        long member = intent.getLongExtra("member", -1);
+        member = intent.getLongExtra("member", -1);
         Log.d(TAG, "member Id: " + member);
         if (member == -1) {
             Log.d(TAG + "Intent", "Not valid User");
@@ -86,7 +85,7 @@ public class MyPageActivity extends AppCompatActivity {
 
         userName = findViewById(R.id.userName);
         userEmail = findViewById(R.id.userEmail);
-        memberDtoCall = memberApi.memberInfo(member);
+        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
@@ -163,20 +162,6 @@ public class MyPageActivity extends AppCompatActivity {
                         circleCroppedBmp = getCroppedBitmap(resizedBmp);
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
-
-                        memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
-                            @Override
-                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                                MemberDto memberDto = response.body();
-                                Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
-                                // TODO: 이미지 불러오고 적용시키기
-                            }
-
-                            @Override
-                            public void onFailure(Call<MemberDto> call, Throwable t) {
-                                Log.v(TAG + "api fail", t.toString());
-                            }
-                        });
 
                         // 1. Bitmap을 byte[]로 변환.
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -295,6 +280,7 @@ public class MyPageActivity extends AppCompatActivity {
             if (item.getTitle().equals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", HOME);
+                toMapActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
                 recycleBmp();
@@ -302,11 +288,13 @@ public class MyPageActivity extends AppCompatActivity {
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
                 toMainActivity.putExtra("fromWhere", HOME);
+                toMainActivity.putExtra("member", member);
                 startActivity(toMainActivity);
                 recycleBmp();
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
                 toCommunityActivity.putExtra("fromWhere", HOME);
+                toCommunityActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
                 startActivity(toCommunityActivity);
                 recycleBmp();

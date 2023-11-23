@@ -6,7 +6,13 @@ import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.ImageDecoder;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +34,7 @@ import androidx.core.content.PermissionChecker;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import kr.example.ttubuckttubuck.api.MemberApi;
@@ -44,6 +51,10 @@ public class MyPageActivity extends AppCompatActivity {
     Retrofit retrofit = NetworkClient.getRetrofitClient(MyPageActivity.this);
     MemberApi memberApi = retrofit.create(MemberApi.class);
 
+    // API components ↓
+    private long member;
+    private Call<MemberDto> memberDtoCall;
+
     // UI components ↓
     private BottomNavigationView navigationView;
     private Toolbar toolBar;
@@ -53,6 +64,9 @@ public class MyPageActivity extends AppCompatActivity {
     private Button logoutBtn;
     private TextView userName, userEmail;
     private FrameLayout profile;
+    private Bitmap profileBmp = null;
+    private Bitmap resizedBmp = null;
+    private Bitmap circleCroppedBmp = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +84,7 @@ public class MyPageActivity extends AppCompatActivity {
 
         userName = findViewById(R.id.userName);
         userEmail = findViewById(R.id.userEmail);
-        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
+        memberDtoCall = memberApi.memberInfo(member);
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
@@ -85,7 +99,6 @@ public class MyPageActivity extends AppCompatActivity {
                 Log.v("api fail", t.toString());
             }
         });
-
 
         eclipseProfile = findViewById(R.id.eclipse);
         profile = findViewById(R.id.profile);
@@ -128,7 +141,6 @@ public class MyPageActivity extends AppCompatActivity {
                 cameraBtn.setVisibility(View.INVISIBLE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     Log.d(TAG, "SDK version meet.");
-                    Bitmap profileBmp = null;
                     try {
                         profileBmp = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), selectedImg), new ImageDecoder.OnHeaderDecodedListener() {
                             @Override
@@ -137,8 +149,54 @@ public class MyPageActivity extends AppCompatActivity {
                                 imageDecoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
                             }
                         });
-                        eclipseProfile.setImageBitmap(profileBmp);
+                        //Bitmap.createScaledBitmap(profileBmp, 75, 75, true);
+                        resizedBmp = getResizedBitmap(profileBmp, profileBmp.getWidth() / 6, profileBmp.getHeight() / 6);
+                        circleCroppedBmp = getCroppedBitmap(resizedBmp);
+                        eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
+
+                        memberDtoCall.enqueue(new Callback<MemberDto>() {
+                            @Override
+                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                                MemberDto memberDto = response.body();
+                                // TODO: 이미지 불러오고 적용시키기
+
+                                Call<MemberDto> insertImage = memberApi.insertImage(member, memberDto);
+                                insertImage.enqueue(new Callback<MemberDto>() {
+                                    @Override
+                                    public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                                        // 1. Bitmap을 byte[]로 변환.
+                                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                        resizedBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                                        byte[] byteBuffer = stream.toByteArray();
+                                        try {
+                                            stream.close();
+                                        } catch (IOException e) {
+                                            Log.e(TAG, "Failed to close stram: " + e);
+                                            e.printStackTrace();
+                                        }
+
+                                        // 2. byte[]를 String으로 변환.
+                                        String stringBuffer = new String(byteBuffer);
+
+                                        // 3. String으로 cast된 Bitmap을 memberDto에 set.
+                                        memberDto.setImage(stringBuffer);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<MemberDto> call, Throwable t) {
+                                        Log.v("api fail", t.toString());
+                                    }
+                                });
+
+                            }
+
+                            @Override
+                            public void onFailure(Call<MemberDto> call, Throwable t) {
+                                Log.v("api fail", t.toString());
+                            }
+                        });
+
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to set Bitmap to profile view.");
                         e.printStackTrace();
@@ -148,6 +206,55 @@ public class MyPageActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    // https://stackoverflow.com/questions/11932805/how-to-crop-circular-area-from-bitmap-in-android
+    private Bitmap getCroppedBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output;
+    }
+
+    // https://stackoverflow.com/questions/4837715/how-to-resize-a-bitmap-in-android
+    private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
+    }
+
+    private void recycleBmp(){
+        if(profileBmp != null)
+            profileBmp.recycle();
+        if(resizedBmp != null)
+            resizedBmp.recycle();
+        if(circleCroppedBmp != null)
+            circleCroppedBmp.recycle();
     }
 
     private void setActionBar() {
@@ -166,6 +273,7 @@ public class MyPageActivity extends AppCompatActivity {
             Log.d(TAG + "Intent", "Convert to Main Activity.");
             toMainActivity.putExtra("fromWhere", HOME);
             startActivity(toMainActivity);
+            recycleBmp();
         });
 
         navigationView = findViewById(R.id.navigationBtm);
@@ -177,16 +285,19 @@ public class MyPageActivity extends AppCompatActivity {
                 toMapActivity.putExtra("fromWhere", HOME);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
+                recycleBmp();
             } else if (item.getTitle().equals("Home")) {
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
                 toMainActivity.putExtra("fromWhere", HOME);
                 startActivity(toMainActivity);
+                recycleBmp();
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
                 toCommunityActivity.putExtra("fromWhere", HOME);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
                 startActivity(toCommunityActivity);
+                recycleBmp();
             }
             return false;
         });

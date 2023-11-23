@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         tmp.setTag("userItem"+ (userItemCnt++));
         tmp.setUserName(memberDto.getName());
         // TODO: 프로필 사진 불러오게 바꾸기
+        String userImg = memberDto.getImage();
         tmp.setUserImg(R.drawable.profile);
         return tmp;
     }
@@ -85,10 +86,9 @@ public class MainActivity extends AppCompatActivity {
         String title = todoListDto.getContent();
         tmp.setTitle(title);
         tmp.setDate(todoListDto.getDate());
-        // TODO: 체크 표시 되게 바꿔야함
         tmp.findViewById(R.id.todoChk).setOnClickListener(view-> {
             Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
-            view.findViewById(R.id.todoChk).setSelected(view.findViewById(R.id.todoChk).isSelected());
+            view.findViewById(R.id.todoChk).setSelected(!(view.findViewById(R.id.todoChk).isSelected()));
         });
         return tmp;
     }

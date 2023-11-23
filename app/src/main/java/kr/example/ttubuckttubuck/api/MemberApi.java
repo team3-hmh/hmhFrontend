@@ -19,7 +19,7 @@ public interface MemberApi {
     Call<String> login(@Body SignInDto signInDto);
 
     @POST("/member/insertImage/{id}")
-    Call<MemberDto> insertImage(@Path("id") Long id, @Body MemberDto memberDto);
+    Call<MemberDto> insertImage(@Path("id") Long id, @Query("imageFile") String imageFile);
 
     @GET("/member/{id}")
     Call<MemberDto> memberInfo(@Path("id") Long id);

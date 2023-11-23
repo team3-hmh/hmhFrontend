@@ -6,6 +6,7 @@ import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
@@ -76,6 +77,7 @@ public class MyPageActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         long member = intent.getLongExtra("member", -1);
+        Log.d(TAG, "member Id: " + member);
         if (member == -1) {
             Log.d(TAG + "Intent", "Not valid User");
             Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
@@ -89,9 +91,15 @@ public class MyPageActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
                 MemberDto memberDto = response.body();
-                // TODO: 이미지 불러오고 적용시키기
                 userName.setText(memberDto.getName());
                 userEmail.setText(memberDto.getEmail());
+                String userImg = memberDto.getImage();
+                Log.d(TAG, "Is userImag null?: " + (userImg == null) + ", value: " + userImg);
+                if (userImg != null) {
+                    byte[] buffer = userImg.getBytes();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+                    runOnUiThread(() -> eclipseProfile.setImageBitmap(bitmap));
+                }
             }
 
             @Override
@@ -102,17 +110,17 @@ public class MyPageActivity extends AppCompatActivity {
 
         eclipseProfile = findViewById(R.id.eclipse);
         profile = findViewById(R.id.profile);
-        profile.setOnClickListener(view->{
+        profile.setOnClickListener(view -> {
             Log.d(TAG, "Select the profile picture.");
             selectPicture();
         });
         cameraBtn = findViewById(R.id.cameraBtn);
-        cameraBtn.setOnClickListener(view->{
+        cameraBtn.setOnClickListener(view -> {
             Log.d(TAG, "Select the profile picture.");
             selectPicture();
         });
         logoutBtn = findViewById(R.id.logoutBtn);
-        logoutBtn.setOnClickListener(view->{
+        logoutBtn.setOnClickListener(view -> {
             Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
             // toLoginActivity.putExtra("fromWhere", HOME);
             Log.d(TAG + "Intent", "Convert to Login Activity.");
@@ -121,12 +129,13 @@ public class MyPageActivity extends AppCompatActivity {
     }
 
     private final int OPEN_GALLERY = 1;
-    private void selectPicture(){
-        if(PermissionChecker.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED){
+
+    private void selectPicture() {
+        if (PermissionChecker.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
             //권한이 확인된 경우 갤러리 오픈
-            Intent openGallery = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            Intent openGallery = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(openGallery, OPEN_GALLERY);
-        }else{
+        } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION);
         }
     }
@@ -135,8 +144,8 @@ public class MyPageActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult() called.");
-        if(requestCode == OPEN_GALLERY){
-            if(data != null && resultCode == RESULT_OK){
+        if (requestCode == OPEN_GALLERY) {
+            if (data != null && resultCode == RESULT_OK) {
                 Uri selectedImg = data.getData();
                 cameraBtn.setVisibility(View.INVISIBLE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -155,53 +164,56 @@ public class MyPageActivity extends AppCompatActivity {
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
 
-                        memberDtoCall.enqueue(new Callback<MemberDto>() {
+                        memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
                             @Override
                             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
                                 MemberDto memberDto = response.body();
+                                Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
                                 // TODO: 이미지 불러오고 적용시키기
-
-                                Call<MemberDto> insertImage = memberApi.insertImage(member, memberDto);
-                                insertImage.enqueue(new Callback<MemberDto>() {
-                                    @Override
-                                    public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                                        // 1. Bitmap을 byte[]로 변환.
-                                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                        resizedBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                                        byte[] byteBuffer = stream.toByteArray();
-                                        try {
-                                            stream.close();
-                                        } catch (IOException e) {
-                                            Log.e(TAG, "Failed to close stram: " + e);
-                                            e.printStackTrace();
-                                        }
-
-                                        // 2. byte[]를 String으로 변환.
-                                        String stringBuffer = new String(byteBuffer);
-
-                                        // 3. String으로 cast된 Bitmap을 memberDto에 set.
-                                        memberDto.setImage(stringBuffer);
-                                    }
-
-                                    @Override
-                                    public void onFailure(Call<MemberDto> call, Throwable t) {
-                                        Log.v("api fail", t.toString());
-                                    }
-                                });
-
                             }
 
                             @Override
                             public void onFailure(Call<MemberDto> call, Throwable t) {
-                                Log.v("api fail", t.toString());
+                                Log.v(TAG + "api fail", t.toString());
                             }
                         });
 
+                        // 1. Bitmap을 byte[]로 변환.
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        resizedBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] byteBuffer = stream.toByteArray();
+                        try {
+                            stream.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to close stream: " + e);
+                            e.printStackTrace();
+                        }
+
+                        // 2. byte[]를 String으로 변환.
+                        String stringBuffer = new String(byteBuffer);
+                        // Log.d(TAG, "string info: " + stringBuffer);
+
+
+                        Call<MemberDto> insertImage = memberApi.insertImage(member, stringBuffer);
+                        insertImage.enqueue(new Callback<MemberDto>() {
+                            @Override
+                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                                MemberDto memberDto = response.body();
+                                Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
+                                // 3. String으로 cast된 Bitmap을 memberDto에 set.
+                                memberDto.setImage(stringBuffer);
+                            }
+                            @Override
+                            public void onFailure(Call<MemberDto> call, Throwable t) {
+                                Log.e(TAG, "Failed to call insertImage: " + t);
+                                Log.v(TAG + "api fail", t.toString());
+                            }
+                        });
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to set Bitmap to profile view.");
                         e.printStackTrace();
                     }
-                }else{
+                } else {
                     Log.d(TAG, "SDK version not meet.");
                 }
             }
@@ -248,12 +260,12 @@ public class MyPageActivity extends AppCompatActivity {
         return resizedBitmap;
     }
 
-    private void recycleBmp(){
-        if(profileBmp != null)
+    private void recycleBmp() {
+        if (profileBmp != null)
             profileBmp.recycle();
-        if(resizedBmp != null)
+        if (resizedBmp != null)
             resizedBmp.recycle();
-        if(circleCroppedBmp != null)
+        if (circleCroppedBmp != null)
             circleCroppedBmp.recycle();
     }
 
@@ -268,7 +280,7 @@ public class MyPageActivity extends AppCompatActivity {
         actionBar.setTitle("Mypage");
 
         goBackBtn = findViewById(R.id.goBackBtn);
-        goBackBtn.setOnClickListener(view->{
+        goBackBtn.setOnClickListener(view -> {
             Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
             Log.d(TAG + "Intent", "Convert to Main Activity.");
             toMainActivity.putExtra("fromWhere", HOME);

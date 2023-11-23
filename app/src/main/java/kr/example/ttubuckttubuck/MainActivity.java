@@ -70,34 +70,37 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private HomeUserItem addFriendItem(MemberDto memberDto){
+    private HomeUserItem addFriendItem(MemberDto memberDto) {
         HomeUserItem tmp = new HomeUserItem(getApplicationContext());
-        tmp.setTag("userItem"+ (userItemCnt++));
+        tmp.setTag("userItem" + (userItemCnt++));
         tmp.setUserName(memberDto.getName());
         // TODO: 프로필 사진 불러오게 바꾸기
         String userImg = memberDto.getImage();
-        tmp.setUserImg(R.drawable.profile);
+        if (userImg == null)
+            tmp.setUserDefaultImg();
+        else
+            tmp.setUserImg(userImg);
         return tmp;
     }
 
-    private HomeTodoItem addTodoItem(TodoListDto todoListDto){
+    private HomeTodoItem addTodoItem(TodoListDto todoListDto) {
         HomeTodoItem tmp = new HomeTodoItem(getApplicationContext());
-        tmp.setTag("todoItem"+ (++todotemCnt));
+        tmp.setTag("todoItem" + (++todotemCnt));
         String title = todoListDto.getContent();
         tmp.setTitle(title);
         tmp.setDate(todoListDto.getDate());
-        tmp.findViewById(R.id.todoChk).setOnClickListener(view-> {
+        tmp.findViewById(R.id.todoChk).setOnClickListener(view -> {
             Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
             view.findViewById(R.id.todoChk).setSelected(!(view.findViewById(R.id.todoChk).isSelected()));
         });
         return tmp;
     }
 
-    private void setAddTodo(){
+    private void setAddTodo() {
         todoDialog = new TodoDialog(MainActivity.this);
     }
 
-    private void showAddTodoDialog(){
+    private void showAddTodoDialog() {
         todoDialog.show();
     }
 
@@ -173,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        myself.setOnClickListener(view->{
+        myself.setOnClickListener(view -> {
             Log.d(TAG + "Intent", "Convert to MyPage Activity");
             Intent toMyPageActivity = new Intent(getApplicationContext(), MyPageActivity.class);
             toMyPageActivity.putExtra("member", member);
@@ -182,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
 
         setAddTodo();
         addTodoBtn = findViewById(R.id.addTodoBtn);
-        addTodoBtn.setOnClickListener(view->{
+        addTodoBtn.setOnClickListener(view -> {
             Log.d(TAG, "addTodoList() called.");
             showAddTodoDialog();
         });

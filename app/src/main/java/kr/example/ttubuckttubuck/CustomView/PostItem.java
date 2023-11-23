@@ -2,6 +2,8 @@ package kr.example.ttubuckttubuck.CustomView;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,8 +75,10 @@ public class PostItem extends LinearLayout {
         typedArray.recycle();
     }
 
-    public void setPostImg(int img) {
-        postImg.setImageResource(img);
+    public void setPostImg(String stringImg) {
+        byte[] buffer = stringImg.getBytes();
+        Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+        postImg.setImageBitmap(bitmap);
     }
 
 

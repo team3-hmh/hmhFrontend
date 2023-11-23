@@ -2,6 +2,8 @@ package kr.example.ttubuckttubuck.CustomView;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,8 +64,14 @@ public class HomeUserItem extends LinearLayout {
         typedArray.recycle();
     }
 
-    public void setUserImg(int img) {
-        userImg.setImageResource(img);
+    public void setUserImg(String stringImg) {
+        byte[] buffer = stringImg.getBytes();
+        Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+        userImg.setImageBitmap(bitmap);
+    }
+
+    public void setUserDefaultImg() {
+        userImg.setImageResource(R.drawable.profile);
     }
 
     public void setUserName(String text) {

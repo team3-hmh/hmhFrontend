@@ -27,4 +27,12 @@ public class MemberDto {
     public String getEmail() {
         return this.email;
     }
+
+    public String getImage() {
+        return this.image;
+    }
+
+    public void setImage(String image){
+        this.image = image;
+    }
 }

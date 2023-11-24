@@ -64,4 +64,5 @@ public class AddUserItem extends LinearLayout {
         userName.setText(name);
     }
     public Button getFollowBtn(){ return followBtn;}
+    public Button getUnfollowBtn(){ return unfollowBtn;}
 }

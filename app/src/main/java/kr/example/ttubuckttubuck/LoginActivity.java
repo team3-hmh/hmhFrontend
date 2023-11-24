@@ -9,7 +9,6 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
 import kr.example.ttubuckttubuck.api.MemberApi;
-import kr.example.ttubuckttubuck.dto.MemberDto;
 import kr.example.ttubuckttubuck.dto.SignInDto;
 import kr.example.ttubuckttubuck.utils.NetworkClient;
 import retrofit2.Call;
@@ -58,7 +57,7 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d(TAG, "Is response null?: " + (responseParent == null));
                             Log.d(TAG, "response.message(): " + responseParent.message());
                             Log.d(TAG, "Is response.body() null?: " + (responseParent.body() == null));
-                            Log.d(TAG, "response.body().toString()" + responseParent.body().toString());
+                            //Log.d(TAG, "response.body().toString()" + responseParent.body().toString());
                             Log.d(TAG, "response.isSuccessful(): " + responseParent.isSuccessful());
 
                             Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);

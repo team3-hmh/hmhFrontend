@@ -19,6 +19,7 @@
 
         <LinearLayout
             android:id="@+id/topLayout"
+            android:layout_marginTop="70dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -28,80 +29,61 @@
                 android:layout_width="180dp"
                 android:layout_height="180dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="0dp"
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/logo" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="50dp"
-                android:layout_marginTop="30dp"
-                android:background="@drawable/search_edit_text"
-                android:gravity="center"
-                android:orientation="vertical">
-
                 <EditText
                     android:id="@+id/idText"
+                    android:fontFamily="@font/pretendard_variable"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
+                    android:layout_marginHorizontal="50dp"
+                    android:layout_marginTop="60dp"
                     android:layout_marginLeft="7dp"
-                    android:background="@null"
-                    android:hint="ID"
+                    android:hint="아이디를 입력해주세요."
                     android:text="test2@test.com"
                     android:textSize="25dp" />
-            </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="50dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/search_edit_text"
-                android:gravity="center"
-                android:orientation="vertical">
 
                 <EditText
                     android:id="@+id/pwdText"
+                    android:fontFamily="@font/pretendard_variable"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
+                    android:layout_marginHorizontal="50dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginLeft="7dp"
-                    android:background="@null"
-                    android:hint="Password"
+                    android:hint="비밀번호를 입력해주세요."
                     android:text="testpassword2!"
                     android:textSize="25dp" />
-            </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/bottomLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:gravity="center"
-            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/loginBtn"
-                android:layout_width="120dp"
-                android:layout_height="60dp"
-                android:layout_marginRight="20dp"
+                android:fontFamily="@font/pretendard_variable"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="60dp"
+                android:layout_marginHorizontal="50dp"
                 android:background="@drawable/basic_btn"
-                android:text="Login"
+                android:text="로그인"
                 android:textColor="@color/white"
-                android:textSize="25dp" />
+                android:textSize="20dp" />
 
             <Button
                 android:id="@+id/joinBtn"
-                android:layout_width="120dp"
-                android:layout_height="60dp"
-                android:layout_marginLeft="20dp"
+                android:fontFamily="@font/pretendard_variable"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="50dp"
                 android:background="@drawable/basic_btn"
-                android:text="Join"
+                android:text="회원가입"
                 android:textColor="@color/white"
-                android:textSize="25dp" />
-        </LinearLayout>
+                android:textSize="20dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private HomeUserItem myself;
     private TodoDialog todoDialog;
 
+    private long member;
+
     // 네트워크로 데이터 전송, Retrofit 객체 생성
     // NetworkClient : 위에서 Retrofit 기본 설정한 클래스 파일
     // MainActivity.this : API서버와 통신 할 액티비티 이름
@@ -76,10 +78,14 @@ public class MainActivity extends AppCompatActivity {
         tmp.setUserName(memberDto.getName());
         // TODO: 프로필 사진 불러오게 바꾸기
         String userImg = memberDto.getImage();
-        if (userImg == null)
+        if (userImg == null) {
+            Log.d(TAG, "default img set.");
             tmp.setUserDefaultImg();
-        else
+        }
+        else {
+            Log.d(TAG, "custom img set.");
             tmp.setUserImg(userImg);
+        }
         return tmp;
     }
 
@@ -147,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Intent intent = getIntent();
-        long member = intent.getLongExtra("id", -1);
+        member = intent.getLongExtra("id", -1);
         if (member == -1) {
             Log.d(TAG + "Intent", "Not valid User");
             Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
@@ -251,5 +257,60 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume() called.");
+
+        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
+        memberDtoCall.enqueue(new Callback<MemberDto>() {
+            @Override
+            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                myself.setUserName(response.body().getName());
+            }
+
+            @Override
+            public void onFailure(Call<MemberDto> call, Throwable t) {
+                Log.v("api fail", t.toString());
+            }
+        });
+
+        //todoList, follows 불러오기
+        Call<List<TodoListDto>> todosCall = todoListApi.getTodoList(member);
+        Call<List<MemberDto>> followsCall = followApi.getFollowingList(member);
+
+        todosCall.enqueue(new Callback<>() {
+            //로그인 성공
+            @Override
+            public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
+                List<TodoListDto> todoLists = response.body();
+                for (TodoListDto x : todoLists) {
+                    if (!x.getDone()) {
+                        Log.d(TAG, String.valueOf(x.getId()));
+                        todoList.addView(addTodoItem(x));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
+                todoList.addView(addItem("todoListApi calling Failed, " + t.toString()));
+                Log.v("api fail", t.toString());
+            }
+        });
+
+        followsCall.enqueue(new Callback<List<MemberDto>>() {
+            @Override
+            public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
+                List<MemberDto> follows = response.body();
+                if (follows != null) {
+                    for (MemberDto x : follows) {
+                        addedUserList.addView(addFriendItem(x));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MemberDto>> call, Throwable t) {
+                Log.v("api fail", t.toString());
+            }
+        });
     }
 }

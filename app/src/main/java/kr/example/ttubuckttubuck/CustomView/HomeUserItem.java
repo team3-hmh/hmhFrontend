@@ -5,6 +5,8 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import kr.example.ttubuckttubuck.R;
 
 public class HomeUserItem extends LinearLayout {
+    private static final String TAG = "HomeUserItem_Debug";
     private ImageView userImg;
     private TextView userName;
 
@@ -64,10 +67,24 @@ public class HomeUserItem extends LinearLayout {
         typedArray.recycle();
     }
 
+    private Bitmap StringToBitmap(String encodedString) {
+        try {
+            byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+            Log.d(TAG, "Is bitmap null?: " + (bitmap == null));
+            Log.d(TAG, "bitmap info: " + bitmap.getWidth() + ", " + bitmap.getHeight());
+            return bitmap;
+        } catch (Exception e) {
+            Log.e(TAG, "error occurred: " + e);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void setUserImg(String stringImg) {
-        byte[] buffer = stringImg.getBytes();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
-        userImg.setImageBitmap(bitmap);
+        Log.d(TAG, "stringImg info: " + stringImg);
+        Bitmap decodedBmp = StringToBitmap(stringImg);
+        userImg.setImageBitmap(decodedBmp);
     }
 
     public void setUserDefaultImg() {

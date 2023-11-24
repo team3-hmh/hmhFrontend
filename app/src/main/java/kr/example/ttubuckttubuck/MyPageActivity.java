@@ -17,6 +17,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -139,6 +140,15 @@ public class MyPageActivity extends AppCompatActivity {
         }
     }
 
+    private String BitmapToString(Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 70, baos);
+        byte[] bytes = baos.toByteArray();
+        String temp = Base64.encodeToString(bytes, Base64.DEFAULT);
+        Log.d(TAG, "string info: " + temp);
+        return temp;
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -163,37 +173,38 @@ public class MyPageActivity extends AppCompatActivity {
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
 
-                        // 1. Bitmap을 byte[]로 변환.
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        resizedBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                        byte[] byteBuffer = stream.toByteArray();
-                        try {
-                            stream.close();
-                        } catch (IOException e) {
-                            Log.e(TAG, "Failed to close stream: " + e);
-                            e.printStackTrace();
-                        }
 
-                        // 2. byte[]를 String으로 변환.
-                        String stringBuffer = new String(byteBuffer);
-                        // Log.d(TAG, "string info: " + stringBuffer);
-
-
-                        Call<MemberDto> insertImage = memberApi.insertImage(member, stringBuffer);
-                        insertImage.enqueue(new Callback<MemberDto>() {
+                        memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
                             @Override
                             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
                                 MemberDto memberDto = response.body();
-                                Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
-                                // 3. String으로 cast된 Bitmap을 memberDto에 set.
-                                memberDto.setImage(stringBuffer);
+                                Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
+                                // TODO: 이미지 불러오고 적용시키기
+                                String encodedBmp = BitmapToString(resizedBmp);
+                                Log.d(TAG, "string info: " + encodedBmp);
+
+                                Call<MemberDto> insertImage = memberApi.insertImage(member, encodedBmp);
+                                insertImage.enqueue(new Callback<MemberDto>() {
+                                    @Override
+                                    public void onResponse(Call<MemberDto> call, Response<MemberDto> nestedResponse) {
+                                        MemberDto memberDto = response.body();
+                                        Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
+                                        // 3. String으로 cast된 Bitmap을 memberDto에 set.
+                                        memberDto.setImage(encodedBmp);
+                                    }
+                                    @Override
+                                    public void onFailure(Call<MemberDto> call, Throwable t) {
+                                        Log.e(TAG, "Failed to call insertImage: " + t);
+                                        Log.v(TAG + "api fail", t.toString());
+                                    }
+                                });
+                                Log.d(TAG, "insertImage called.");
                             }
                             @Override
                             public void onFailure(Call<MemberDto> call, Throwable t) {
-                                Log.e(TAG, "Failed to call insertImage: " + t);
                                 Log.v(TAG + "api fail", t.toString());
                             }
-                        });
+                        }); 필요합니다. Drawable을 Bitmap으로 변경하거나 Bitmap을 Drawable로 변경하
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to set Bitmap to profile view.");
                         e.printStackTrace();
@@ -277,7 +288,7 @@ public class MyPageActivity extends AppCompatActivity {
         navigationView.getMenu().findItem(HOME).setChecked(true);
         navigationView.setOnItemSelectedListener(item -> {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId());
-            if (item.getTitle().equals("Map")) {
+            if (item.getTitle().e 필요합니다. Drawable을 Bitmap으로 변경하거나 Bitmap을 Drawable로 변경하quals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", HOME);
                 toMapActivity.putExtra("member", member);

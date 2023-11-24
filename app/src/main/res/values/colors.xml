@@ -2,5 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="app_theme">#A1C8E5</color>
+    <color name="grey">#DFDFDF</color>
+    <color name="app_theme">#FD907E</color>
 </resources>

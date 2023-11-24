@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         actionBar = getSupportActionBar();
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Home");
+        //actionBar.setTitle("뚜벅");
 
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(fromWhere).setChecked(false);

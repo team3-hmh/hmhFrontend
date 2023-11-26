@@ -95,10 +95,22 @@ public class MainActivity extends AppCompatActivity {
         String title = todoListDto.getContent();
         tmp.setTitle(title);
         tmp.setDate(todoListDto.getDate());
-        tmp.findViewById(R.id.todoChk).setOnClickListener(view -> {
-            Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
-            view.findViewById(R.id.todoChk).setSelected(!(view.findViewById(R.id.todoChk).isSelected()));
-        });
+//        tmp.findViewById(R.id.todoChk).setOnClickListener(view -> {
+//            Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
+//            dummy.enqueue(new Callback<TodoListDto>() {
+//                @Override
+//                public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
+//                    Log.d(TAG, "todo checked");
+//                    view.findViewById(R.id.todoChk).setSelected(!(view.findViewById(R.id.todoChk).isSelected()));
+//                }
+//
+//                @Override
+//                public void onFailure(Call<TodoListDto> call, Throwable t) {
+//                    Log.v("api fail", t.toString());
+//                }
+//            });
+//
+//        });
         return tmp;
     }
 
@@ -219,7 +231,23 @@ public class MainActivity extends AppCompatActivity {
                 for (TodoListDto x : todoLists) {
                     if (!x.getDone()) {
                         Log.d(TAG, String.valueOf(x.getId()));
-                        todoList.addView(addTodoItem(x));
+                        HomeTodoItem newTodo = addTodoItem(x);
+                        newTodo.findViewById(R.id.todoChk).setOnClickListener(view -> {
+                            view.setSelected(!(newTodo.findViewById(R.id.todoChk).isSelected()));
+                            Call<TodoListDto> dummy = todoListApi.editTodoDone(x.getId());
+                            dummy.enqueue(new Callback<TodoListDto>() {
+                                @Override
+                                public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
+                                    Log.d(TAG, "todo checked");
+                                }
+
+                                @Override
+                                public void onFailure(Call<TodoListDto> call, Throwable t) {
+                                    Log.v("api fail", t.toString());
+                                }
+                            });
+                        });
+                        todoList.addView(newTodo);
                     }
                 }
             }

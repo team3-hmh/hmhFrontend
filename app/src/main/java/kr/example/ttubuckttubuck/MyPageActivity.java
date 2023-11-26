@@ -54,7 +54,6 @@ public class MyPageActivity extends AppCompatActivity {
     MemberApi memberApi = retrofit.create(MemberApi.class);
     // API components ↓
     private long member;
-    private Call<MemberDto> memberDtoCall;
 
     // UI components ↓
     private BottomNavigationView navigationView;
@@ -86,7 +85,7 @@ public class MyPageActivity extends AppCompatActivity {
 
         userName = findViewById(R.id.userName);
         userEmail = findViewById(R.id.userEmail);
-        memberDtoCall = memberApi.memberInfo(member);
+        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
@@ -173,38 +172,52 @@ public class MyPageActivity extends AppCompatActivity {
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
 
-
-                        memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
+                        String encodedmap = BitmapToString(resizedBmp);
+                        Call<MemberDto> insertImageCall = memberApi.insertImage(member, encodedmap);
+                        insertImageCall.enqueue(new Callback<MemberDto>() {
                             @Override
                             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                                MemberDto memberDto = response.body();
-                                Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
-                                // TODO: 이미지 불러오고 적용시키기
-                                String encodedBmp = BitmapToString(resizedBmp);
-                                Log.d(TAG, "string info: " + encodedBmp);
-
-                                Call<MemberDto> insertImage = memberApi.insertImage(member, encodedBmp);
-                                insertImage.enqueue(new Callback<MemberDto>() {
-                                    @Override
-                                    public void onResponse(Call<MemberDto> call, Response<MemberDto> nestedResponse) {
-                                        MemberDto memberDto = response.body();
-                                        Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
-                                        // 3. String으로 cast된 Bitmap을 memberDto에 set.
-                                        memberDto.setImage(encodedBmp);
-                                    }
-                                    @Override
-                                    public void onFailure(Call<MemberDto> call, Throwable t) {
-                                        Log.e(TAG, "Failed to call insertImage: " + t);
-                                        Log.v(TAG + "api fail", t.toString());
-                                    }
-                                });
-                                Log.d(TAG, "insertImage called.");
+                                Log.d(TAG, response.body().getImage());
                             }
+
                             @Override
                             public void onFailure(Call<MemberDto> call, Throwable t) {
                                 Log.v(TAG + "api fail", t.toString());
                             }
                         });
+
+
+//                        memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
+//                            @Override
+//                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+//                                MemberDto memberDto = response.body();
+//                                Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
+//                                // TODO: 이미지 불러오고 적용시키기
+//                                String encodedBmp = BitmapToString(resizedBmp);
+//                                Log.d(TAG, "string info: " + encodedBmp);
+//
+//                                Call<MemberDto> insertImage = memberApi.insertImage(member, encodedBmp);
+//                                insertImage.enqueue(new Callback<MemberDto>() {
+//                                    @Override
+//                                    public void onResponse(Call<MemberDto> call, Response<MemberDto> nestedResponse) {
+//                                        MemberDto memberDto = response.body();
+//                                        Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
+//                                        // 3. String으로 cast된 Bitmap을 memberDto에 set.
+//                                        memberDto.setImage(encodedBmp);
+//                                    }
+//                                    @Override
+//                                    public void onFailure(Call<MemberDto> call, Throwable t) {
+//                                        Log.e(TAG, "Failed to call insertImage: " + t);
+//                                        Log.v(TAG + "api fail", t.toString());
+//                                    }
+//                                });
+//                                Log.d(TAG, "insertImage called.");
+//                            }
+//                            @Override
+//                            public void onFailure(Call<MemberDto> call, Throwable t) {
+//                                Log.v(TAG + "api fail", t.toString());
+//                            }
+//                        });
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to set Bitmap to profile view.");
                         e.printStackTrace();

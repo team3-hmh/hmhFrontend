@@ -2,6 +2,7 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.DestinationsList.listAdapter;
 import static kr.example.ttubuckttubuck.DestinationsList.listItems;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
@@ -28,11 +29,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -55,6 +58,7 @@ import org.w3c.dom.NodeList;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -70,44 +74,10 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private Handler mainHandler;
     private TMapGpsManager gpsManager;
     private ExecutorService threadPool;
-    private Object locker;
-
-
-    private class MarkerHeading extends AsyncTask<Void, Void, Boolean> {
-        private Context mContext = null;
-
-        public MarkerHeading(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            while (curLocation != null) {
-                //Log.i(TAG, "Cur rotation: " + curMarker.getRotation());
-                publishProgress();
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            Log.i(TAG, "AsyncTask executed.");
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-            Log.i(TAG, "onProgressUpdate called.");
-        }
-    }
 
     // UI 구성 요소 ↓
     private ViewGroup container;
+    private RelativeLayout loadView;
     public static SlidingUpPanelLayout slidePanel;
     private static TMapView mapView;
     private static TMapPoint curLocation;
@@ -122,6 +92,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private BottomNavigationView navigationView;
     private int fromWhere;
     private static boolean blockRefresh = true;
+    private long member;
+    private ContentLoadingProgressBar loadingFragment;
 
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
@@ -189,13 +161,10 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     @Override
     public void onMapReady() {
         Log.d(TAG + "_Callback", "[ Callback ] : onMapReady() called.");
-
-        // Default zoomLevel value: 13.
-        //Log.d(TAG + "_Callback", "Zoom level: " + mapView.getZoomLevel());
+        loadingFragment.show();
+        loadView.setVisibility(View.VISIBLE);
 
         mapView.setRotateEnable(true);
-
-        //mapView.setTrackingMode(true);
 
         // 화면 회전 유무 설정.
         mapView.setCompassMode(false);
@@ -204,6 +173,12 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         mapView.setZoomLevel(17);
 
         curLocationInit();
+
+        loadView.animate().alpha(0.0f);
+        mainHandler.postDelayed(() -> {
+            loadingFragment.hide();
+            loadView.setVisibility(View.GONE);
+        }, 2000);   // 2sec.
     }
 
     @Override
@@ -211,7 +186,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         Log.d(TAG + "_Callback", "[ Callback] : onLocationChange() called.");
         /*final float curLatitude = (float) location.getLatitude();
         final float curLongitude = (float) location.getLongitude();*/
-        if(blockRefresh) {
+        if (blockRefresh) {
             if (curLocation != null) {
                 curLocation.setLatitude(location.getLatitude());
                 curLocation.setLongitude(location.getLongitude());
@@ -490,6 +465,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         threadPool = Executors.newCachedThreadPool();
 
         // UI 초기화 ↓
+        loadingFragment = findViewById(R.id.loadingFragment);
+        loadView = findViewById(R.id.loadView);
+
         slidePanel = findViewById(R.id.slidePanel);
         mapView = new TMapView(this);
         mapView.setSKTMapApiKey(appKey); // API Key 할당.
@@ -538,7 +516,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
     private void setActionBar() {
         refreshBtn = findViewById(R.id.refreshBtn);
-        refreshBtn.setOnClickListener(view->refreshLocation());
+        refreshBtn.setOnClickListener(view -> refreshLocation());
 
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(fromWhere).setChecked(false);
@@ -551,11 +529,13 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
                 toMainActivity.putExtra("fromWhere", MAP);
+                toMainActivity.putExtra("member", member);
                 startActivity(toMainActivity);
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
                 toCommunityActivity.putExtra("fromWhere", MAP);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
+                toCommunityActivity.putExtra("member", member);
                 startActivity(toCommunityActivity);
             }
             return false;
@@ -567,13 +547,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     public boolean checkPermission(String[] permissions, int type) {
         Log.d(TAG, "checkPermission() called.");
         SharedPreferences preference = getPreferences(MODE_PRIVATE);
-        //if(preference.getBoolean("isFirstCheckPermission", true))
-        //    return true;
-
         try {
-            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-                return true;*/
-
             for (String permission : permissions) {
                 if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED)
                     ActivityCompat.requestPermissions(this, permissions, type);
@@ -595,12 +569,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
         switch (requestCode) {
             case ACCESS_GPS:
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "Permission has been granted.");
-
-                    //curLocationInit();
                 } else {
                     Toast.makeText(getApplicationContext(), "Permission should be granted.", Toast.LENGTH_SHORT);
                     Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
@@ -608,8 +579,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                     startActivity(toMainActivity);
                 }
         }
-        // Other 'case' lines to check for other
-        // permissions this app might request.
     }
 
     @Override
@@ -634,9 +603,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         Location curLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         firstLatitude = curLocation.getLatitude();
         firstLongitude = curLocation.getLongitude();
-        // Log.d(TAG, "provider meaning?: " +curLocation.getProvider());
 
-        //reverseGeoCoding(firstLatitude, firstLongitude);
         Log.d(TAG, "Detected current location as first: " + firstLatitude + ", " + firstLongitude);
     }
 

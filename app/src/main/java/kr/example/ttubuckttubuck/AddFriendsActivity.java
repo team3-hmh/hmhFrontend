@@ -5,6 +5,8 @@ import static kr.example.ttubuckttubuck.utils.MenuItemID.*;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -41,7 +43,8 @@ public class AddFriendsActivity extends AppCompatActivity {
     private BottomNavigationView navigationView;
     private Toolbar toolBar;
     private ActionBar actionBar;
-    private ImageButton searchBtn, goBackBtn;
+    private ImageButton goBackBtn;
+    private Button followBtn;
     private EditText searchEditTxt;
     private LinearLayout userList;
     private AddUserItem userItem;
@@ -82,9 +85,9 @@ public class AddFriendsActivity extends AppCompatActivity {
         });
 
         searchEditTxt = findViewById(R.id.searchEditTxt);
-        searchBtn = findViewById(R.id.searchBtn);
+        followBtn = findViewById(R.id.followBtn);
         // TODO: follow 버튼으로 바꾸기
-        searchBtn.setOnClickListener(view->{
+        followBtn.setOnClickListener(view->{
             final String query = searchEditTxt.getText().toString();
             if(query.equals("") || query == null)
                 Toast.makeText(getApplicationContext(), "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
@@ -123,11 +126,10 @@ public class AddFriendsActivity extends AppCompatActivity {
 
         userItem = findViewById(R.id.userItem0);
         userItem.setUserName("Kim Ho");
-        userItem.getFollowBtn().setOnClickListener(view -> {
-            Toast.makeText(getApplicationContext(), "Hello World", Toast.LENGTH_SHORT).show();
-        });
         userItem.getUnfollowBtn().setOnClickListener(view -> {
             // TODO: 뷰 없애기
+            userItem.hideView();
+            // TODO: 다른 액티비티 전환하고 다시 돌아오면 뷰가 다시 생김. AddUserItem에 isFollowed 변수 추가해놨고 유저 정보랑 연동해야 할 듯
         });
     }
 

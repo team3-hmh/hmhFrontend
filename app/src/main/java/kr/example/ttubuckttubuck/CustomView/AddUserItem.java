@@ -13,7 +13,8 @@ import kr.example.ttubuckttubuck.R;
 
 public class AddUserItem extends LinearLayout {
     private TextView userName;
-    private Button followBtn, unfollowBtn;
+    private Button unfollowBtn;
+    private boolean isFollowed = true;
 
     public AddUserItem(Context context) {
         super(context);
@@ -39,8 +40,12 @@ public class AddUserItem extends LinearLayout {
         addView(v);
 
         this.userName = findViewById(R.id.userName);
-        followBtn = findViewById(R.id.followBtn);
         unfollowBtn = findViewById(R.id.unfollowBtn);
+
+        if(isFollowed)
+            this.setVisibility(View.VISIBLE);
+        else
+            this.setVisibility(View.GONE);
     }
 
     private void getAttrs(AttributeSet attrs) {
@@ -63,6 +68,9 @@ public class AddUserItem extends LinearLayout {
     public void setUserName(String name) {
         userName.setText(name);
     }
-    public Button getFollowBtn(){ return followBtn;}
     public Button getUnfollowBtn(){ return unfollowBtn;}
+    public void hideView(){
+        this.isFollowed = false;
+        this.setVisibility(View.GONE);
+    }
 }

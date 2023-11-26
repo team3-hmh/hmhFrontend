@@ -21,11 +21,31 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolBar"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_weight="0.2"
+                android:background="@color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageButton
+                    android:id="@+id/goBackBtn"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="15dp"
+                    android:background="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/go_back_btn" />
+            </androidx.appcompat.widget.Toolbar>
+
             <ScrollView
                 android:id="@+id/listScrollView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="9.9">
+                android:layout_weight="9.7"
+                android:layout_marginTop="20dp">
 
                 <LinearLayout
                     android:id="@+id/postList"

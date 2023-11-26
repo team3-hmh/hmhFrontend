@@ -22,8 +22,8 @@
             android:id="@+id/slidePanel"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:gravity="bottom"
             android:layout_weight="9.9"
+            android:gravity="bottom"
             app:umanoDragView="@id/navigationView">
 
             <FrameLayout
@@ -34,70 +34,88 @@
                 <RelativeLayout
                     android:id="@+id/mapView"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"></RelativeLayout>
+                    android:layout_height="match_parent" />
 
-                <ImageView
-                    android:id="@+id/refreshBtn"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginRight="20dp"
-                    android:layout_gravity="end|top"
-                    android:background="@drawable/refresh_btn"
-                    android:scaleType="fitCenter" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:id="@+id/navigationView"
-                android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:id="@+id/destinations"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal">
-
-                    <EditText
-                        android:id="@+id/destinationText"
-                        android:layout_width="230dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="5dp"
-                        android:layout_marginTop="10dp"
-                        android:hint="목적지를 입력하세요."
-                        android:text="국민대학교" />
-
-                    <ImageView
-                        android:id="@+id/searchBtn"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_marginHorizontal="5dp"
-                        android:layout_marginTop="13dp"
-                        android:background="@drawable/search_btn"
-                        android:scaleType="fitCenter"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/candidates"
+                <RelativeLayout
+                    android:id="@+id/loadView"
+                    android:background="@color/white"
+                    android:animateLayoutChanges="true"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"></LinearLayout>
-            </LinearLayout>
-        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+                    android:gravity="center">
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/navigationBtm"
+                    <androidx.core.widget.ContentLoadingProgressBar
+                        android:id="@+id/loadingFragment"
+                        style="?android:attr/progressBarStyleLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:indeterminateTint="@color/second"
+                        android:indeterminateTintMode="src_atop" />
+                </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/refreshBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="end|top"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/refresh_btn"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/navigationView"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:layout_weight="0.1"
-            android:background="@color/white"
-            app:itemIconTint="@color/fourth"
-            app:itemTextColor="@color/fourth"
-            app:labelVisibilityMode="unlabeled"
-            app:menu="@menu/bottom_navi" />
+            android:layout_height="500dp"
+            android:orientation="vertical">
 
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <LinearLayout
+                android:id="@+id/destinations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/destinationText"
+                    android:layout_width="230dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="목적지를 입력하세요."
+                    android:text="국민대학교" />
+
+                <ImageView
+                    android:id="@+id/searchBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginTop="13dp"
+                    android:background="@drawable/search_btn"
+                    android:scaleType="fitCenter" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/candidates"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"></LinearLayout>
+        </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigationBtm"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:layout_weight="0.1"
+        android:background="@color/white"
+        app:itemIconTint="@color/fourth"
+        app:itemTextColor="@color/fourth"
+        app:labelVisibilityMode="unlabeled"
+        app:menu="@menu/bottom_navi" />
+
+</LinearLayout></androidx.constraintlayout.widget.ConstraintLayout>

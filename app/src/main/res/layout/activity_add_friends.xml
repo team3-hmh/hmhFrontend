@@ -19,9 +19,9 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolBar"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:layout_weight="0.2"
-            android:background="@color/app_theme"
+            android:background="@color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -33,19 +33,6 @@
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/go_back_btn" />
-
-            <TextView
-                android:id="@+id/loginTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="35dp"
-                android:gravity="center"
-                android:text="Friends"
-                android:textSize="30dp" />
         </androidx.appcompat.widget.Toolbar>
 
         <FrameLayout
@@ -66,16 +53,15 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"/>
 
-            <ImageButton
-                android:id="@+id/searchBtn"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:src="@drawable/search"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:layout_marginRight="18dp"
+            <Button
+                android:id="@+id/followBtn"
+                android:text="Follow"
+                android:textSize="15dp"
+                android:background="@drawable/follow_btn"
                 android:layout_gravity="end|center_vertical"
-                />
+                android:layout_marginRight="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp" />
         </FrameLayout>
 
         <LinearLayout
@@ -98,9 +84,10 @@
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             android:layout_weight="0.1"
-            android:background="@color/app_theme"
-            app:itemIconTint="@android:color/primary_text_dark"
-            app:itemTextColor="@android:color/primary_text_dark"
+            android:background="@color/white"
+            app:itemIconTint="@color/fourth"
+            app:itemTextColor="@color/fourth"
+            app:labelVisibilityMode="unlabeled"
             app:menu="@menu/bottom_navi" />
     </LinearLayout>
 

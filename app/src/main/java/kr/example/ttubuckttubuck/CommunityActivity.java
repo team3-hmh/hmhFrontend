@@ -38,15 +38,14 @@ public class CommunityActivity extends AppCompatActivity {
     private LinearLayout postList;
     private ImageButton addPostBtn;
     private int fromWhere;
+    private long member;
 
     private PostItem addPostItem(PostingDto postingDto) {
         PostItem tmp = new PostItem(getApplicationContext());
         tmp.setTag("todoItem" + (++postitemCnt));
-        tmp.setPostImg(postingDto.getContent());
-        tmp.setPostTitle("title example");
         tmp.setPostContent(postingDto.getContent());
         // TODO: date 대신 rating 들어가게 수정
-        tmp.setDate(postingDto.getRating());
+        tmp.setRate(postingDto.getRating());
 
         return tmp;
     }

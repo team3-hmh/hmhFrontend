@@ -1,6 +1,7 @@
 package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.POSTING;
 
 import android.content.Intent;
@@ -34,7 +35,7 @@ public class PostingActivity extends AppCompatActivity {
     private BottomNavigationView navigationView;
     private Toolbar toolBar;
     private ActionBar actionBar;
-    private ImageButton starBtn1, starBtn2, starBtn3, starBtn4, starBtn5;
+    private ImageButton starBtn1, starBtn2, starBtn3, starBtn4, starBtn5, goBackBtn;
     private ArrayList<ImageButton> starBtns = new ArrayList<>();
     private EditText postEditTxt;
     private Button submitBtn;
@@ -81,14 +82,13 @@ public class PostingActivity extends AppCompatActivity {
     }
 
     private void setActionBar(Long member) {
-        toolBar = findViewById(R.id.toolBar);
-        setSupportActionBar(toolBar);
-        toolBar.setTitle("Posting");
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Posting");
+        goBackBtn = findViewById(R.id.goBackBtn);
+        goBackBtn.setOnClickListener(view -> {
+            Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+            Log.d(TAG + "Intent", "Convert to Community Activity.");
+            toCommunityActivity.putExtra("fromWhere", COMMUNITY);
+            startActivity(toCommunityActivity);
+        });
 
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(COMMUNITY).setChecked(true);

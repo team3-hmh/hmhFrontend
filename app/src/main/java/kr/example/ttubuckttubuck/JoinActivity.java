@@ -22,22 +22,22 @@ public class JoinActivity extends AppCompatActivity {
     Retrofit retrofit = NetworkClient.getRetrofitClient(JoinActivity.this);
 
     MemberApi memberApi = retrofit.create(MemberApi.class);
-    private EditText idText, pwdText, nameText, pwdCheckText;
+    private EditText emailText, pwdText, nameText, pwdCheckText;
     private Button joinBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join);
 
-        idText = findViewById(R.id.idText);
+        nameText = findViewById(R.id.nameText);
+        emailText = findViewById(R.id.emailText);
         pwdText = findViewById(R.id.pwdText);
         pwdCheckText = findViewById(R.id.pwdCheckText);
-        nameText = findViewById(R.id.nameText);
 
         joinBtn = findViewById(R.id.joinBtn);
         joinBtn.setOnClickListener(view->{
             SignUpDto signUpDto = new SignUpDto(
-                    idText.getText(),
+                    emailText.getText(),
                     pwdText.getText(),
                     pwdCheckText.getText(),
                     nameText.getText()

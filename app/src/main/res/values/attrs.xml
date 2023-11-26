@@ -2,7 +2,7 @@
 <resources>
     <declare-styleable name="UserItem">
         <attr name="userName" format="reference|string" />
-        <attr name="userImg" format="reference|integer" />
+        <attr name="userImg" format="reference|string" />
     </declare-styleable>
 
     <declare-styleable name="AddUserItem">
@@ -18,10 +18,8 @@
     </declare-styleable>
 
     <declare-styleable name="PostItem">
-        <attr name="postImg" format="integer"/>
-        <attr name="title" />
-        <attr name="content" />
-        <attr name="date"/>
+        <attr name="content"/>
+        <attr name="rate" format="string"/>
     </declare-styleable>
 </resources>
 

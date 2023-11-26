@@ -2,18 +2,25 @@ package kr.example.ttubuckttubuck.CustomView;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import kr.example.ttubuckttubuck.R;
 
 public class PostItem extends LinearLayout {
-    private ImageView postImg;
-    private TextView postTitle, postContent, date;
+    private TextView postContent;
+    private LinearLayout starBtns;
+    private ImageButton starBtn1, starBtn2, starBtn3, starBtn4, starBtn5, goBackBtn;
+    private ArrayList<ImageButton> starBtnsArray = new ArrayList<>();
 
     public PostItem(Context context) {
         super(context);
@@ -38,10 +45,19 @@ public class PostItem extends LinearLayout {
         View v = lI.inflate(R.layout.fragment_post, this, false);
         addView(v);
 
-        postTitle = findViewById(R.id.postTitle);
-        postImg = findViewById(R.id.postImg);
         postContent = findViewById(R.id.postContent);
-        date = findViewById(R.id.date);
+        starBtns = findViewById(R.id.rate);
+
+        starBtn1 = findViewById(R.id.star1);
+        starBtnsArray.add(starBtn1);
+        starBtn2 = findViewById(R.id.star2);
+        starBtnsArray.add(starBtn2);
+        starBtn3 = findViewById(R.id.star3);
+        starBtnsArray.add(starBtn3);
+        starBtn4 = findViewById(R.id.star4);
+        starBtnsArray.add(starBtn4);
+        starBtn5 = findViewById(R.id.star5);
+        starBtnsArray.add(starBtn5);
     }
 
     private void getAttrs(AttributeSet attrs) {
@@ -55,38 +71,23 @@ public class PostItem extends LinearLayout {
     }
 
     private void setTypeArray(TypedArray typedArray) {
-        int img = typedArray.getResourceId(R.styleable.PostItem_postImg, R.drawable.kmu);
-        postImg.setImageResource(img);
-
-        //String text = typedArray.getString(R.styleable.AddUserBtn_userName);
-        String text = "성북구 국민대학교 북악관 207호";
-        postTitle.setText(text);
-
-
-        text = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하라는 내용이 기억에 남습니다.";
+        String text = "삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하라는 내용이 기억에 남습니다.";
         postContent.setText(text);
 
-
-        text = "2023-11-15";
-        date.setText(text);
+        for(int i = 0; i < 4; i++)
+            starBtnsArray.get(i).setSelected(true);
 
         typedArray.recycle();
     }
 
-    public void setPostImg(int img) {
-        postImg.setImageResource(img);
-    }
-
-
-    public void setPostTitle(String text) {
-        postTitle.setText(text);
-    }
 
     public void setPostContent(String text){
         postContent.setText(text);
     }
 
-    public void setDate(String text){
-        date.setText(text);
+    public void setRate(String rate){
+        for(int i = 0; i < Integer.valueOf(rate); i++)
+            starBtnsArray.get(i).setSelected(true);
     }
+
 }

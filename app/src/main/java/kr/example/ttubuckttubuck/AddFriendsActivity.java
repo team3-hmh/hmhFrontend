@@ -5,6 +5,8 @@ import static kr.example.ttubuckttubuck.utils.MenuItemID.*;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -34,53 +36,27 @@ public class AddFriendsActivity extends AppCompatActivity {
     private static final String TAG = "AddFriendsActivity_Debug";
 
     Retrofit retrofit = NetworkClient.getRetrofitClient(AddFriendsActivity.this);
-
-    MemberApi memberApi = retrofit.create(MemberApi.class);
     FollowApi followApi = retrofit.create(FollowApi.class);
+    MemberApi memberApi = retrofit.create(MemberApi.class);
 
     // UI components ↓
     private BottomNavigationView navigationView;
     private Toolbar toolBar;
     private ActionBar actionBar;
-    private ImageButton searchBtn, goBackBtn;
+    private ImageButton goBackBtn;
+    private Button followBtn;
     private EditText searchEditTxt;
     private LinearLayout userList;
     private AddUserItem userItem;
 
     public void searchUser(String query){
-        SignInDto signInDto = new SignInDto(query, "empty");
-        Call<Long> idCall = memberApi.findIdByEmail(signInDto);
-        idCall.enqueue(new Callback<Long>() {
-            @Override
-            public void onResponse(Call<Long> call, Response<Long> response) {
-                Long searchedId = response.body();
-                Call<MemberDto> serachedCall = memberApi.memberInfo(searchedId);
-                serachedCall.enqueue(new Callback<MemberDto>() {
-                    @Override
-                    public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                        MemberDto searchedDto = response.body();
-                        // TODO: 찾은 멤버 정보를 팔로잉 창에 표시
-                    }
-
-                    @Override
-                    public void onFailure(Call<MemberDto> call, Throwable t) {
-                        Log.v("api fail", t.toString());
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(Call<Long> call, Throwable t) {
-                Log.v("api fail", t.toString());
-            }
-        });
+        Log.d(TAG, "searchUser() called.");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friends);
-
         Intent intent = getIntent();
         long member = intent.getLongExtra("member", -1);
         if (member == -1) {
@@ -91,22 +67,15 @@ public class AddFriendsActivity extends AppCompatActivity {
         setActionBar(member);
 
         userList = findViewById(R.id.userList);
-        searchEditTxt = findViewById(R.id.searchEditTxt);
-        searchBtn = findViewById(R.id.searchBtn);
-        searchBtn.setOnClickListener(view->{
-            final String query = searchEditTxt.getText().toString();
-            if(query.equals("") || query == null)
-                Toast.makeText(getApplicationContext(), "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
-            else
-                searchUser(query);
-        });
-
-        Call<List<MemberDto>> followingCall = followApi.getFollowingList(member);
-        followingCall.enqueue(new Callback<List<MemberDto>>() {
+        Call<List<MemberDto>> followingListCall = followApi.getFollowingList(member);
+        followingListCall.enqueue(new Callback<List<MemberDto>>() {
             @Override
             public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
                 List<MemberDto> followingList = response.body();
-                // TODO: 팔로우 하고 있는 유저 띄우기 (View로 출력하고 Array나 List로 묶기)
+//                for (MemberDto x : followingList) {
+//                    break;
+//                    // TODO: userList에 뷰로 팔로우 리스트 보여주기 + 팔로우 버튼 없애고 언팔로우 버튼만 추가하기
+//                }
             }
 
             @Override
@@ -115,18 +84,35 @@ public class AddFriendsActivity extends AppCompatActivity {
             }
         });
 
-        userItem = findViewById(R.id.userItem0);
-        userItem.setUserName("Kim Ho");
-        userItem.getFollowBtn().setOnClickListener(view -> {
+        searchEditTxt = findViewById(R.id.searchEditTxt);
+        followBtn = findViewById(R.id.followBtn);
+        // TODO: follow 버튼으로 바꾸기
+        followBtn.setOnClickListener(view->{
+            final String query = searchEditTxt.getText().toString();
+            if(query.equals("") || query == null)
+                Toast.makeText(getApplicationContext(), "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
+            else
+                searchUser(query);
 
-            SignInDto dummy = new SignInDto(userItem.getUserName(), "dummy");
-            Call<Long> followingIdCall = memberApi.findIdByEmail(dummy);
-            followingIdCall.enqueue(new Callback<Long>() {
+            SignInDto d = new SignInDto(query, "dummy");
+            Call<Long> idCall = memberApi.findIdByEmail(d);
+            idCall.enqueue(new Callback<Long>() {
                 @Override
                 public void onResponse(Call<Long> call, Response<Long> response) {
                     FollowDto followDto = new FollowDto(member, response.body());
-                    followApi.follow(followDto);
-                    Toast.makeText(getApplicationContext(), "팔로우 했습니다", Toast.LENGTH_SHORT).show();
+                    Call<MemberDto> follow = followApi.follow(followDto);
+                    follow.enqueue(new Callback<MemberDto>() {
+                        @Override
+                        public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                            // TODO: 팔로우 성공 알람
+                        }
+
+                        @Override
+                        public void onFailure(Call<MemberDto> call, Throwable t) {
+                            // TODO: 존재하지 않는 아이디 알람
+                            Log.v("api fail", t.toString());
+                        }
+                    });
                 }
 
                 @Override
@@ -134,31 +120,20 @@ public class AddFriendsActivity extends AppCompatActivity {
                     Log.v("api fail", t.toString());
                 }
             });
+
 
         });
 
+        userItem = findViewById(R.id.userItem0);
+        userItem.setUserName("Kim Ho");
         userItem.getUnfollowBtn().setOnClickListener(view -> {
-
-            SignInDto dummy = new SignInDto(userItem.getUserName(), "dummy");
-            Call<Long> followingIdCall = memberApi.findIdByEmail(dummy);
-            followingIdCall.enqueue(new Callback<Long>() {
-                @Override
-                public void onResponse(Call<Long> call, Response<Long> response) {
-                    FollowDto followDto = new FollowDto(member, response.body());
-                    followApi.unfollow(followDto);
-                    Toast.makeText(getApplicationContext(), "팔로우를 취소했습니다", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onFailure(Call<Long> call, Throwable t) {
-                    Log.v("api fail", t.toString());
-                }
-            });
-
+            // TODO: 뷰 없애기
+            userItem.hideView();
+            // TODO: 다른 액티비티 전환하고 다시 돌아오면 뷰가 다시 생김. AddUserItem에 isFollowed 변수 추가해놨고 유저 정보랑 연동해야 할 듯
         });
     }
 
-    private void setActionBar(Long member) {
+    private void setActionBar(long member) {
         toolBar = findViewById(R.id.toolBar);
         setSupportActionBar(toolBar);
         toolBar.setTitle("Friends");
@@ -179,21 +154,20 @@ public class AddFriendsActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(HOME).setChecked(true);
         navigationView.setOnItemSelectedListener(item -> {
-            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId() + " : " + R.id.map);
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ": " + item.getItemId());
             if (item.getTitle().equals("Map")) {
                 Intent toMapActivity = new Intent(getApplicationContext(), MapActivity.class);
                 toMapActivity.putExtra("fromWhere", HOME);
-                toMapActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Map Activity.");
                 startActivity(toMapActivity);
             } else if (item.getTitle().equals("Home")) {
-                // todoList.addView(addItem());
-//                todoList.addView(addTodoItem("김호","혜화", "2023-11-11"));
-                Log.d(TAG + "Intent", "Already in Main Activity.");
+                Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                Log.d(TAG + "Intent", "Convert to Main Activity.");
+                toMainActivity.putExtra("fromWhere", HOME);
+                startActivity(toMainActivity);
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
                 toCommunityActivity.putExtra("fromWhere", HOME);
-                toCommunityActivity.putExtra("member", member);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
                 startActivity(toCommunityActivity);
             }

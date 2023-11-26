@@ -17,40 +17,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolBar"
-            app:menu="@menu/refresh"
-            android:layout_width="match_parent"
-            android:theme="@style/RefreshStyle"
-            android:layout_height="60dp"
-            android:background="@color/app_theme"
-            android:layout_gravity="center"
-            android:layout_weight="0.2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/toolBarTitle"
-                android:theme="@style/RefreshStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Map"
-                android:layout_gravity="center_horizontal"
-                android:textFontWeight="@integer/material_motion_duration_short_2"
-                android:textSize="25dp" />
-
-        </androidx.appcompat.widget.Toolbar>
-
         <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/slidePanel"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:layout_weight="9.9"
             android:gravity="bottom"
-            android:layout_weight="9.7"
             app:umanoDragView="@id/navigationView">
 
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
@@ -58,59 +34,88 @@
                 <RelativeLayout
                     android:id="@+id/mapView"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"></RelativeLayout>
+                    android:layout_height="match_parent" />
+
+                <RelativeLayout
+                    android:id="@+id/loadView"
+                    android:background="@color/white"
+                    android:animateLayoutChanges="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center">
+
+                    <androidx.core.widget.ContentLoadingProgressBar
+                        android:id="@+id/loadingFragment"
+                        style="?android:attr/progressBarStyleLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:indeterminateTint="@color/second"
+                        android:indeterminateTintMode="src_atop" />
+                </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/refreshBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="end|top"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/refresh_btn"
+                android:scaleType="fitCenter" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/navigationView"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/destinations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/destinationText"
+                    android:layout_width="230dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="목적지를 입력하세요."
+                    android:text="국민대학교" />
+
+                <ImageView
+                    android:id="@+id/searchBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginTop="13dp"
+                    android:background="@drawable/search_btn"
+                    android:scaleType="fitCenter" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/navigationView"
+                android:id="@+id/candidates"
                 android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:orientation="vertical">
+                android:layout_height="match_parent"
+                android:orientation="vertical"></LinearLayout>
+        </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
-                <LinearLayout
-                    android:id="@+id/destinations"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal">
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigationBtm"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:layout_weight="0.1"
+        android:background="@color/white"
+        app:itemIconTint="@color/fourth"
+        app:itemTextColor="@color/fourth"
+        app:labelVisibilityMode="unlabeled"
+        app:menu="@menu/bottom_navi" />
 
-                    <EditText
-                        android:id="@+id/destinationText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="5dp"
-                        android:layout_marginTop="10dp"
-                        android:hint="목적지를 입력하세요."
-                        android:text="국민대학교" />
-
-                    <Button
-                        android:id="@+id/searchBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="5dp"
-                        android:layout_marginTop="13dp"
-                        android:text="검색" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/candidates"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"></LinearLayout>
-            </LinearLayout>
-        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
-
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/navigationBtm"
-            android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:layout_weight="0.1"
-            android:background="@color/app_theme"
-            app:itemIconTint="@android:color/primary_text_dark"
-            app:itemTextColor="@android:color/primary_text_dark"
-            app:menu="@menu/bottom_navi" />
-
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout></androidx.constraintlayout.widget.ConstraintLayout>

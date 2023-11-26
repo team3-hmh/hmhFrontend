@@ -2,5 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="app_theme">#A1C8E5</color>
+    <color name="grey">#DFDFDF</color>
+    <color name="app_theme">#588157</color>
+    <color name="join">#A3B18A</color>
+    <color name="first">#DAD7CD</color>
+    <color name="second">#A3B18A</color>
+    <color name="fourth">#3A5A40</color>
+    <color name="fifth">#344E41</color>
+    <color name="pressed">#DAD7CD</color>
+    <color name="dark_grey">#878787</color>
 </resources>

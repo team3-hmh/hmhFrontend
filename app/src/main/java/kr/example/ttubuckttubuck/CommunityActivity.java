@@ -9,9 +9,7 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -38,33 +36,21 @@ public class CommunityActivity extends AppCompatActivity {
     // UI components ↓
     private BottomNavigationView navigationView;
     private LinearLayout postList;
-    private Toolbar toolBar;
-    private ActionBar actionBar;
     private ImageButton addPostBtn;
     private int fromWhere;
+    private long member;
 
     private PostItem addPostItem(PostingDto postingDto) {
         PostItem tmp = new PostItem(getApplicationContext());
         tmp.setTag("todoItem" + (++postitemCnt));
-        tmp.setPostImg(R.drawable.kmu);
-        tmp.setPostTitle("title example");
         tmp.setPostContent(postingDto.getContent());
         // TODO: date 대신 rating 들어가게 수정
-        tmp.setDate(postingDto.getRating());
+        tmp.setRate(postingDto.getRating());
 
         return tmp;
     }
 
     private void setActionBar(Long member) {
-        toolBar = findViewById(R.id.toolBar);
-        setSupportActionBar(toolBar);
-        toolBar.setTitle("Community");
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Community");
-
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(fromWhere).setChecked(false);
         navigationView.getMenu().findItem(COMMUNITY).setChecked(true);

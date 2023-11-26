@@ -9,9 +9,7 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -38,8 +36,6 @@ public class CommunityActivity extends AppCompatActivity {
     // UI components ↓
     private BottomNavigationView navigationView;
     private LinearLayout postList;
-    private Toolbar toolBar;
-    private ActionBar actionBar;
     private ImageButton addPostBtn;
     private int fromWhere;
 
@@ -56,15 +52,6 @@ public class CommunityActivity extends AppCompatActivity {
     }
 
     private void setActionBar(Long member) {
-        toolBar = findViewById(R.id.toolBar);
-        setSupportActionBar(toolBar);
-        toolBar.setTitle("Community");
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Community");
-
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(fromWhere).setChecked(false);
         navigationView.getMenu().findItem(COMMUNITY).setChecked(true);

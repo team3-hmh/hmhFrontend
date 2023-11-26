@@ -25,91 +25,91 @@
             android:layout_weight="0.2"
             android:background="@color/white"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" >
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:text="뚜벅뚜벅"
-                android:textSize="25dp"
-                android:layout_marginTop="15dp"
-                android:textColor="@color/black"
-                android:fontFamily="@font/jalnan_gothic"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/jalnan_gothic"
+                android:text="뚜벅뚜벅"
+                android:textColor="@color/fifth"
+                android:textSize="25dp" />
         </androidx.appcompat.widget.Toolbar>
 
-        <HorizontalScrollView
-            android:id="@+id/scrollViewFriendList"
-            android:scrollbars="none"
-            android:background="@drawable/home_underline"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2">
+            android:layout_weight="1.7"
+            android:background="@drawable/home_underline"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:id="@+id/userList"
-                android:layout_width="match_parent"
+            <kr.example.ttubuckttubuck.CustomView.HomeUserItem
+                android:id="@+id/userItem0"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginLeft="12dp" />
 
-                <kr.example.ttubuckttubuck.CustomView.HomeUserItem
-                    android:id="@+id/userItem0"
-                    android:layout_marginLeft="12dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            <LinearLayout
-                android:id="@+id/addedUserList"
+            <HorizontalScrollView
+                android:id="@+id/scrollViewFriendList"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="match_parent"
+                android:scrollbars="none">
 
-            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/addUserBtn"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginLeft="17dp"
-                    android:layout_marginRight="25dp"
-                    android:layout_gravity="center"
-                    android:scaleType="fitCenter"
-                    android:background="@drawable/add_post_btn"
-                    />
+                    <LinearLayout
+                        android:id="@+id/addedUserList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
 
-            </LinearLayout>
+                    <ImageView
+                        android:id="@+id/addUserBtn"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="25dp"
+                        android:layout_marginLeft="17dp"
+                        android:layout_marginRight="25dp"
+                        android:background="@drawable/add_user_btn"
+                        android:scaleType="fitCenter" />
+                </LinearLayout>
 
+            </HorizontalScrollView>
 
-        </HorizontalScrollView>
+        </LinearLayout>
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="7.7">
-        <ScrollView
-            android:id="@+id/scrollViewList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
-            >
+            android:layout_weight="8">
 
-            <LinearLayout
-                android:id="@+id/todoList"
-                android:weightSum="10"
+            <ScrollView
+                android:id="@+id/scrollViewList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
-            </LinearLayout>
-        </ScrollView>
+                android:layout_marginTop="10dp">
 
-        <ImageView
-            android:id="@+id/addTodoBtn"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:layout_gravity="end|bottom"
-            android:layout_marginBottom="20dp"
-            android:layout_marginRight="20dp"
-            android:scaleType="fitCenter"
-            android:background="@drawable/add_post_btn"
-            />
+                <LinearLayout
+                    android:id="@+id/todoList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:weightSum="10"></LinearLayout>
+            </ScrollView>
+
+            <ImageView
+                android:id="@+id/addTodoBtn"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_gravity="end|bottom"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/add_post_btn"
+                android:scaleType="fitCenter" />
         </FrameLayout>
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -118,9 +118,9 @@
             android:layout_height="?android:attr/actionBarSize"
             android:layout_weight="0.1"
             android:background="@color/white"
-            app:itemTextColor="@android:color/primary_text_dark"
-            app:itemIconTint="@android:color/primary_text_dark"
-            app:menu="@menu/bottom_navi"
-            />
+            app:itemIconTint="@color/fourth"
+            app:itemTextColor="@color/fourth"
+            app:labelVisibilityMode="unlabeled"
+            app:menu="@menu/bottom_navi" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

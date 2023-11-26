@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume() called.");
+        /*Log.d(TAG, "onResume() called.");
 
         Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
         memberDtoCall.enqueue(new Callback<MemberDto>() {
@@ -312,6 +312,6 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<List<MemberDto>> call, Throwable t) {
                 Log.v("api fail", t.toString());
             }
-        });
+        });*/
     }
 }

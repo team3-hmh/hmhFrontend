@@ -26,13 +26,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -116,12 +114,11 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private static TMapMarkerItem curMarker;
     private static
     ArrayList<TMapMarkerItem> resultMarkers = new ArrayList<>();
-    private Button searchBtn;
+    private ImageView searchBtn;
     private EditText destinationTxt;
     private Bitmap markerBmp;
     private Fragment destinationsFragment;
-    private Toolbar toolBar;
-    private ActionBar actionBar;
+    private ImageView refreshBtn;
     private BottomNavigationView navigationView;
     private int fromWhere;
     private static boolean blockRefresh = true;
@@ -540,14 +537,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     }
 
     private void setActionBar() {
-        toolBar = findViewById(R.id.toolBar);
-        setSupportActionBar(toolBar);
-        toolBar.setTitle("Map");
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Map");
+        refreshBtn = findViewById(R.id.refreshBtn);
+        refreshBtn.setOnClickListener(view->refreshLocation());
 
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(fromWhere).setChecked(false);

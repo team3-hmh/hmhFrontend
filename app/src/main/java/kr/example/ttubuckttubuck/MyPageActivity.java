@@ -94,7 +94,7 @@ public class MyPageActivity extends AppCompatActivity {
                 userName.setText(memberDto.getName());
                 userEmail.setText(memberDto.getEmail());
                 String userImg = memberDto.getImage();
-                Log.d(TAG, "Is userImag null?: " + (userImg == null) + ", value: " + userImg);
+                Log.d(TAG, "Is userImg null?: " + (userImg == null) + ", value: " + userImg);
                 if (userImg != null) {
                     byte[] buffer = userImg.getBytes();
                     Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);

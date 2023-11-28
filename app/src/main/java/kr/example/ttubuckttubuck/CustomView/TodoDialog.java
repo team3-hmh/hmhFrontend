@@ -4,12 +4,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,19 +21,20 @@ public class TodoDialog extends Dialog {
 
     public TodoDialog(@NonNull Context context) {
         super(context);
+        initView();
     }
 
     public TodoDialog(@NonNull Context context, int themeResId) {
         super(context, themeResId);
+        initView();
     }
 
     protected TodoDialog(@NonNull Context context, boolean cancelable, @Nullable OnCancelListener cancelListener) {
         super(context, cancelable, cancelListener);
+        initView();
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private void initView() {
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -44,14 +43,20 @@ public class TodoDialog extends Dialog {
         contentEditTxt = findViewById(R.id.contentEditTxt);
         dateEditTxt = findViewById(R.id.dateEditTxt);
         confirmBtn = findViewById(R.id.confirmBtn);
-        confirmBtn.setOnClickListener(view -> {
-            Toast.makeText(getContext(), "Hello World!", Toast.LENGTH_SHORT).show();
-            this.dismiss();
-        });
 
         quitBtn = findViewById(R.id.goBackBtn);
-        quitBtn.setOnClickListener(view->{
-            this.dismiss();
-        });
+        quitBtn.setOnClickListener(view-> this.dismiss());
+    }
+
+    public Button getConfirmBtn(){
+        return this.confirmBtn;
+    }
+
+    public String getDate(){
+        return this.dateEditTxt.getText().toString();
+    }
+
+    public String getContent(){
+        return this.contentEditTxt.getText().toString();
     }
 }

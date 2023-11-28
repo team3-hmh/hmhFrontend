@@ -13,7 +13,7 @@
     <TextView
         android:id="@+id/postContent"
         android:textSize="18dp"
-        android:hint="삶과윤리 수업이 아주 좋습니다. 수신지가 치국평천하 나무아미타불 색즉시공 공즉시색 도덕경 노자 공자 맹자 고자"
+        android:hint="을지로 청계천 산책 하면서 데이트 하기 좋아요! 요즘 날씨에 딱 좋은 장소인 것 같아요."
         android:layout_marginTop="15dp"
         android:layout_marginHorizontal="10dp"
         android:layout_width="match_parent"

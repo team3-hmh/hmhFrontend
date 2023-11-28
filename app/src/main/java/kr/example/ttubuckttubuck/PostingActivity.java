@@ -1,7 +1,6 @@
 package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
-import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.POSTING;
 
 import android.content.Intent;
@@ -19,8 +18,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
+import kr.example.ttubuckttubuck.CustomView.PostItem;
 import kr.example.ttubuckttubuck.api.PostingApi;
-import kr.example.ttubuckttubuck.dto.PostingDto;
 import kr.example.ttubuckttubuck.utils.NetworkClient;
 import retrofit2.Retrofit;
 
@@ -70,12 +69,19 @@ public class PostingActivity extends AppCompatActivity {
             }
             // TODO: placeId는 어떻게 할지
             // TODO: POST posting 해결해야함
-            PostingDto postingDto = new PostingDto(member, 1L, String.valueOf(postEditTxt.getText()), rate);
-            postingApi.savePosting(postingDto);
+            /*PostingDto postingDto = new PostingDto(member, 1L, String.valueOf(postEditTxt.getText()), rate);
+            postingApi.savePosting(postingDto);*/
+
+            PostItem tmp = new PostItem(getApplicationContext());
+            tmp.setTag("todoItem");
+            tmp.setPostContent(postEditTxt.getText().toString());
+            // TODO: date 대신 rating 들어가게 수정
+            tmp.setRate(String.valueOf(rate));
 
             Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
             toCommunityActivity.putExtra("fromWhere", POSTING);
             toCommunityActivity.putExtra("member", member);
+            // toCommunityActivity.putExtra("postItem", tmp);
             Log.d(TAG + "Intent", "Convert to Community Activity.");
             startActivity(toCommunityActivity);
         });

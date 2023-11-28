@@ -67,6 +67,20 @@ public class MyPageActivity extends AppCompatActivity {
     private Bitmap profileBmp = null;
     private Bitmap resizedBmp = null;
     private Bitmap circleCroppedBmp = null;
+    private Call<MemberDto> memberDtoCall;
+    private String tmp = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAJVSURBVDiNrZFLSFRxGMV//ztzR8d5XW18pIUuHMHFmKjgVIsQ0YIYWrWwTWUUiOs2hcsgiJbRogiiTRiEUEg+CHEnNMhoRjm28IWjZNPceevc+28xzmBStKizPHDOd8754B8hALaf0Ifk" +
+            "MpIviuBN9S2W5XRHGwZ+ABSxIPpCiztPaTYNgkLQguB17U2mrADSZEAIriPAWuF+kB9vjGMKrWAP" +
+            "SMiP+2OJ3VVtL6OLA64CmFIOckQBKty1aDU+YbHatKNRLVZbpVbrE3Z3TZHaAlAOemzYyl04q078" +
+            "tbOr6iRquQsh2SgZKDDt0OoByO1L3s7FMUxZEhlmgdvLFzinVo+wMlUy8Da2baplTgBCkRTBkRUi" +
+            "mzkyW4LMlmB5I0dwZIXQchoAtcyJt6ZzvfSFgR7tXKDVNTN43ovTrhD9vo/bYWFhTIKAtksCPWVQ" +
+            "V6WSzpk8e/eN2UW999Vs/L0AkB861a9LuaTXbbV5HBYAbjxcpdxWGDyZNXl+uwkAPW2wE9vPNTdV" +
+            "O0XPTL74KO5eOT7vayhrv9p3DIBExkBPmQC4HQoue8H4xfQun9ay8/dfRjtKGwCc9TsGL3R59Jlw" +
+            "orC23UKDV6XBq5bEs4tJettd+mm/51pRV0oAcKbF+Wjsjm+oul75hS9id9OUF+9FHs+tJId/axDu" +
+            "73fIbDLqaZVOd7OBy1wt1FEa0SMKPz5bEkYqW9cVCqWLGuWwwanJyZQ0lWDso7IencijxrdR49tE" +
+            "J/LElixrUirBw+I/QoISDgS6E8OVo/pQ5Wg4EOiWR479N/wE4aXcriAWd8UAAAAASUVORK5CYII=";
+
+    private String tmp2 = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
+            "CHwIZIgAAAAaSURBVAiZY/y8Qvw/j5AMA/PBS4xiAfpCJgA7NAVfdDo6XgAAAABJRU5ErkJggg==";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +99,7 @@ public class MyPageActivity extends AppCompatActivity {
 
         userName = findViewById(R.id.userName);
         userEmail = findViewById(R.id.userEmail);
-        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
+        memberDtoCall = memberApi.memberInfo(member);
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
@@ -95,9 +109,15 @@ public class MyPageActivity extends AppCompatActivity {
                 String userImg = memberDto.getImage();
                 Log.d(TAG, "Is userImg null?: " + (userImg == null) + ", value: " + userImg);
                 if (userImg != null) {
-                    byte[] buffer = userImg.getBytes();
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
-                    runOnUiThread(() -> eclipseProfile.setImageBitmap(bitmap));
+                    //byte[] buffer = Base64.decode(userImg, 1);
+                    //Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+                    Bitmap bitmap = stringToBitmap(tmp);
+                    runOnUiThread(() -> {
+                        eclipseProfile.setImageBitmap(bitmap);
+                        cameraBtn.setVisibility(View.INVISIBLE);
+                    });
+                } else {
+                    runOnUiThread(() -> cameraBtn.setVisibility(View.VISIBLE));
                 }
             }
 
@@ -139,12 +159,22 @@ public class MyPageActivity extends AppCompatActivity {
         }
     }
 
-    private String BitmapToString(Bitmap bitmap) {
+    public static Bitmap stringToBitmap(String encodedString) {
+        try {
+            byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+            return bitmap;
+        } catch (Exception e) {
+            e.getMessage();
+            return null;
+        }
+    }
+
+    public static String bitmapToString(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 70, baos);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] bytes = baos.toByteArray();
         String temp = Base64.encodeToString(bytes, Base64.DEFAULT);
-        Log.d(TAG, "string info: " + temp);
         return temp;
     }
 
@@ -166,18 +196,64 @@ public class MyPageActivity extends AppCompatActivity {
                                 imageDecoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
                             }
                         });
-                        //Bitmap.createScaledBitmap(profileBmp, 75, 75, true);
+                        Bitmap.createScaledBitmap(profileBmp, 75, 75, true);
                         resizedBmp = getResizedBitmap(profileBmp, profileBmp.getWidth() / 6, profileBmp.getHeight() / 6);
                         circleCroppedBmp = getCroppedBitmap(resizedBmp);
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
 
-                        String encodedmap = BitmapToString(resizedBmp);
+                        String encodedmap = bitmapToString(profileBmp);
+                        Log.d(TAG, "Encoded Bitmap: " + encodedmap);
+
+                        /*// TODO: 아래 주석 처리한 Call 호출하면 onResponse는 되는데 response.body()가 null임.
                         Call<MemberDto> insertImageCall = memberApi.insertImage(member, encodedmap);
                         insertImageCall.enqueue(new Callback<MemberDto>() {
                             @Override
                             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                                Log.d(TAG, response.body().getImage());
+                                try {
+                                    Log.d(TAG, "onResponse()'s response info: " + response.errorBody().string());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                MemberDto memberDto = response.body();
+                                Log.d(TAG, "onResponse() called.");
+                                // Log.d(TAG, "memberDto info called in insertImage: " + memberDto.toString());
+                                // 3. String으로 cast된 Bitmap을 memberDto에 set.
+                                memberDto.setImage(encodedmap);
+                            }
+
+                            @Override
+                            public void onFailure(Call<MemberDto> call, Throwable t) {
+                                Log.v(TAG + "api fail", t.toString());
+                            }
+                        });*/
+
+                        // TODO: 하지만 이렇게 memberDtoCall을 한 번 더 호출하고 그 안에 insertImage를 호출해서 바깥 response.body()를 가져오면 null이 아니긴 함.
+                        memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
+                            @Override
+                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                                MemberDto memberDto = response.body();
+                                Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
+                                // TODO: 이미지 불러오고 적용시키기
+
+                                Call<MemberDto> insertImage = memberApi.insertImage(member, encodedmap);
+                                insertImage.enqueue(new Callback<MemberDto>() {
+                                    @Override
+                                    public void onResponse(Call<MemberDto> call, Response<MemberDto> nestedResponse) {
+                                        MemberDto memberDto = response.body();
+                                        Log.d(TAG, "Is nestedResponse null?: " + (nestedResponse.body() == null)); // true.
+                                        Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
+                                        // 3. String으로 cast된 Bitmap을 memberDto에 set.
+                                        memberDto.setImage(encodedmap);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<MemberDto> call, Throwable t) {
+                                        Log.e(TAG, "Failed to call insertImage: " + t);
+                                        Log.v(TAG + "api fail", t.toString());
+                                    }
+                                });
+                                Log.d(TAG, "insertImage called.");
                             }
 
                             @Override
@@ -185,39 +261,6 @@ public class MyPageActivity extends AppCompatActivity {
                                 Log.v(TAG + "api fail", t.toString());
                             }
                         });
-
-
-//                        memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
-//                            @Override
-//                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-//                                MemberDto memberDto = response.body();
-//                                Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
-//                                // TODO: 이미지 불러오고 적용시키기
-//                                String encodedBmp = BitmapToString(resizedBmp);
-//                                Log.d(TAG, "string info: " + encodedBmp);
-//
-//                                Call<MemberDto> insertImage = memberApi.insertImage(member, encodedBmp);
-//                                insertImage.enqueue(new Callback<MemberDto>() {
-//                                    @Override
-//                                    public void onResponse(Call<MemberDto> call, Response<MemberDto> nestedResponse) {
-//                                        MemberDto memberDto = response.body();
-//                                        Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
-//                                        // 3. String으로 cast된 Bitmap을 memberDto에 set.
-//                                        memberDto.setImage(encodedBmp);
-//                                    }
-//                                    @Override
-//                                    public void onFailure(Call<MemberDto> call, Throwable t) {
-//                                        Log.e(TAG, "Failed to call insertImage: " + t);
-//                                        Log.v(TAG + "api fail", t.toString());
-//                                    }
-//                                });
-//                                Log.d(TAG, "insertImage called.");
-//                            }
-//                            @Override
-//                            public void onFailure(Call<MemberDto> call, Throwable t) {
-//                                Log.v(TAG + "api fail", t.toString());
-//                            }
-//                        });
                     } catch (IOException e) {
                         Log.e(TAG, "Failed to set Bitmap to profile view.");
                         e.printStackTrace();
@@ -265,7 +308,7 @@ public class MyPageActivity extends AppCompatActivity {
         // "RECREATE" THE NEW BITMAP
         Bitmap resizedBitmap = Bitmap.createBitmap(
                 bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
+        // bm.recycle();
         return resizedBitmap;
     }
 

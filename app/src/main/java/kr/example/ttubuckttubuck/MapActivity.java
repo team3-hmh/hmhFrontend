@@ -2,7 +2,6 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.DestinationsList.listAdapter;
 import static kr.example.ttubuckttubuck.DestinationsList.listItems;
-import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.MAP;
 
@@ -17,7 +16,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,7 +56,6 @@ import org.w3c.dom.NodeList;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -205,12 +202,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         //double editLongitude = Double.valueOf(String.format("%.6f", longitude));
 
         TMapAddressInfo result = new TMapData().reverseGeocoding(latitude, longitude, "A10");
-        /*new TMapData().convertGpsToAddress(longitude, latitude, new TMapData.OnConvertGPSToAddressListener() {
-                    @Override
-                    public void onConverGPSToAddress(String s) {
-                        // Log.d("findAllPOI_Result", "GPS to address: " + s);
 
-                    }
+        /*new TMapData().convertGpsToAddress(longitude, latitude, s -> {
+                    Log.d("findAllPOI_Result", "GPS to address: " + s);
                 }
         );*/
 
@@ -266,58 +260,48 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         mapView.removeTMapPath();
         listItems.clear();
         resultMarkers.clear();
-        new TMapData().findAllPOI(destination, new TMapData.OnFindAllPOIListener() {
-            @Override
-            public void onFindAllPOI(ArrayList<TMapPOIItem> arrayList) {
-                blockRefresh = false;
-                if (arrayList != null) {
-                    double lat = 0, lon = 0;
-                    int inx = 0;
-                    for (int i = 0; i < arrayList.size(); i++) {
-                        // Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
-                        lat = arrayList.get(i).getPOIPoint().getLatitude();
-                        lon = arrayList.get(i).getPOIPoint().getLongitude();
+        new TMapData().findAllPOI(destination, arrayList -> {
+            blockRefresh = false;
+            if (arrayList != null) {
+                double lat = 0, lon = 0;
+                int inx = 0;
+                for (int i = 0; i < arrayList.size(); i++) {
+                    Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
+                    lat = arrayList.get(i).getPOIPoint().getLatitude();
+                    lon = arrayList.get(i).getPOIPoint().getLongitude();
 
-                    /*new TMapData().convertGpsToAddress(lat, lon, new TMapData.OnConvertGPSToAddressListener() {
-                        @Override
-                        public void onConverGPSToAddress(String s) {
-                            // Log.d("findAllPOI_Result", "GPS to address: " + s);
-                        }
-                    });*/
+                    TMapMarkerItem resultMarker = new TMapMarkerItem();
+                    resultMarker.setTMapPoint(new TMapPoint(lat, lon));
+                    resultMarker.setPosition(0.5f, 0.5f);
+                    resultMarker.setId(String.valueOf(inx));
+                    resultMarker.setName("Query" + inx++);
+                    resultMarker.setVisible(true);
+                    Log.d(TAG + "resultMarker", "resultMarker info: " + resultMarker);
+                    // Log.d(TAG + "resultMarker", "resultMarker position: " + resultMarker.getTMapPoint().getLatitude() + ", " + resultMarker.getTMapPoint().getLongitude());
 
-                        TMapMarkerItem resultMarker = new TMapMarkerItem();
-                        resultMarker.setTMapPoint(new TMapPoint(lat, lon));
-                        resultMarker.setPosition(0.5f, 0.5f);
-                        resultMarker.setId(String.valueOf(inx));
-                        resultMarker.setName("Query" + inx++);
-                        resultMarker.setVisible(true);
-                        Log.d(TAG + "resultMarker", "resultMarker info: " + resultMarker);
-                        // Log.d(TAG + "resultMarker", "resultMarker position: " + resultMarker.getTMapPoint().getLatitude() + ", " + resultMarker.getTMapPoint().getLongitude());
+                    // markerBmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.marker), 100, 100, true);
+                    // resultMarker.setIcon(markerBmp);
 
-                        // markerBmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.marker), 100, 100, true);
-                        // resultMarker.setIcon(markerBmp);
-
-                        listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
-                        resultMarkers.add(resultMarker);
-                    }
-
-                    runOnUiThread(() -> {
-                        listAdapter.notifyDataSetChanged();
-                        mapView.removeAllTMapMarkerItem();
-                        try {
-                            // 지도에 표시할 marker 등록.
-                            for (TMapMarkerItem m : resultMarkers)
-                                mapView.addTMapMarkerItem(m);
-                            Log.d(TAG, "resultMarker added at mapView.");
-                        } catch (NullPointerException e) {
-                            Log.e(TAG, "NullPointerException occurred by Bitmap: " + e);
-                            e.printStackTrace();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Failed to add the marker to mapView: " + e);
-                            e.printStackTrace();
-                        }
-                    });
+                    listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
+                    resultMarkers.add(resultMarker);
                 }
+
+                runOnUiThread(() -> {
+                    listAdapter.notifyDataSetChanged();
+                    mapView.removeAllTMapMarkerItem();
+                    try {
+                        // 지도에 표시할 marker 등록.
+                        for (TMapMarkerItem m : resultMarkers)
+                            mapView.addTMapMarkerItem(m);
+                        Log.d(TAG, "resultMarker added at mapView.");
+                    } catch (NullPointerException e) {
+                        Log.e(TAG, "NullPointerException occurred by Bitmap: " + e);
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to add the marker to mapView: " + e);
+                        e.printStackTrace();
+                    }
+                });
             }
         });
     }

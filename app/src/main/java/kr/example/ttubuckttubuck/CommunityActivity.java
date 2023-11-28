@@ -46,7 +46,6 @@ public class CommunityActivity extends AppCompatActivity {
         tmp.setPostContent(postingDto.getContent());
         // TODO: date 대신 rating 들어가게 수정
         tmp.setRate(postingDto.getRating());
-
         return tmp;
     }
 

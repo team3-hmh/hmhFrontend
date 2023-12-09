@@ -15,6 +15,7 @@ import kr.example.ttubuckttubuck.R;
 
 public class PostItem extends LinearLayout {
     private TextView postContent;
+    private int starCnt = 0;
     private LinearLayout starBtns;
     private ImageButton starBtn1, starBtn2, starBtn3, starBtn4, starBtn5, goBackBtn;
     private ArrayList<ImageButton> starBtnsArray = new ArrayList<>();
@@ -83,8 +84,10 @@ public class PostItem extends LinearLayout {
     }
 
     public void setRate(String rate){
-        for(int i = 0; i < Integer.valueOf(rate); i++)
+        for(int i = 0; i < (starCnt =  Integer.valueOf(rate)); i++)
             starBtnsArray.get(i).setSelected(true);
     }
+    public String getContent(){ return this.postContent.getText().toString(); }
+    public int getRate(){ return this.starCnt ;}
 
 }

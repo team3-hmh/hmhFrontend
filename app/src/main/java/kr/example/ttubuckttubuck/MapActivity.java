@@ -235,6 +235,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private void refreshLocation() {
         if (curLocation != null) {
             mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude(), true);
+
+            mapView.setZoomLevel(17);
             // mapView.setZoomLevel(17);
 
             runOnUiThread(() -> {
@@ -258,6 +260,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private void geoCoding(String destination) throws InterruptedException {
         String address = new String();
         mapView.removeTMapPath();
+        mapView.setZoomLevel(17);
         listItems.clear();
         resultMarkers.clear();
         new TMapData().findAllPOI(destination, arrayList -> {
@@ -327,6 +330,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         mapView.removeAllTMapMarkerItem();
         blockRefresh = true;
 
+        mapView.setZoomLevel(12);
         setCurMarkerOnMap();
 
         double endX = destinationY;
@@ -392,7 +396,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                     zoom = 12;
                 }
 
-                mapView.setZoomLevel(zoom);
+                mapView.setZoomLevel(15);
                 mapView.setCenterPoint(info.getPoint().getLatitude(), info.getPoint().getLongitude());
 
                 mapView.setTMapPath(mPolyLine);

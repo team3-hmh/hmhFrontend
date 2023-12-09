@@ -79,10 +79,11 @@ public class PostingActivity extends AppCompatActivity {
             tmp.setRate(String.valueOf(rate));
 
             Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
-            toCommunityActivity.putExtra("fromWhere", POSTING);
+            toCommunityActivity.putExtra("fromWhere2", POSTING);
             toCommunityActivity.putExtra("member", member);
-            // toCommunityActivity.putExtra("postItem", tmp);
-            Log.d(TAG + "Intent", "Convert to Community Activity.");
+            toCommunityActivity.putExtra("postContent", tmp.getContent());
+            toCommunityActivity.putExtra("postRate", tmp.getRate());
+            Log.d(TAG + "Intent", "Convert to Community Activity: " + POSTING);
             startActivity(toCommunityActivity);
         });
     }

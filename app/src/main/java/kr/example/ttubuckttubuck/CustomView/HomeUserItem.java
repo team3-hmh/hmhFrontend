@@ -106,7 +106,7 @@ public class HomeUserItem extends LinearLayout {
     public void setUserImg(String stringImg) {
         Log.d(TAG, "stringImg info: " + stringImg);
         Bitmap bmp = stringToBitmap(stringImg);
-        Bitmap resizedBmp = getResizedBitmap(bmp, bmp.getWidth() / 6, bmp.getHeight() / 6);
+        Bitmap resizedBmp = getResizedBitmap(bmp, bmp.getWidth(), bmp.getHeight());
         Bitmap circleCroppedBmp = getCroppedBitmap(resizedBmp);
         userImg.setImageBitmap(circleCroppedBmp);
     }

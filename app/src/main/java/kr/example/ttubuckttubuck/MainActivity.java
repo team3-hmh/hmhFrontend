@@ -114,8 +114,6 @@ public class MainActivity extends AppCompatActivity {
 //
 //        });
 
-
-
         return tmp;
     }
 
@@ -198,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                // myself.setUserImg(response.body().getImage());
+                myself.setUserImg(response.body().getImage());
                 myself.setUserName(response.body().getName());
             }
 
@@ -302,10 +300,21 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d(TAG, "onResume() called.");
 
-        /*Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
+        Call<MemberDto> memberDtoCall = memberApi.memberInfo(member);
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                String userImg = response.body().getImage();
+                if (userImg == null || userImg.equals("011101001001")) {
+                    Log.d(TAG, "default img set.");
+                    myself.setUserDefaultImg();
+                }
+                else {
+                    Log.d(TAG + "userImg", "userImg: " + userImg);
+                    Log.d(TAG, "custom img set.");
+                    myself.setUserImg(response.body().getImage());
+                }
+                Log.d(TAG, "onResume: getImage() value: " + response.body().getImage());
                 myself.setUserName(response.body().getName());
             }
 
@@ -315,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /*
         //todoList, follows 불러오기
         Call<List<TodoListDto>> todosCall = todoListApi.getTodoList(member);
         Call<List<MemberDto>> followsCall = followApi.getFollowingList(member);

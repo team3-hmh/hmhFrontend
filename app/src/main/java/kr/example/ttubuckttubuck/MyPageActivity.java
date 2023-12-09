@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -111,9 +112,9 @@ public class MyPageActivity extends AppCompatActivity {
                 if (userImg != null) {
                     //byte[] buffer = Base64.decode(userImg, 1);
                     //Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
-                    Bitmap bitmap = stringToBitmap(tmp);
+                    //Bitmap bitmap = stringToBitmap(tmp);
                     runOnUiThread(() -> {
-                        eclipseProfile.setImageBitmap(bitmap);
+                        eclipseProfile.setImageBitmap(stringToBitmap(userImg));
                         cameraBtn.setVisibility(View.INVISIBLE);
                     });
                 } else {
@@ -196,9 +197,19 @@ public class MyPageActivity extends AppCompatActivity {
                                 imageDecoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
                             }
                         });
-                        Bitmap.createScaledBitmap(profileBmp, 75, 75, true);
-                        resizedBmp = getResizedBitmap(profileBmp, profileBmp.getWidth() / 6, profileBmp.getHeight() / 6);
-                        circleCroppedBmp = getCroppedBitmap(resizedBmp);
+                        // Bitmap.createScaledBitmap(profileBmp, 250, 250, false);
+                        final int basicWidth = profileBmp.getWidth();
+                        final int basicHeight = profileBmp.getHeight();
+                        Toast.makeText(getApplicationContext(), basicWidth + ", " + basicHeight, Toast.LENGTH_SHORT).show();
+                        if(basicWidth > circleSize || basicHeight > circleSize) {
+                            resizedBmp = getDownScaledBitmap(profileBmp, 512, 512);
+                            Toast.makeText(getApplicationContext(), resizedBmp.getWidth() + ", " + resizedBmp.getHeight(), Toast.LENGTH_SHORT).show();
+                            circleCroppedBmp = getCroppedBitmap(resizedBmp);
+                        }else {
+                            resizedBmp = getUpScaledBitmap(profileBmp, 512, 512);
+                            Toast.makeText(getApplicationContext(), resizedBmp.getWidth() + ", " + resizedBmp.getHeight(), Toast.LENGTH_SHORT).show();
+                            circleCroppedBmp = getCroppedBitmap(profileBmp);
+                        }
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
 
@@ -272,9 +283,10 @@ public class MyPageActivity extends AppCompatActivity {
         }
     }
 
+    final int circleSize = 512;
     // https://stackoverflow.com/questions/11932805/how-to-crop-circular-area-from-bitmap-in-android
     private Bitmap getCroppedBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap output = Bitmap.createBitmap(circleSize, circleSize, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
 
         final int color = 0xff424242;
@@ -285,8 +297,8 @@ public class MyPageActivity extends AppCompatActivity {
         canvas.drawARGB(0, 0, 0, 0);
         paint.setColor(color);
 
-        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                bitmap.getWidth() / 2, paint);
+        canvas.drawCircle(circleSize / 2, circleSize / 2,
+                circleSize / 2, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
@@ -294,21 +306,51 @@ public class MyPageActivity extends AppCompatActivity {
     }
 
     // https://stackoverflow.com/questions/4837715/how-to-resize-a-bitmap-in-android
-    private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+    private Bitmap getUpScaledBitmap(Bitmap bm, int newWidth, int newHeight) {
         int width = bm.getWidth();
         int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
+        float scaleWidth = (((float) newWidth) / width);
+        float scaleHeight = (((float) newHeight) / height);
 
         // CREATE A MATRIX FOR THE MANIPULATION
         Matrix matrix = new Matrix();
         // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
+        matrix.postScale(2f, 2f);
 
         // "RECREATE" THE NEW BITMAP
         Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        // bm.recycle();
+                bm, 0, 0, width, height, matrix, true);
+
+        return resizedBitmap;
+    }
+
+    private Bitmap getDownScaledBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+
+        float scaleWidth;
+        float scaleHeight;
+
+        if(width > height) {
+            scaleWidth = (float) (((float) newWidth) / width);
+            scaleHeight = (float) (((float) newHeight ) / width);
+        }
+        else {
+            scaleWidth = (float) (((float) newWidth ) / height);
+            scaleHeight = (float) (((float) newHeight) / height);
+        }
+
+        Log.d("downscaletest", scaleWidth + ", " + scaleHeight);
+
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale((float) (scaleWidth * 1.5), (float) (scaleHeight * 1.5));
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, true);
+
         return resizedBitmap;
     }
 
@@ -337,7 +379,7 @@ public class MyPageActivity extends AppCompatActivity {
             Log.d(TAG + "Intent", "Convert to Main Activity.");
             toMainActivity.putExtra("fromWhere", HOME);
             startActivity(toMainActivity);
-            recycleBmp();
+            //recycleBmp();
         });
 
         navigationView = findViewById(R.id.navigationBtm);

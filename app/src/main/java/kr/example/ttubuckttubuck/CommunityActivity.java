@@ -2,6 +2,7 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.POSTING;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -87,7 +88,9 @@ public class CommunityActivity extends AppCompatActivity {
             startActivity(toLoginActivity);
         }
 
+        Log.d(TAG, "member: " + member);
         fromWhere = getIntent().getIntExtra("fromWhere", HOME);
+        Log.d(TAG, "From where: " + fromWhere + ", toString: " + HOME);
         setActionBar(member);
 
         postList = findViewById(R.id.postList);
@@ -111,7 +114,6 @@ public class CommunityActivity extends AppCompatActivity {
         });
 
 
-
         addPostBtn = findViewById(R.id.addPostBtn);
         addPostBtn.setOnClickListener(view -> {
                     //postList.addView(addPostItem(-1, "성북구 국민대학교 북악관 207호", content, "2023-11-11"))
@@ -128,9 +130,36 @@ public class CommunityActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
     }
-
+    private int s = 0;
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume() called.");
+        s++;
+
+        Intent intent = getIntent();
+        long member = intent.getLongExtra("member", -1);
+        if (member == -1) {
+            Log.d(TAG + "Intent", "onResume: Not valid User");
+            Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(toLoginActivity);
+        }
+
+        int fromWhere = getIntent().getIntExtra("fromWhere2", POSTING);
+        Log.d(TAG, "onResume: From where: " + fromWhere + ", " + POSTING);
+
+        if (fromWhere == POSTING) {
+            Log.d(TAG, "onResume: From posting activity.");
+            String postContent = getIntent().getStringExtra("postContent");
+            int postRate = getIntent().getIntExtra("postRate", -1);
+            Log.d(TAG, "onResume: Intent value: " + postContent + ", " + postRate);
+            if(s>1) {
+                PostItem result = new PostItem(getApplicationContext());
+                result.setTag("todoItem" + (++postitemCnt));
+                result.setPostContent("안녕하세요");
+                result.setRate(String.valueOf(2));
+                postList.addView(result);
+            }
+        }
     }
 }

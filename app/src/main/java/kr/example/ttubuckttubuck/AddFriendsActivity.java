@@ -1,11 +1,10 @@
 package kr.example.ttubuckttubuck;
 
-import static kr.example.ttubuckttubuck.utils.MenuItemID.*;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -105,12 +104,17 @@ public class AddFriendsActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
                             // TODO: 팔로우 성공 알람
+                            Log.d(TAG, "helloworld");
+                            AddUserItem tmp = new AddUserItem(getApplicationContext());
+                            tmp.setUserName(response.body().getName());
+                            userList.addView(tmp);
                         }
 
                         @Override
                         public void onFailure(Call<MemberDto> call, Throwable t) {
                             // TODO: 존재하지 않는 아이디 알람
-                            Log.v("api fail", t.toString());
+                            Log.v("api fail", "add user error: " + t.toString());
+                            Toast.makeText(getApplicationContext(), "검색한 이메일에 해당하는 유저 팔로우 기능 추가 예정.", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }

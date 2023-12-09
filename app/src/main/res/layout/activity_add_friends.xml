@@ -71,13 +71,7 @@
             android:layout_weight="9.2"
             android:layout_marginTop="30dp"
             android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <kr.example.ttubuckttubuck.CustomView.AddUserItem
-                android:id="@+id/userItem0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+            android:orientation="vertical" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/navigationBtm"

@@ -69,8 +69,16 @@ public class AddUserItem extends LinearLayout {
         userName.setText(name);
     }
     public Button getUnfollowBtn(){ return unfollowBtn;}
+
+    public void setIsFollowed(boolean followed){
+        this.isFollowed = followed;
+    }
+
+    public boolean getIsFollowed(){
+        return this.isFollowed;
+    }
+
     public void hideView(){
-        this.isFollowed = false;
         this.setVisibility(View.GONE);
     }
 }

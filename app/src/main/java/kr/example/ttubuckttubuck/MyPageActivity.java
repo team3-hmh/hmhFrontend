@@ -69,19 +69,6 @@ public class MyPageActivity extends AppCompatActivity {
     private Bitmap resizedBmp = null;
     private Bitmap circleCroppedBmp = null;
     private Call<MemberDto> memberDtoCall;
-    private String tmp = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAJVSURBVDiNrZFLSFRxGMV//ztzR8d5XW18pIUuHMHFmKjgVIsQ0YIYWrWwTWUUiOs2hcsgiJbRogiiTRiEUEg+CHEnNMhoRjm28IWjZNPceevc+28xzmBStKizPHDOd8754B8hALaf0Ifk" +
-            "MpIviuBN9S2W5XRHGwZ+ABSxIPpCiztPaTYNgkLQguB17U2mrADSZEAIriPAWuF+kB9vjGMKrWAP" +
-            "SMiP+2OJ3VVtL6OLA64CmFIOckQBKty1aDU+YbHatKNRLVZbpVbrE3Z3TZHaAlAOemzYyl04q078" +
-            "tbOr6iRquQsh2SgZKDDt0OoByO1L3s7FMUxZEhlmgdvLFzinVo+wMlUy8Da2baplTgBCkRTBkRUi" +
-            "mzkyW4LMlmB5I0dwZIXQchoAtcyJt6ZzvfSFgR7tXKDVNTN43ovTrhD9vo/bYWFhTIKAtksCPWVQ" +
-            "V6WSzpk8e/eN2UW999Vs/L0AkB861a9LuaTXbbV5HBYAbjxcpdxWGDyZNXl+uwkAPW2wE9vPNTdV" +
-            "O0XPTL74KO5eOT7vayhrv9p3DIBExkBPmQC4HQoue8H4xfQun9ay8/dfRjtKGwCc9TsGL3R59Jlw" +
-            "orC23UKDV6XBq5bEs4tJettd+mm/51pRV0oAcKbF+Wjsjm+oul75hS9id9OUF+9FHs+tJId/axDu" +
-            "73fIbDLqaZVOd7OBy1wt1FEa0SMKPz5bEkYqW9cVCqWLGuWwwanJyZQ0lWDso7IencijxrdR49tE" +
-            "J/LElixrUirBw+I/QoISDgS6E8OVo/pQ5Wg4EOiWR479N/wE4aXcriAWd8UAAAAASUVORK5CYII=";
-
-    private String tmp2 = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAAARzQklUCAgI\n" +
-            "CHwIZIgAAAAaSURBVAiZY/y8Qvw/j5AMA/PBS4xiAfpCJgA7NAVfdDo6XgAAAABJRU5ErkJggg==";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -5,6 +5,7 @@ import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -48,7 +49,7 @@ public class AddFriendsActivity extends AppCompatActivity {
     private LinearLayout userList;
     private AddUserItem userItem;
 
-    public void searchUser(String query){
+    public void searchUser(String query) {
         Log.d(TAG, "searchUser() called.");
     }
 
@@ -71,10 +72,34 @@ public class AddFriendsActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
                 List<MemberDto> followingList = response.body();
-//                for (MemberDto x : followingList) {
-//                    break;
-//                    // TODO: userList에 뷰로 팔로우 리스트 보여주기 + 팔로우 버튼 없애고 언팔로우 버튼만 추가하기
-//                }
+                Log.d(TAG, "response.body() info:" + response.body());
+
+                for (MemberDto m : followingList) {
+                    AddUserItem tmp = new AddUserItem(getApplicationContext());
+                    tmp.setUserName(m.getName());
+                    Log.d(TAG, "isFollowed: " + tmp.getIsFollowed());
+                    tmp.findViewById(R.id.unfollowBtn).setOnClickListener(view -> {
+                        FollowDto unfollowDto = new FollowDto(member, m.getId());
+                        Call<FollowDto> unfollow = followApi.unfollow(unfollowDto);
+                        unfollow.enqueue(new Callback<FollowDto>() {
+                            @Override
+                            public void onResponse(Call<FollowDto> call, Response<FollowDto> response) {
+                                tmp.hideView();
+                                Toast.makeText(AddFriendsActivity.this, "helloworld", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onFailure(Call<FollowDto> call, Throwable t) {
+                                Toast.makeText(AddFriendsActivity.this, "FollowDto error", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                    });
+
+                    userList.addView(tmp);
+                }
+
+                // TODO: 다른 액티비티 전환하고 다시 돌아오면 뷰가 다시 생김. AddUserItem에 isFollowed 변수 추가해놨고 유저 정보랑 연동해야 할 듯
             }
 
             @Override
@@ -86,54 +111,47 @@ public class AddFriendsActivity extends AppCompatActivity {
         searchEditTxt = findViewById(R.id.searchEditTxt);
         followBtn = findViewById(R.id.followBtn);
         // TODO: follow 버튼으로 바꾸기
-        followBtn.setOnClickListener(view->{
+        followBtn.setOnClickListener(view -> {
             final String query = searchEditTxt.getText().toString();
-            if(query.equals("") || query == null)
+            if (query.equals("") || query == null)
                 Toast.makeText(getApplicationContext(), "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
-            else
-                searchUser(query);
+            else {
+                //searchUser(query);
 
-            SignInDto d = new SignInDto(query, "dummy");
-            Call<Long> idCall = memberApi.findIdByEmail(d);
-            idCall.enqueue(new Callback<Long>() {
-                @Override
-                public void onResponse(Call<Long> call, Response<Long> response) {
-                    FollowDto followDto = new FollowDto(member, response.body());
-                    Call<MemberDto> follow = followApi.follow(followDto);
-                    follow.enqueue(new Callback<MemberDto>() {
-                        @Override
-                        public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
-                            // TODO: 팔로우 성공 알람
-                            Log.d(TAG, "helloworld");
-                            AddUserItem tmp = new AddUserItem(getApplicationContext());
-                            tmp.setUserName(response.body().getName());
-                            userList.addView(tmp);
-                        }
+                SignInDto d = new SignInDto(query, "dummy");
+                Call<Long> idCall = memberApi.findIdByEmail(d);
+                idCall.enqueue(new Callback<Long>() {
+                    @Override
+                    public void onResponse(Call<Long> call, Response<Long> response) {
+                        FollowDto followDto = new FollowDto(member, response.body());
+                        Call<MemberDto> follow = followApi.follow(followDto);
+                        follow.enqueue(new Callback<MemberDto>() {
+                            @Override
+                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                                // TODO: 팔로우 성공 알람
+                                Log.d(TAG, "helloworld");
+                                AddUserItem tmp = new AddUserItem(getApplicationContext());
+                                tmp.setUserName(response.body().getName());
+                                userList.addView(tmp);
+                            }
 
-                        @Override
-                        public void onFailure(Call<MemberDto> call, Throwable t) {
-                            // TODO: 존재하지 않는 아이디 알람
-                            Log.v("api fail", "add user error: " + t.toString());
-                            Toast.makeText(getApplicationContext(), "검색한 이메일에 해당하는 유저 팔로우 기능 추가 예정.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                            @Override
+                            public void onFailure(Call<MemberDto> call, Throwable t) {
+                                // TODO: 존재하지 않는 아이디 알람
+                                Log.v("api fail", "add user error: " + t.toString());
+                                Toast.makeText(getApplicationContext(), "검색한 이메일에 해당하는 유저 팔로우 기능 추가 예정.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
 
-                @Override
-                public void onFailure(Call<Long> call, Throwable t) {
-                    Log.v("api fail", t.toString());
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Long> call, Throwable t) {
+                        Log.v("api fail", t.toString());
+                    }
+                });
+            }
 
 
-        });
-
-        userItem = findViewById(R.id.userItem0);
-        userItem.setUserName("Kim Ho");
-        userItem.getUnfollowBtn().setOnClickListener(view -> {
-            // TODO: 뷰 없애기
-            userItem.hideView();
-            // TODO: 다른 액티비티 전환하고 다시 돌아오면 뷰가 다시 생김. AddUserItem에 isFollowed 변수 추가해놨고 유저 정보랑 연동해야 할 듯
         });
     }
 
@@ -148,7 +166,7 @@ public class AddFriendsActivity extends AppCompatActivity {
         actionBar.setTitle("Friends");
 
         goBackBtn = findViewById(R.id.goBackBtn);
-        goBackBtn.setOnClickListener(view->{
+        goBackBtn.setOnClickListener(view -> {
             Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
             Log.d(TAG + "Intent", "Convert to Main Activity.");
             toMainActivity.putExtra("fromWhere", HOME);

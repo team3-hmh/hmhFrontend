@@ -49,10 +49,6 @@ public class AddFriendsActivity extends AppCompatActivity {
     private LinearLayout userList;
     private AddUserItem userItem;
 
-    public void searchUser(String query) {
-        Log.d(TAG, "searchUser() called.");
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,33 +69,33 @@ public class AddFriendsActivity extends AppCompatActivity {
             public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
                 List<MemberDto> followingList = response.body();
                 Log.d(TAG, "response.body() info:" + response.body());
+                if(followingList != null) {
+                    for (MemberDto m : followingList) {
+                        AddUserItem tmp = new AddUserItem(getApplicationContext());
+                        tmp.setUserName(m.getName());
+                        Log.d(TAG, "isFollowed: " + tmp.getIsFollowed());
+                        tmp.findViewById(R.id.unfollowBtn).setOnClickListener(view -> {
+                            FollowDto unfollowDto = new FollowDto(member, m.getId());
+                            Call<FollowDto> unfollow = followApi.unfollow(unfollowDto);
+                            unfollow.enqueue(new Callback<FollowDto>() {
+                                @Override
+                                public void onResponse(Call<FollowDto> call, Response<FollowDto> response) {
+                                    tmp.hideView();
+                                    // Toast.makeText(AddFriendsActivity.this, "helloworld", Toast.LENGTH_SHORT).show();
+                                }
 
-                for (MemberDto m : followingList) {
-                    AddUserItem tmp = new AddUserItem(getApplicationContext());
-                    tmp.setUserName(m.getName());
-                    Log.d(TAG, "isFollowed: " + tmp.getIsFollowed());
-                    tmp.findViewById(R.id.unfollowBtn).setOnClickListener(view -> {
-                        FollowDto unfollowDto = new FollowDto(member, m.getId());
-                        Call<FollowDto> unfollow = followApi.unfollow(unfollowDto);
-                        unfollow.enqueue(new Callback<FollowDto>() {
-                            @Override
-                            public void onResponse(Call<FollowDto> call, Response<FollowDto> response) {
-                                tmp.hideView();
-                                Toast.makeText(AddFriendsActivity.this, "helloworld", Toast.LENGTH_SHORT).show();
-                            }
+                                @Override
+                                public void onFailure(Call<FollowDto> call, Throwable t) {
+                                    tmp.hideView();
+                                    // Toast.makeText(AddFriendsActivity.this, "FollowDto error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
 
-                            @Override
-                            public void onFailure(Call<FollowDto> call, Throwable t) {
-                                Toast.makeText(AddFriendsActivity.this, "FollowDto error", Toast.LENGTH_SHORT).show();
-                            }
                         });
 
-                    });
-
-                    userList.addView(tmp);
+                        userList.addView(tmp);
+                    }
                 }
-
-                // TODO: 다른 액티비티 전환하고 다시 돌아오면 뷰가 다시 생김. AddUserItem에 isFollowed 변수 추가해놨고 유저 정보랑 연동해야 할 듯
             }
 
             @Override
@@ -112,7 +108,7 @@ public class AddFriendsActivity extends AppCompatActivity {
         followBtn = findViewById(R.id.followBtn);
         // TODO: follow 버튼으로 바꾸기
         followBtn.setOnClickListener(view -> {
-            final String query = searchEditTxt.getText().toString();
+            String query = searchEditTxt.getText().toString();
             if (query.equals("") || query == null)
                 Toast.makeText(getApplicationContext(), "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show();
             else {
@@ -123,6 +119,7 @@ public class AddFriendsActivity extends AppCompatActivity {
                 idCall.enqueue(new Callback<Long>() {
                     @Override
                     public void onResponse(Call<Long> call, Response<Long> response) {
+                        Toast.makeText(AddFriendsActivity.this, String.valueOf(response.body()), Toast.LENGTH_SHORT).show();
                         FollowDto followDto = new FollowDto(member, response.body());
                         Call<MemberDto> follow = followApi.follow(followDto);
                         follow.enqueue(new Callback<MemberDto>() {
@@ -139,7 +136,48 @@ public class AddFriendsActivity extends AppCompatActivity {
                             public void onFailure(Call<MemberDto> call, Throwable t) {
                                 // TODO: 존재하지 않는 아이디 알람
                                 Log.v("api fail", "add user error: " + t.toString());
-                                Toast.makeText(getApplicationContext(), "검색한 이메일에 해당하는 유저 팔로우 기능 추가 예정.", Toast.LENGTH_SHORT).show();
+                                // Toast.makeText(getApplicationContext(), "검색한 이메일에 해당하는 유저 팔로우 기능 추가 예정.", Toast.LENGTH_SHORT).show();
+                                userList.removeAllViews();
+                                Call<List<MemberDto>> followingListCall = followApi.getFollowingList(member);
+                                followingListCall.enqueue(new Callback<List<MemberDto>>() {
+                                    @Override
+                                    public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
+                                        List<MemberDto> followingList = response.body();
+                                        Log.d(TAG, "response.body() info:" + response.body());
+                                        if(followingList != null) {
+                                            for (MemberDto m : followingList) {
+                                                AddUserItem tmp = new AddUserItem(getApplicationContext());
+                                                tmp.setUserName(m.getName());
+                                                Log.d(TAG, "isFollowed: " + tmp.getIsFollowed());
+                                                tmp.findViewById(R.id.unfollowBtn).setOnClickListener(view -> {
+                                                    FollowDto unfollowDto = new FollowDto(member, m.getId());
+                                                    Call<FollowDto> unfollow = followApi.unfollow(unfollowDto);
+                                                    unfollow.enqueue(new Callback<FollowDto>() {
+                                                        @Override
+                                                        public void onResponse(Call<FollowDto> call, Response<FollowDto> response) {
+                                                            tmp.hideView();
+                                                            // Toast.makeText(AddFriendsActivity.this, "helloworld", Toast.LENGTH_SHORT).show();
+                                                        }
+
+                                                        @Override
+                                                        public void onFailure(Call<FollowDto> call, Throwable t) {
+                                                            tmp.hideView();
+                                                            // Toast.makeText(AddFriendsActivity.this, "FollowDto error", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+
+                                                });
+
+                                                userList.addView(tmp);
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<List<MemberDto>> call, Throwable t) {
+
+                                    }
+                                });
                             }
                         });
                     }

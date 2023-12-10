@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAddTodoDialog() {
+
         todoDialog.getConfirmBtn().setOnClickListener(view -> {
             HomeTodoItem result = new HomeTodoItem(getApplicationContext());
             result.getTodoChk().setOnClickListener(v-> result.getTodoChk().setSelected(!(result.getTodoChk().isSelected())));
@@ -277,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                 List<MemberDto> follows = response.body();
                 if (follows != null) {
                     for (MemberDto x : follows) {
-                        addedUserList.addView(addUserItem(x));
+                        // addedUserList.addView(addUserItem(x));
                     }
                 }
             }
@@ -310,11 +311,11 @@ public class MainActivity extends AppCompatActivity {
                     myself.setUserDefaultImg();
                 }
                 else {
-                    Log.d(TAG + "userImg", "userImg: " + userImg);
+                    // Log.d(TAG + "userImg", "userImg: " + userImg);
                     Log.d(TAG, "custom img set.");
                     myself.setUserImg(response.body().getImage());
                 }
-                Log.d(TAG, "onResume: getImage() value: " + response.body().getImage());
+                // Log.d(TAG, "onResume: getImage() value: " + response.body().getImage());
                 myself.setUserName(response.body().getName());
             }
 
@@ -324,38 +325,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        /*
+        addedUserList.removeAllViews();
+
+
         //todoList, follows 불러오기
         Call<List<TodoListDto>> todosCall = todoListApi.getTodoList(member);
         Call<List<MemberDto>> followsCall = followApi.getFollowingList(member);
-
-        todosCall.enqueue(new Callback<>() {
-            //로그인 성공
-            @Override
-            public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
-                List<TodoListDto> todoLists = response.body();
-                for (TodoListDto x : todoLists) {
-                    if (!x.getDone()) {
-                        Log.d(TAG, String.valueOf(x.getId()));
-                        todoList.addView(addTodoItem(x));
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
-                todoList.addView(addItem("todoListApi calling Failed, " + t.toString()));
-                Log.v("api fail", t.toString());
-            }
-        });
-
         followsCall.enqueue(new Callback<List<MemberDto>>() {
             @Override
             public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
                 List<MemberDto> follows = response.body();
                 if (follows != null) {
                     for (MemberDto x : follows) {
-                        addedUserList.addView(addFriendItem(x));
+                        addedUserList.addView(addUserItem(x));
                     }
                 }
             }
@@ -364,6 +346,6 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<List<MemberDto>> call, Throwable t) {
                 Log.v("api fail", t.toString());
             }
-        });*/
+        });
     }
 }

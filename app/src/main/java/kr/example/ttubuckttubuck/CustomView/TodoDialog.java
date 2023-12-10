@@ -4,10 +4,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,7 +21,9 @@ import kr.example.ttubuckttubuck.R;
 public class TodoDialog extends Dialog {
     private Button confirmBtn;
     private ImageButton quitBtn;
-    private EditText contentEditTxt, dateEditTxt;
+    private EditText contentEditTxt;
+    private TextView dateEditTxt;
+    private CalendarView calendarView;
 
     public TodoDialog(@NonNull Context context) {
         super(context);
@@ -40,8 +46,17 @@ public class TodoDialog extends Dialog {
 
         setContentView(R.layout.dialog_todo);
 
+        calendarView = findViewById(R.id.calendar);
+        calendarView.setVisibility(View.GONE);
+        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+            String date = year + "-" + (month + 1) + "-" + dayOfMonth;
+            dateEditTxt.setText(date);
+            calendarView.setVisibility(View.GONE);
+        });
+
         contentEditTxt = findViewById(R.id.contentEditTxt);
         dateEditTxt = findViewById(R.id.dateEditTxt);
+        dateEditTxt.setOnClickListener(view-> calendarView.setVisibility(View.VISIBLE));
         confirmBtn = findViewById(R.id.confirmBtn);
 
         quitBtn = findViewById(R.id.goBackBtn);
@@ -52,6 +67,13 @@ public class TodoDialog extends Dialog {
         return this.confirmBtn;
     }
 
+    public void setDate(String s){
+        this.dateEditTxt.setText(s);
+    }
+
+    public CalendarView getCalendarView(){
+        return this.calendarView;
+    }
     public String getDate(){
         return this.dateEditTxt.getText().toString();
     }

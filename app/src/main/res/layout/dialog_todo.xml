@@ -1,67 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="350dp"
-    android:layout_height="270dp"
-    android:background="@drawable/todo_fragment">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
 
-    <ImageButton
-        android:id="@+id/goBackBtn"
-        android:layout_width="23dp"
-        android:layout_height="23dp"
-        android:layout_gravity="end|top"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="20dp"
-        android:background="@null"
-        android:scaleType="fitCenter"
-        android:src="@drawable/close" />
+    <FrameLayout
+        android:layout_width="350dp"
+        android:layout_height="270dp"
+        android:background="@drawable/todo_fragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:layout_marginBottom="20dp">
-
-        <LinearLayout
-            android:layout_width="280dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/search_edit_text"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/contentEditTxt"
-                android:layout_marginLeft="13dp"
-                android:background="@null"
-                android:layout_width="wrap_content"
-                android:layout_height="45dp"
-                android:hint="새로운 약속을 작성해주세요." />
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/goBackBtn"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:layout_gravity="end|top"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/close" />
 
         <LinearLayout
-            android:layout_width="280dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/search_edit_text"
-            android:orientation="horizontal">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/dateEditTxt"
-                android:layout_marginLeft="13dp"
-                android:background="@null"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/search_edit_text"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/contentEditTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="13dp"
+                    android:background="@null"
+                    android:hint="새로운 약속을 작성해주세요." />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="280dp"
                 android:layout_height="45dp"
-                android:hint="날짜" />
-        </LinearLayout>
-    </LinearLayout>
+                android:layout_marginTop="15dp"
+                android:background="@drawable/search_edit_text"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/confirmBtn"
-        android:layout_width="100dp"
-        android:layout_height="45dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:background="@drawable/basic_btn"
-        android:layout_marginBottom="25dp"
-        android:text="완료"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
-</FrameLayout>
+                <TextView
+                    android:id="@+id/dateEditTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:background="@null"
+                    android:hint="날짜"
+                    android:textSize="17dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/confirmBtn"
+            android:layout_width="100dp"
+            android:layout_height="45dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/basic_btn"
+            android:text="완료"
+            android:textColor="@color/white"
+            android:textSize="20dp" />
+    </FrameLayout>
+
+    <CalendarView
+        android:layout_marginTop="10dp"
+        android:id="@+id/calendar"
+        android:visibility="visible"
+        android:layout_width="300dp"
+        android:layout_height="310dp"
+        android:background="@color/white"
+        android:weekDayTextAppearance="@color/second"
+        android:focusedMonthDateColor="@color/second"
+        android:selectedWeekBackgroundColor="@color/second"
+        android:firstDayOfWeek="@color/second"
+        android:unfocusedMonthDateColor="@color/second" />
+</LinearLayout>

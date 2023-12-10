@@ -58,7 +58,7 @@
                     android:layout_marginLeft="13dp"
                     android:background="@null"
                     android:hint="날짜"
-                    android:textSize="17dp" />
+                    android:textSize="19dp" />
             </LinearLayout>
         </LinearLayout>
 

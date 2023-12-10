@@ -9,6 +9,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -122,10 +123,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAddTodoDialog() {
-
         todoDialog.getConfirmBtn().setOnClickListener(view -> {
             HomeTodoItem result = new HomeTodoItem(getApplicationContext());
             result.getTodoChk().setOnClickListener(v-> result.getTodoChk().setSelected(!(result.getTodoChk().isSelected())));
+            if(todoDialog.getContent().equals("") || todoDialog.getContent().equals(null)){
+                Toast.makeText(this, "내용을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             result.setTitle(todoDialog.getContent());
             result.setDate(todoDialog.getDate());
             todoList.addView(result);
@@ -272,13 +276,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        followsCall.enqueue(new Callback<List<MemberDto>>() {
+        /* followsCall.enqueue(new Callback<List<MemberDto>>() {
             @Override
             public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
                 List<MemberDto> follows = response.body();
                 if (follows != null) {
                     for (MemberDto x : follows) {
-                        // addedUserList.addView(addUserItem(x));
+                        addedUserList.addView(addUserItem(x));
                     }
                 }
             }
@@ -287,8 +291,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<List<MemberDto>> call, Throwable t) {
                 Log.v("api fail", t.toString());
             }
-        });
-
+        }); */
     }
 
     @Override

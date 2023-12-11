@@ -5,7 +5,6 @@ import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -119,7 +118,7 @@ public class AddFriendsActivity extends AppCompatActivity {
                 idCall.enqueue(new Callback<Long>() {
                     @Override
                     public void onResponse(Call<Long> call, Response<Long> response) {
-                        Toast.makeText(AddFriendsActivity.this, String.valueOf(response.body()), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(AddFriendsActivity.this, String.valueOf(response.body()), Toast.LENGTH_SHORT).show();
                         FollowDto followDto = new FollowDto(member, response.body());
                         Call<MemberDto> follow = followApi.follow(followDto);
                         follow.enqueue(new Callback<MemberDto>() {

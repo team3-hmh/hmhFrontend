@@ -25,7 +25,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -187,16 +186,11 @@ public class MyPageActivity extends AppCompatActivity {
                         // Bitmap.createScaledBitmap(profileBmp, 250, 250, false);
                         final int basicWidth = profileBmp.getWidth();
                         final int basicHeight = profileBmp.getHeight();
-                        Toast.makeText(getApplicationContext(), basicWidth + ", " + basicHeight, Toast.LENGTH_SHORT).show();
-                        if(basicWidth > circleSize || basicHeight > circleSize) {
-                            resizedBmp = getDownScaledBitmap(profileBmp, 512, 512);
-                            Toast.makeText(getApplicationContext(), resizedBmp.getWidth() + ", " + resizedBmp.getHeight(), Toast.LENGTH_SHORT).show();
-                            circleCroppedBmp = getCroppedBitmap(resizedBmp);
-                        }else {
-                            resizedBmp = getUpScaledBitmap(profileBmp, 512, 512);
-                            Toast.makeText(getApplicationContext(), resizedBmp.getWidth() + ", " + resizedBmp.getHeight(), Toast.LENGTH_SHORT).show();
-                            circleCroppedBmp = getCroppedBitmap(profileBmp);
-                        }
+                        //Toast.makeText(getApplicationContext(), basicWidth + ", " + basicHeight, Toast.LENGTH_SHORT).show();
+                        resizedBmp = getUpScaledBitmap(profileBmp, profile.getWidth(), profile.getHeight());
+                        //Toast.makeText(getApplicationContext(), resizedBmp.getWidth() + ", " + resizedBmp.getHeight(), Toast.LENGTH_SHORT).show();
+                        circleCroppedBmp = getCroppedBitmap(resizedBmp);
+
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
 
@@ -271,9 +265,10 @@ public class MyPageActivity extends AppCompatActivity {
     }
 
     final int circleSize = 512;
+
     // https://stackoverflow.com/questions/11932805/how-to-crop-circular-area-from-bitmap-in-android
     private Bitmap getCroppedBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(circleSize, circleSize, Bitmap.Config.ARGB_8888);
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
 
         final int color = 0xff424242;
@@ -284,8 +279,8 @@ public class MyPageActivity extends AppCompatActivity {
         canvas.drawARGB(0, 0, 0, 0);
         paint.setColor(color);
 
-        canvas.drawCircle(circleSize / 2, circleSize / 2,
-                circleSize / 2, paint);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
@@ -318,12 +313,11 @@ public class MyPageActivity extends AppCompatActivity {
         float scaleWidth;
         float scaleHeight;
 
-        if(width > height) {
+        if (width > height) {
             scaleWidth = (float) (((float) newWidth) / width);
-            scaleHeight = (float) (((float) newHeight ) / width);
-        }
-        else {
-            scaleWidth = (float) (((float) newWidth ) / height);
+            scaleHeight = (float) (((float) newHeight) / width);
+        } else {
+            scaleWidth = (float) (((float) newWidth) / height);
             scaleHeight = (float) (((float) newHeight) / height);
         }
 

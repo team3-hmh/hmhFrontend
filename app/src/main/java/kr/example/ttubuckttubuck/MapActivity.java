@@ -190,7 +190,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
                 Log.d(TAG + "_Callback", "Changed location: " + location.getLatitude() + ", " + location.getLongitude());
 
-                if (VERBOSE)
+                if (false)
                     Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
                 refreshLocation();
             }

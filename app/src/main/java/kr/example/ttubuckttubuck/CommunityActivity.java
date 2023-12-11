@@ -2,6 +2,7 @@ package kr.example.ttubuckttubuck;
 
 import static kr.example.ttubuckttubuck.utils.MenuItemID.COMMUNITY;
 import static kr.example.ttubuckttubuck.utils.MenuItemID.HOME;
+import static kr.example.ttubuckttubuck.utils.MenuItemID.POSTING;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,9 +10,7 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -38,33 +37,20 @@ public class CommunityActivity extends AppCompatActivity {
     // UI components ↓
     private BottomNavigationView navigationView;
     private LinearLayout postList;
-    private Toolbar toolBar;
-    private ActionBar actionBar;
     private ImageButton addPostBtn;
     private int fromWhere;
+    private long member;
 
     private PostItem addPostItem(PostingDto postingDto) {
         PostItem tmp = new PostItem(getApplicationContext());
         tmp.setTag("todoItem" + (++postitemCnt));
-        tmp.setPostImg(postingDto.getContent());
-        tmp.setPostTitle("title example");
         tmp.setPostContent(postingDto.getContent());
         // TODO: date 대신 rating 들어가게 수정
-        tmp.setDate(postingDto.getRating());
-
+        tmp.setRate(postingDto.getRating());
         return tmp;
     }
 
     private void setActionBar(Long member) {
-        toolBar = findViewById(R.id.toolBar);
-        setSupportActionBar(toolBar);
-        toolBar.setTitle("Community");
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Community");
-
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(fromWhere).setChecked(false);
         navigationView.getMenu().findItem(COMMUNITY).setChecked(true);
@@ -102,7 +88,9 @@ public class CommunityActivity extends AppCompatActivity {
             startActivity(toLoginActivity);
         }
 
+        Log.d(TAG, "member: " + member);
         fromWhere = getIntent().getIntExtra("fromWhere", HOME);
+        Log.d(TAG, "From where: " + fromWhere + ", toString: " + HOME);
         setActionBar(member);
 
         postList = findViewById(R.id.postList);
@@ -126,7 +114,6 @@ public class CommunityActivity extends AppCompatActivity {
         });
 
 
-
         addPostBtn = findViewById(R.id.addPostBtn);
         addPostBtn.setOnClickListener(view -> {
                     //postList.addView(addPostItem(-1, "성북구 국민대학교 북악관 207호", content, "2023-11-11"))
@@ -143,9 +130,36 @@ public class CommunityActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
     }
-
+    private int s = 0;
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume() called.");
+        s++;
+
+        Intent intent = getIntent();
+        long member = intent.getLongExtra("member", -1);
+        if (member == -1) {
+            Log.d(TAG + "Intent", "onResume: Not valid User");
+            Intent toLoginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(toLoginActivity);
+        }
+
+        int fromWhere = getIntent().getIntExtra("fromWhere2", POSTING);
+        Log.d(TAG, "onResume: From where: " + fromWhere + ", " + POSTING);
+
+        if (fromWhere == POSTING) {
+            Log.d(TAG, "onResume: From posting activity.");
+            String postContent = getIntent().getStringExtra("postContent");
+            int postRate = getIntent().getIntExtra("postRate", -1);
+            Log.d(TAG, "onResume: Intent value: " + postContent + ", " + postRate);
+            if(s>1) {
+                PostItem result = new PostItem(getApplicationContext());
+                result.setTag("todoItem" + (++postitemCnt));
+                result.setPostContent("안녕하세요");
+                result.setRate(String.valueOf(2));
+                postList.addView(result);
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
@@ -19,7 +20,7 @@ public interface FollowApi {
     @POST("/member/follow")
     Call<MemberDto> follow(@Body FollowDto followDto);
 
-    @DELETE("/member/follow")
+    @HTTP(method = "DELETE", path="/member/follow", hasBody = true)
     Call<FollowDto> unfollow(@Body FollowDto followDto);
 
 }

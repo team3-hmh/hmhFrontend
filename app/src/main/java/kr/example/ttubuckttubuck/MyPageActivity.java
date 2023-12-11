@@ -54,7 +54,6 @@ public class MyPageActivity extends AppCompatActivity {
     MemberApi memberApi = retrofit.create(MemberApi.class);
     // API components ↓
     private long member;
-    private Call<MemberDto> memberDtoCall;
 
     // UI components ↓
     private BottomNavigationView navigationView;
@@ -68,6 +67,7 @@ public class MyPageActivity extends AppCompatActivity {
     private Bitmap profileBmp = null;
     private Bitmap resizedBmp = null;
     private Bitmap circleCroppedBmp = null;
+    private Call<MemberDto> memberDtoCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,11 +94,17 @@ public class MyPageActivity extends AppCompatActivity {
                 userName.setText(memberDto.getName());
                 userEmail.setText(memberDto.getEmail());
                 String userImg = memberDto.getImage();
-                Log.d(TAG, "Is userImag null?: " + (userImg == null) + ", value: " + userImg);
+                Log.d(TAG, "Is userImg null?: " + (userImg == null) + ", value: " + userImg);
                 if (userImg != null) {
-                    byte[] buffer = userImg.getBytes();
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
-                    runOnUiThread(() -> eclipseProfile.setImageBitmap(bitmap));
+                    //byte[] buffer = Base64.decode(userImg, 1);
+                    //Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+                    //Bitmap bitmap = stringToBitmap(tmp);
+                    runOnUiThread(() -> {
+                        eclipseProfile.setImageBitmap(stringToBitmap(userImg));
+                        cameraBtn.setVisibility(View.INVISIBLE);
+                    });
+                } else {
+                    runOnUiThread(() -> cameraBtn.setVisibility(View.VISIBLE));
                 }
             }
 
@@ -140,12 +146,22 @@ public class MyPageActivity extends AppCompatActivity {
         }
     }
 
-    private String BitmapToString(Bitmap bitmap) {
+    public static Bitmap stringToBitmap(String encodedString) {
+        try {
+            byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+            return bitmap;
+        } catch (Exception e) {
+            e.getMessage();
+            return null;
+        }
+    }
+
+    public static String bitmapToString(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 70, baos);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] bytes = baos.toByteArray();
         String temp = Base64.encodeToString(bytes, Base64.DEFAULT);
-        Log.d(TAG, "string info: " + temp);
         return temp;
     }
 
@@ -167,31 +183,62 @@ public class MyPageActivity extends AppCompatActivity {
                                 imageDecoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
                             }
                         });
-                        //Bitmap.createScaledBitmap(profileBmp, 75, 75, true);
-                        resizedBmp = getResizedBitmap(profileBmp, profileBmp.getWidth() / 6, profileBmp.getHeight() / 6);
+                        // Bitmap.createScaledBitmap(profileBmp, 250, 250, false);
+                        final int basicWidth = profileBmp.getWidth();
+                        final int basicHeight = profileBmp.getHeight();
+                        //Toast.makeText(getApplicationContext(), basicWidth + ", " + basicHeight, Toast.LENGTH_SHORT).show();
+                        resizedBmp = getUpScaledBitmap(profileBmp, profile.getWidth(), profile.getHeight());
+                        //Toast.makeText(getApplicationContext(), resizedBmp.getWidth() + ", " + resizedBmp.getHeight(), Toast.LENGTH_SHORT).show();
                         circleCroppedBmp = getCroppedBitmap(resizedBmp);
+
                         eclipseProfile.setImageBitmap(circleCroppedBmp);
                         Log.d(TAG, "profile has been set.");
 
+                        String encodedmap = bitmapToString(profileBmp);
+                        Log.d(TAG, "Encoded Bitmap: " + encodedmap);
 
+                        /*// TODO: 아래 주석 처리한 Call 호출하면 onResponse는 되는데 response.body()가 null임.
+                        Call<MemberDto> insertImageCall = memberApi.insertImage(member, encodedmap);
+                        insertImageCall.enqueue(new Callback<MemberDto>() {
+                            @Override
+                            public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                                try {
+                                    Log.d(TAG, "onResponse()'s response info: " + response.errorBody().string());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                MemberDto memberDto = response.body();
+                                Log.d(TAG, "onResponse() called.");
+                                // Log.d(TAG, "memberDto info called in insertImage: " + memberDto.toString());
+                                // 3. String으로 cast된 Bitmap을 memberDto에 set.
+                                memberDto.setImage(encodedmap);
+                            }
+
+                            @Override
+                            public void onFailure(Call<MemberDto> call, Throwable t) {
+                                Log.v(TAG + "api fail", t.toString());
+                            }
+                        });*/
+
+                        // TODO: 하지만 이렇게 memberDtoCall을 한 번 더 호출하고 그 안에 insertImage를 호출해서 바깥 response.body()를 가져오면 null이 아니긴 함.
                         memberDtoCall.clone().enqueue(new Callback<MemberDto>() {
                             @Override
                             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
                                 MemberDto memberDto = response.body();
                                 Log.d(TAG, "memberDto info: " + memberDto.getId() + ", " + memberDto.getName());
                                 // TODO: 이미지 불러오고 적용시키기
-                                String encodedBmp = BitmapToString(resizedBmp);
-                                Log.d(TAG, "string info: " + encodedBmp);
 
-                                Call<MemberDto> insertImage = memberApi.insertImage(member, encodedBmp);
+                                Call<MemberDto> insertImage = memberApi.insertImage(member, encodedmap);
                                 insertImage.enqueue(new Callback<MemberDto>() {
                                     @Override
                                     public void onResponse(Call<MemberDto> call, Response<MemberDto> nestedResponse) {
                                         MemberDto memberDto = response.body();
+                                        Log.d(TAG, "Is nestedResponse null?: " + (nestedResponse.body() == null)); // true.
                                         Log.d(TAG, "memberDto info called in insertImage: " + memberDto.getId() + ", " + memberDto.getName());
                                         // 3. String으로 cast된 Bitmap을 memberDto에 set.
-                                        memberDto.setImage(encodedBmp);
+                                        memberDto.setImage(encodedmap);
                                     }
+
                                     @Override
                                     public void onFailure(Call<MemberDto> call, Throwable t) {
                                         Log.e(TAG, "Failed to call insertImage: " + t);
@@ -200,6 +247,7 @@ public class MyPageActivity extends AppCompatActivity {
                                 });
                                 Log.d(TAG, "insertImage called.");
                             }
+
                             @Override
                             public void onFailure(Call<MemberDto> call, Throwable t) {
                                 Log.v(TAG + "api fail", t.toString());
@@ -215,6 +263,8 @@ public class MyPageActivity extends AppCompatActivity {
             }
         }
     }
+
+    final int circleSize = 512;
 
     // https://stackoverflow.com/questions/11932805/how-to-crop-circular-area-from-bitmap-in-android
     private Bitmap getCroppedBitmap(Bitmap bitmap) {
@@ -238,21 +288,50 @@ public class MyPageActivity extends AppCompatActivity {
     }
 
     // https://stackoverflow.com/questions/4837715/how-to-resize-a-bitmap-in-android
-    private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+    private Bitmap getUpScaledBitmap(Bitmap bm, int newWidth, int newHeight) {
         int width = bm.getWidth();
         int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
+        float scaleWidth = (((float) newWidth) / width);
+        float scaleHeight = (((float) newHeight) / height);
 
         // CREATE A MATRIX FOR THE MANIPULATION
         Matrix matrix = new Matrix();
         // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
+        matrix.postScale(2f, 2f);
 
         // "RECREATE" THE NEW BITMAP
         Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
+                bm, 0, 0, width, height, matrix, true);
+
+        return resizedBitmap;
+    }
+
+    private Bitmap getDownScaledBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+
+        float scaleWidth;
+        float scaleHeight;
+
+        if (width > height) {
+            scaleWidth = (float) (((float) newWidth) / width);
+            scaleHeight = (float) (((float) newHeight) / width);
+        } else {
+            scaleWidth = (float) (((float) newWidth) / height);
+            scaleHeight = (float) (((float) newHeight) / height);
+        }
+
+        Log.d("downscaletest", scaleWidth + ", " + scaleHeight);
+
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale((float) (scaleWidth * 1.5), (float) (scaleHeight * 1.5));
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, true);
+
         return resizedBitmap;
     }
 
@@ -281,7 +360,7 @@ public class MyPageActivity extends AppCompatActivity {
             Log.d(TAG + "Intent", "Convert to Main Activity.");
             toMainActivity.putExtra("fromWhere", HOME);
             startActivity(toMainActivity);
-            recycleBmp();
+            //recycleBmp();
         });
 
         navigationView = findViewById(R.id.navigationBtm);

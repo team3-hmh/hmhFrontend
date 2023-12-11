@@ -16,7 +16,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,15 +25,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -72,59 +71,26 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private Handler mainHandler;
     private TMapGpsManager gpsManager;
     private ExecutorService threadPool;
-    private Object locker;
-
-
-    private class MarkerHeading extends AsyncTask<Void, Void, Boolean> {
-        private Context mContext = null;
-
-        public MarkerHeading(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            while (curLocation != null) {
-                //Log.i(TAG, "Cur rotation: " + curMarker.getRotation());
-                publishProgress();
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            Log.i(TAG, "AsyncTask executed.");
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-            Log.i(TAG, "onProgressUpdate called.");
-        }
-    }
 
     // UI 구성 요소 ↓
     private ViewGroup container;
+    private RelativeLayout loadView;
     public static SlidingUpPanelLayout slidePanel;
     private static TMapView mapView;
     private static TMapPoint curLocation;
     private static TMapMarkerItem curMarker;
     private static
     ArrayList<TMapMarkerItem> resultMarkers = new ArrayList<>();
-    private Button searchBtn;
+    private ImageView searchBtn;
     private EditText destinationTxt;
     private Bitmap markerBmp;
     private Fragment destinationsFragment;
-    private Toolbar toolBar;
-    private ActionBar actionBar;
+    private ImageView refreshBtn;
     private BottomNavigationView navigationView;
     private int fromWhere;
     private static boolean blockRefresh = true;
+    private long member;
+    private ContentLoadingProgressBar loadingFragment;
 
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
@@ -192,13 +158,10 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     @Override
     public void onMapReady() {
         Log.d(TAG + "_Callback", "[ Callback ] : onMapReady() called.");
-
-        // Default zoomLevel value: 13.
-        //Log.d(TAG + "_Callback", "Zoom level: " + mapView.getZoomLevel());
+        loadingFragment.show();
+        loadView.setVisibility(View.VISIBLE);
 
         mapView.setRotateEnable(true);
-
-        //mapView.setTrackingMode(true);
 
         // 화면 회전 유무 설정.
         mapView.setCompassMode(false);
@@ -207,6 +170,12 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         mapView.setZoomLevel(17);
 
         curLocationInit();
+
+        loadView.animate().alpha(0.0f);
+        mainHandler.postDelayed(() -> {
+            loadingFragment.hide();
+            loadView.setVisibility(View.GONE);
+        }, 2000);   // 2sec.
     }
 
     @Override
@@ -214,14 +183,14 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         Log.d(TAG + "_Callback", "[ Callback] : onLocationChange() called.");
         /*final float curLatitude = (float) location.getLatitude();
         final float curLongitude = (float) location.getLongitude();*/
-        if(blockRefresh) {
+        if (blockRefresh) {
             if (curLocation != null) {
                 curLocation.setLatitude(location.getLatitude());
                 curLocation.setLongitude(location.getLongitude());
 
                 Log.d(TAG + "_Callback", "Changed location: " + location.getLatitude() + ", " + location.getLongitude());
 
-                if (VERBOSE)
+                if (false)
                     Toast.makeText(this, "Changed location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show();
                 refreshLocation();
             }
@@ -233,12 +202,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         //double editLongitude = Double.valueOf(String.format("%.6f", longitude));
 
         TMapAddressInfo result = new TMapData().reverseGeocoding(latitude, longitude, "A10");
-        /*new TMapData().convertGpsToAddress(longitude, latitude, new TMapData.OnConvertGPSToAddressListener() {
-                    @Override
-                    public void onConverGPSToAddress(String s) {
-                        // Log.d("findAllPOI_Result", "GPS to address: " + s);
 
-                    }
+        /*new TMapData().convertGpsToAddress(longitude, latitude, s -> {
+                    Log.d("findAllPOI_Result", "GPS to address: " + s);
                 }
         );*/
 
@@ -269,6 +235,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private void refreshLocation() {
         if (curLocation != null) {
             mapView.setCenterPoint(curLocation.getLatitude(), curLocation.getLongitude(), true);
+
+            mapView.setZoomLevel(17);
             // mapView.setZoomLevel(17);
 
             runOnUiThread(() -> {
@@ -292,60 +260,51 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     private void geoCoding(String destination) throws InterruptedException {
         String address = new String();
         mapView.removeTMapPath();
+        mapView.setZoomLevel(17);
         listItems.clear();
         resultMarkers.clear();
-        new TMapData().findAllPOI(destination, new TMapData.OnFindAllPOIListener() {
-            @Override
-            public void onFindAllPOI(ArrayList<TMapPOIItem> arrayList) {
-                blockRefresh = false;
-                if (arrayList != null) {
-                    double lat = 0, lon = 0;
-                    int inx = 0;
-                    for (int i = 0; i < arrayList.size(); i++) {
-                        // Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
-                        lat = arrayList.get(i).getPOIPoint().getLatitude();
-                        lon = arrayList.get(i).getPOIPoint().getLongitude();
+        new TMapData().findAllPOI(destination, arrayList -> {
+            blockRefresh = false;
+            if (arrayList != null) {
+                double lat = 0, lon = 0;
+                int inx = 0;
+                for (int i = 0; i < arrayList.size(); i++) {
+                    Log.d("findAllPOI_Result", arrayList.get(i).getPOIAddress() + ": " + arrayList.get(i).getPOIName() + ", " + arrayList.get(i).getPOIPoint().getLatitude() + ", " + arrayList.get(i).getPOIPoint().getLongitude());
+                    lat = arrayList.get(i).getPOIPoint().getLatitude();
+                    lon = arrayList.get(i).getPOIPoint().getLongitude();
 
-                    /*new TMapData().convertGpsToAddress(lat, lon, new TMapData.OnConvertGPSToAddressListener() {
-                        @Override
-                        public void onConverGPSToAddress(String s) {
-                            // Log.d("findAllPOI_Result", "GPS to address: " + s);
-                        }
-                    });*/
+                    TMapMarkerItem resultMarker = new TMapMarkerItem();
+                    resultMarker.setTMapPoint(new TMapPoint(lat, lon));
+                    resultMarker.setPosition(0.5f, 0.5f);
+                    resultMarker.setId(String.valueOf(inx));
+                    resultMarker.setName("Query" + inx++);
+                    resultMarker.setVisible(true);
+                    Log.d(TAG + "resultMarker", "resultMarker info: " + resultMarker);
+                    // Log.d(TAG + "resultMarker", "resultMarker position: " + resultMarker.getTMapPoint().getLatitude() + ", " + resultMarker.getTMapPoint().getLongitude());
 
-                        TMapMarkerItem resultMarker = new TMapMarkerItem();
-                        resultMarker.setTMapPoint(new TMapPoint(lat, lon));
-                        resultMarker.setPosition(0.5f, 0.5f);
-                        resultMarker.setId(String.valueOf(inx));
-                        resultMarker.setName("Query" + inx++);
-                        resultMarker.setVisible(true);
-                        Log.d(TAG + "resultMarker", "resultMarker info: " + resultMarker);
-                        // Log.d(TAG + "resultMarker", "resultMarker position: " + resultMarker.getTMapPoint().getLatitude() + ", " + resultMarker.getTMapPoint().getLongitude());
+                    // markerBmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.marker), 100, 100, true);
+                    // resultMarker.setIcon(markerBmp);
 
-                        // markerBmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.marker), 100, 100, true);
-                        // resultMarker.setIcon(markerBmp);
-
-                        listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
-                        resultMarkers.add(resultMarker);
-                    }
-
-                    runOnUiThread(() -> {
-                        listAdapter.notifyDataSetChanged();
-                        mapView.removeAllTMapMarkerItem();
-                        try {
-                            // 지도에 표시할 marker 등록.
-                            for (TMapMarkerItem m : resultMarkers)
-                                mapView.addTMapMarkerItem(m);
-                            Log.d(TAG, "resultMarker added at mapView.");
-                        } catch (NullPointerException e) {
-                            Log.e(TAG, "NullPointerException occurred by Bitmap: " + e);
-                            e.printStackTrace();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Failed to add the marker to mapView: " + e);
-                            e.printStackTrace();
-                        }
-                    });
+                    listItems.add(new DestinationsList.ListItem(arrayList.get(i).getPOIName(), reverseGeoCoding(lat, lon), new Pair<>(lat, lon)));
+                    resultMarkers.add(resultMarker);
                 }
+
+                runOnUiThread(() -> {
+                    listAdapter.notifyDataSetChanged();
+                    mapView.removeAllTMapMarkerItem();
+                    try {
+                        // 지도에 표시할 marker 등록.
+                        for (TMapMarkerItem m : resultMarkers)
+                            mapView.addTMapMarkerItem(m);
+                        Log.d(TAG, "resultMarker added at mapView.");
+                    } catch (NullPointerException e) {
+                        Log.e(TAG, "NullPointerException occurred by Bitmap: " + e);
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to add the marker to mapView: " + e);
+                        e.printStackTrace();
+                    }
+                });
             }
         });
     }
@@ -371,6 +330,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         mapView.removeAllTMapMarkerItem();
         blockRefresh = true;
 
+        mapView.setZoomLevel(12);
         setCurMarkerOnMap();
 
         double endX = destinationY;
@@ -436,7 +396,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                     zoom = 12;
                 }
 
-                mapView.setZoomLevel(zoom);
+                mapView.setZoomLevel(15);
                 mapView.setCenterPoint(info.getPoint().getLatitude(), info.getPoint().getLongitude());
 
                 mapView.setTMapPath(mPolyLine);
@@ -493,6 +453,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         threadPool = Executors.newCachedThreadPool();
 
         // UI 초기화 ↓
+        loadingFragment = findViewById(R.id.loadingFragment);
+        loadView = findViewById(R.id.loadView);
+
         slidePanel = findViewById(R.id.slidePanel);
         mapView = new TMapView(this);
         mapView.setSKTMapApiKey(appKey); // API Key 할당.
@@ -540,14 +503,8 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     }
 
     private void setActionBar() {
-        toolBar = findViewById(R.id.toolBar);
-        setSupportActionBar(toolBar);
-        toolBar.setTitle("Map");
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Map");
+        refreshBtn = findViewById(R.id.refreshBtn);
+        refreshBtn.setOnClickListener(view -> refreshLocation());
 
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(fromWhere).setChecked(false);
@@ -560,11 +517,13 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                 Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
                 Log.d(TAG + "Intent", "Convert to Main Activity.");
                 toMainActivity.putExtra("fromWhere", MAP);
+                toMainActivity.putExtra("member", member);
                 startActivity(toMainActivity);
             } else { // Community
                 Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
                 toCommunityActivity.putExtra("fromWhere", MAP);
                 Log.d(TAG + "Intent", "Convert to Community Activity.");
+                toCommunityActivity.putExtra("member", member);
                 startActivity(toCommunityActivity);
             }
             return false;
@@ -576,13 +535,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
     public boolean checkPermission(String[] permissions, int type) {
         Log.d(TAG, "checkPermission() called.");
         SharedPreferences preference = getPreferences(MODE_PRIVATE);
-        //if(preference.getBoolean("isFirstCheckPermission", true))
-        //    return true;
-
         try {
-            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-                return true;*/
-
             for (String permission : permissions) {
                 if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED)
                     ActivityCompat.requestPermissions(this, permissions, type);
@@ -604,12 +557,9 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
 
         switch (requestCode) {
             case ACCESS_GPS:
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "Permission has been granted.");
-
-                    //curLocationInit();
                 } else {
                     Toast.makeText(getApplicationContext(), "Permission should be granted.", Toast.LENGTH_SHORT);
                     Intent toMainActivity = new Intent(getApplicationContext(), MainActivity.class);
@@ -617,8 +567,6 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
                     startActivity(toMainActivity);
                 }
         }
-        // Other 'case' lines to check for other
-        // permissions this app might request.
     }
 
     @Override
@@ -643,9 +591,7 @@ public class MapActivity extends AppCompatActivity implements FragmentManager.On
         Location curLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         firstLatitude = curLocation.getLatitude();
         firstLongitude = curLocation.getLongitude();
-        // Log.d(TAG, "provider meaning?: " +curLocation.getProvider());
 
-        //reverseGeoCoding(firstLatitude, firstLongitude);
         Log.d(TAG, "Detected current location as first: " + firstLatitude + ", " + firstLongitude);
     }
 

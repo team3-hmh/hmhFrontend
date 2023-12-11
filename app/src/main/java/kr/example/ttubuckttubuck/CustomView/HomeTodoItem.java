@@ -62,11 +62,12 @@ public class HomeTodoItem extends LinearLayout {
 //        int img = typedArray.getResourceId(R.styleable.TodoItem_userImg, R.drawable.profile);
 //        userImg.setImageResource(img);
 
-        int img2 = typedArray.getResourceId(R.styleable.TodoItem_todoChk, R.drawable.todo_check);
+        int img2 = typedArray.getResourceId(R.styleable.TodoItem_todoChk, R.drawable.todo_chk_btn);
         todoChk.setImageResource(img2);
+        todoChk.setOnClickListener(view-> todoChk.setSelected(!(todoChk.isSelected())));
 
         //String text = typedArray.getString(R.styleable.AddUserBtn_userName);
-        String text = "김호 와 혜화 약속";
+        String text = "홍길동과 혜화 약속";
         title.setText(text);
 
         String text3 = "2023-11-11";
@@ -85,5 +86,9 @@ public class HomeTodoItem extends LinearLayout {
 
     public void setDate(String text) {
         date.setText(text);
+    }
+
+    public ImageView getTodoChk(){
+        return this.todoChk;
     }
 }

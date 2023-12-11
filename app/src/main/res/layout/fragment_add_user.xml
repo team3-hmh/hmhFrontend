@@ -1,34 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="350dp"
-    android:layout_height="50dp"
+    android:layout_width="330dp"
+    android:layout_height="70dp"
+    android:layout_gravity="center_horizontal"
     android:orientation="horizontal"
-    android:background="@drawable/layout_underline">
+    android:background="@drawable/bottom_underline">
 
     <TextView
         android:id="@+id/userName"
         android:hint="홍길동"
         android:textSize="20dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="5dp"
+        android:layout_gravity="center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/followBtn"
-        android:text="Follow"
-        android:textSize="15dp"
-        android:background="@drawable/follow_btn"
-        android:layout_marginLeft="80dp"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp" />
 
     <Button
         android:id="@+id/unfollowBtn"
         android:text="Unfollow"
         android:textSize="15dp"
         android:background="@drawable/unfollow_btn"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="150dp"
+        android:layout_gravity="center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="40dp" />
 </LinearLayout>

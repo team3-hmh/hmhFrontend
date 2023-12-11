@@ -1,7 +1,5 @@
 package kr.example.ttubuckttubuck.CustomView;
 
-import static androidx.appcompat.content.res.AppCompatResources.getDrawable;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -12,7 +10,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.Log;
@@ -21,6 +18,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.io.ByteArrayOutputStream;
 
 import kr.example.ttubuckttubuck.R;
 
@@ -77,28 +76,47 @@ public class HomeUserItem extends LinearLayout {
         typedArray.recycle();
     }
 
-    private Bitmap StringToBitmap(String encodedString) {
+    /*private Bitmap stringToBitmap(String string){
+        Bitmap temp= null;
+        byte[] buffer = Base64.decode(string, Base64.DEFAULT);
+        ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
+        temp = BitmapFactory.decodeStream(bis);
+        return temp;
+    }*/
+
+    public static Bitmap stringToBitmap(String encodedString) {
         try {
             byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-            Log.d(TAG, "Is bitmap null?: " + (bitmap == null));
-            Log.d(TAG, "bitmap info: " + bitmap.getWidth() + ", " + bitmap.getHeight());
             return bitmap;
         } catch (Exception e) {
-            Log.e(TAG, "error occurred: " + e);
-            e.printStackTrace();
+            e.getMessage();
             return null;
         }
     }
 
+    public static String bitmapToString(Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 70, baos);
+        byte[] bytes = baos.toByteArray();
+        String temp = Base64.encodeToString(bytes, Base64.DEFAULT);
+        return temp;
+    }
+
     public void setUserImg(String stringImg) {
         Log.d(TAG, "stringImg info: " + stringImg);
-        // Bitmap decodedBmp = StringToBitmap(stringImg);
-        BitmapDrawable sample = (BitmapDrawable)getDrawable(getContext(), R.drawable.eclipse);
-        Bitmap bmp = sample.getBitmap();
-        Bitmap resizedBmp = getResizedBitmap(bmp, bmp.getWidth() / 6, bmp.getHeight() / 6);
+        Bitmap bmp = stringToBitmap(stringImg);
+        Bitmap resizedBmp = getResizedBitmap(bmp, bmp.getWidth(), bmp.getHeight());
         Bitmap circleCroppedBmp = getCroppedBitmap(resizedBmp);
         userImg.setImageBitmap(circleCroppedBmp);
+    }
+
+    public void setUserDefaultImg() {
+        userImg.setImageResource(R.drawable.eclipse);
+    }
+
+    public void setUserName(String text) {
+        userName.setText(text);
     }
 
     private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
@@ -136,13 +154,5 @@ public class HomeUserItem extends LinearLayout {
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
         return output;
-    }
-
-    public void setUserDefaultImg() {
-        userImg.setImageResource(R.drawable.eclipse);
-    }
-
-    public void setUserName(String text) {
-        userName.setText(text);
     }
 }

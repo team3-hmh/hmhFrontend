@@ -32,12 +32,12 @@ public class MemberDto {
     }
 
     public String getImage() {
-        Log.d(TAG, "getImage() called: " + this.image);
+        Log.d(TAG, "getImage() called: " + this.image + ", by: " + this.id);
         return this.image;
     }
 
-    public void setImage(String image){
+    public void setImage(String image) {
         this.image = image;
-        Log.d(TAG, "setImage() called: " + this.image);
+        Log.d(TAG, "setImage() called: " + this.image + ", by: " + this.id);
     }
 }

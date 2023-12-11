@@ -18,8 +18,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
+import kr.example.ttubuckttubuck.CustomView.PostItem;
 import kr.example.ttubuckttubuck.api.PostingApi;
-import kr.example.ttubuckttubuck.dto.PostingDto;
 import kr.example.ttubuckttubuck.utils.NetworkClient;
 import retrofit2.Retrofit;
 
@@ -34,7 +34,7 @@ public class PostingActivity extends AppCompatActivity {
     private BottomNavigationView navigationView;
     private Toolbar toolBar;
     private ActionBar actionBar;
-    private ImageButton starBtn1, starBtn2, starBtn3, starBtn4, starBtn5;
+    private ImageButton starBtn1, starBtn2, starBtn3, starBtn4, starBtn5, goBackBtn;
     private ArrayList<ImageButton> starBtns = new ArrayList<>();
     private EditText postEditTxt;
     private Button submitBtn;
@@ -69,26 +69,33 @@ public class PostingActivity extends AppCompatActivity {
             }
             // TODO: placeId는 어떻게 할지
             // TODO: POST posting 해결해야함
-            PostingDto postingDto = new PostingDto(member, 1L, String.valueOf(postEditTxt.getText()), rate);
-            postingApi.savePosting(postingDto);
+            /*PostingDto postingDto = new PostingDto(member, 1L, String.valueOf(postEditTxt.getText()), rate);
+            postingApi.savePosting(postingDto);*/
+
+            PostItem tmp = new PostItem(getApplicationContext());
+            tmp.setTag("todoItem");
+            tmp.setPostContent(postEditTxt.getText().toString());
+            // TODO: date 대신 rating 들어가게 수정
+            tmp.setRate(String.valueOf(rate));
 
             Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
-            toCommunityActivity.putExtra("fromWhere", POSTING);
+            toCommunityActivity.putExtra("fromWhere2", POSTING);
             toCommunityActivity.putExtra("member", member);
-            Log.d(TAG + "Intent", "Convert to Community Activity.");
+            toCommunityActivity.putExtra("postContent", tmp.getContent());
+            toCommunityActivity.putExtra("postRate", tmp.getRate());
+            Log.d(TAG + "Intent", "Convert to Community Activity: " + POSTING);
             startActivity(toCommunityActivity);
         });
     }
 
     private void setActionBar(Long member) {
-        toolBar = findViewById(R.id.toolBar);
-        setSupportActionBar(toolBar);
-        toolBar.setTitle("Posting");
-
-        actionBar = getSupportActionBar();
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setTitle("Posting");
+        goBackBtn = findViewById(R.id.goBackBtn);
+        goBackBtn.setOnClickListener(view -> {
+            Intent toCommunityActivity = new Intent(getApplicationContext(), CommunityActivity.class);
+            Log.d(TAG + "Intent", "Convert to Community Activity.");
+            toCommunityActivity.putExtra("fromWhere", COMMUNITY);
+            startActivity(toCommunityActivity);
+        });
 
         navigationView = findViewById(R.id.navigationBtm);
         navigationView.getMenu().findItem(COMMUNITY).setChecked(true);

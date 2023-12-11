@@ -17,6 +17,14 @@ public class TodoListDto {
     @SerializedName("done")
     private Boolean done;
 
+    public TodoListDto(Long member, Long place, String content, String date){
+        this.member = member;
+        this.place = place;
+        this.content = content;
+        this.date = date;
+        this.done = false;
+    }
+
     public String getContent() { return this.content; }
 
     public String getDate() {

@@ -18,10 +18,8 @@
     </declare-styleable>
 
     <declare-styleable name="PostItem">
-        <attr name="postImg" format="string"/>
-        <attr name="title" />
-        <attr name="content" />
-        <attr name="date"/>
+        <attr name="content"/>
+        <attr name="rate" format="string"/>
     </declare-styleable>
 </resources>
 

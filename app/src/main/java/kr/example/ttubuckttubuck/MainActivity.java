@@ -9,6 +9,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -72,17 +73,17 @@ public class MainActivity extends AppCompatActivity {
         return tmp;
     }
 
-    private HomeUserItem addFriendItem(MemberDto memberDto) {
+    private HomeUserItem addUserItem(MemberDto memberDto) {
         HomeUserItem tmp = new HomeUserItem(getApplicationContext());
-        tmp.setTag("userItem" + (userItemCnt++));
+        tmp.setTag("userItem_" + memberDto.getId());
         tmp.setUserName(memberDto.getName());
-        // TODO: 프로필 사진 불러오게 바꾸기
         String userImg = memberDto.getImage();
-        if (userImg == null) {
+        if (userImg == null || userImg.equals("011101001001")) {
             Log.d(TAG, "default img set.");
             tmp.setUserDefaultImg();
         }
         else {
+            Log.d(TAG + "userImg", "userImg: " + userImg);
             Log.d(TAG, "custom img set.");
             tmp.setUserImg(userImg);
         }
@@ -95,10 +96,25 @@ public class MainActivity extends AppCompatActivity {
         String title = todoListDto.getContent();
         tmp.setTitle(title);
         tmp.setDate(todoListDto.getDate());
-        tmp.findViewById(R.id.todoChk).setOnClickListener(view -> {
-            Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
-            view.findViewById(R.id.todoChk).setSelected(!(view.findViewById(R.id.todoChk).isSelected()));
-        });
+        tmp.getTodoChk().setOnClickListener(v-> tmp.getTodoChk().setSelected(!(tmp.getTodoChk().isSelected())));
+
+//        tmp.findViewById(R.id.todoChk).setOnClickListener(view -> {
+//            Call<TodoListDto> dummy = todoListApi.editTodoDone(todoListDto.getId());
+//            dummy.enqueue(new Callback<TodoListDto>() {
+//                @Override
+//                public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
+//                    Log.d(TAG, "todo checked");
+//                    view.findViewById(R.id.todoChk).setSelected(!(view.findViewById(R.id.todoChk).isSelected()));
+//                }
+//
+//                @Override
+//                public void onFailure(Call<TodoListDto> call, Throwable t) {
+//                    Log.v("api fail", t.toString());
+//                }
+//            });
+//
+//        });
+
         return tmp;
     }
 
@@ -107,6 +123,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAddTodoDialog() {
+        todoDialog.getConfirmBtn().setOnClickListener(view -> {
+            HomeTodoItem result = new HomeTodoItem(getApplicationContext());
+            result.getTodoChk().setOnClickListener(v-> result.getTodoChk().setSelected(!(result.getTodoChk().isSelected())));
+            if(todoDialog.getContent().equals("") || todoDialog.getContent().equals(null)){
+                Toast.makeText(this, "내용을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            result.setTitle(todoDialog.getContent());
+            result.setDate(todoDialog.getDate());
+            todoList.addView(result);
+            todoDialog.dismiss();
+        });
         todoDialog.show();
     }
 
@@ -173,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                myself.setUserImg(response.body().getImage());
                 myself.setUserName(response.body().getName());
             }
 
@@ -219,7 +248,23 @@ public class MainActivity extends AppCompatActivity {
                 for (TodoListDto x : todoLists) {
                     if (!x.getDone()) {
                         Log.d(TAG, String.valueOf(x.getId()));
-                        todoList.addView(addTodoItem(x));
+                        HomeTodoItem newTodo = addTodoItem(x);
+                        newTodo.findViewById(R.id.todoChk).setOnClickListener(view -> {
+                            view.setSelected(!(newTodo.findViewById(R.id.todoChk).isSelected()));
+                            Call<TodoListDto> dummy = todoListApi.editTodoDone(x.getId());
+                            dummy.enqueue(new Callback<TodoListDto>() {
+                                @Override
+                                public void onResponse(Call<TodoListDto> call, Response<TodoListDto> response) {
+                                    Log.d(TAG, "todo checked");
+                                }
+
+                                @Override
+                                public void onFailure(Call<TodoListDto> call, Throwable t) {
+                                    Log.v("api fail", t.toString());
+                                }
+                            });
+                        });
+                        todoList.addView(newTodo);
                     }
                 }
             }
@@ -231,13 +276,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        followsCall.enqueue(new Callback<List<MemberDto>>() {
+        /* followsCall.enqueue(new Callback<List<MemberDto>>() {
             @Override
             public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
                 List<MemberDto> follows = response.body();
                 if (follows != null) {
                     for (MemberDto x : follows) {
-                        addedUserList.addView(addFriendItem(x));
+                        addedUserList.addView(addUserItem(x));
                     }
                 }
             }
@@ -246,8 +291,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<List<MemberDto>> call, Throwable t) {
                 Log.v("api fail", t.toString());
             }
-        });
-
+        }); */
     }
 
     @Override
@@ -264,6 +308,17 @@ public class MainActivity extends AppCompatActivity {
         memberDtoCall.enqueue(new Callback<MemberDto>() {
             @Override
             public void onResponse(Call<MemberDto> call, Response<MemberDto> response) {
+                String userImg = response.body().getImage();
+                if (userImg == null || userImg.equals("011101001001")) {
+                    Log.d(TAG, "default img set.");
+                    myself.setUserDefaultImg();
+                }
+                else {
+                    // Log.d(TAG + "userImg", "userImg: " + userImg);
+                    Log.d(TAG, "custom img set.");
+                    myself.setUserImg(response.body().getImage());
+                }
+                // Log.d(TAG, "onResume: getImage() value: " + response.body().getImage());
                 myself.setUserName(response.body().getName());
             }
 
@@ -273,37 +328,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        addedUserList.removeAllViews();
+
+
         //todoList, follows 불러오기
         Call<List<TodoListDto>> todosCall = todoListApi.getTodoList(member);
         Call<List<MemberDto>> followsCall = followApi.getFollowingList(member);
-
-        todosCall.enqueue(new Callback<>() {
-            //로그인 성공
-            @Override
-            public void onResponse(Call<List<TodoListDto>> call, Response<List<TodoListDto>> response) {
-                List<TodoListDto> todoLists = response.body();
-                for (TodoListDto x : todoLists) {
-                    if (!x.getDone()) {
-                        Log.d(TAG, String.valueOf(x.getId()));
-                        todoList.addView(addTodoItem(x));
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<TodoListDto>> call, Throwable t) {
-                todoList.addView(addItem("todoListApi calling Failed, " + t.toString()));
-                Log.v("api fail", t.toString());
-            }
-        });
-
         followsCall.enqueue(new Callback<List<MemberDto>>() {
             @Override
             public void onResponse(Call<List<MemberDto>> call, Response<List<MemberDto>> response) {
                 List<MemberDto> follows = response.body();
                 if (follows != null) {
                     for (MemberDto x : follows) {
-                        addedUserList.addView(addFriendItem(x));
+                        addedUserList.addView(addUserItem(x));
                     }
                 }
             }
